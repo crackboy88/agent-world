@@ -1,12 +1,11 @@
 /**
  * 3D Scene Component - Simplified without postprocessing
  */
-import React from 'react';
 import { Canvas } from '@react-three/fiber';
 import { OrbitControls, PerspectiveCamera, ContactShadows, Environment, Float, Sparkles, Stars } from '@react-three/drei';
 import * as THREE from 'three';
 import { Agent3D, AGENT_CONFIGS } from './Agent3D';
-import type { Agent, Position } from '../../types';
+import type { Agent } from '../../types';
 
 // Simple Room
 const Room = ({ size = 10 }: { size?: number }) => {
