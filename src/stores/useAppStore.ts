@@ -344,9 +344,8 @@ export const useAppStore = create<AppState>()(
         // Send to Gateway if connected
         if (socketService.isConnected()) {
           socketService.sendTask(
-            task.type,
-            agentId ?? undefined,
-            task.params
+            agentId ?? null,
+            task
           );
           
           get().addLog({
