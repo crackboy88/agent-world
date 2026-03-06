@@ -8,6 +8,9 @@ import { useAppStore } from './stores';
 import Scene3D from './components/3D/Scene3D';
 import AgentList from './components/Common/AgentList';
 import EventLog from './components/Common/EventLog';
+import ControlPanel from './components/UI/ControlPanel';
+import LoadingScreen from './components/UI/LoadingScreen';
+import ErrorBoundary from './components/Common/ErrorBoundary';
 import './index.css';
 
 const App: React.FC = () => {
@@ -26,7 +29,9 @@ const App: React.FC = () => {
   const [showGatewayInput, setShowGatewayInput] = useState(false);
   const [gatewayUrl, setGatewayUrl] = useState('ws://localhost:18789/?token=5a8d91273cf067511ba6aebff67361ced57f54e2c5fb6d8e');
   const [activePanel, setActivePanel] = useState<'events' | 'tasks' | 'chat'>('events');
+  const [leftSidebarTab, setLeftSidebarTab] = useState<'list' | 'control'>('list');
   const [selectedAgentId, setSelectedAgentId] = useState<string | undefined>();
+  const [isAppLoading, setIsAppLoading] = useState(true);
   
   const handleAgentClick = (agentId: string) => {
     setSelectedAgentId(agentId === selectedAgentId ? undefined : agentId);
@@ -34,6 +39,11 @@ const App: React.FC = () => {
 
   useEffect(() => {
     initializeStore();
+    // 模拟初始加载时间，保证 LoadingScreen 至少有展示机会
+    const timer = setTimeout(() => {
+      setIsAppLoading(false);
+    }, 1500);
+    return () => clearTimeout(timer);
   }, [initializeStore]);
 
   const handleConnectGateway = () => {
@@ -50,6 +60,13 @@ const App: React.FC = () => {
 
   return (
     <div className="app-container">
+      {/* 首次加载显示 LoadingScreen */}
+      {isAppLoading && (
+        <LoadingScreen 
+          isLoading={isAppLoading} 
+          onComplete={() => setIsAppLoading(false)} 
+        />
+      )}
       {/* 顶部导航栏 */}
       <header className="top-bar">
         <div className="logo">
@@ -93,17 +110,63 @@ const App: React.FC = () => {
       <div className="main-content">
         {/* 左侧 */}
         <aside className="sidebar-left">
-          <div className="panel-header">
-            <h3>🤖 Agents</h3>
-            <span className="badge">{onlineAgents}/{agents.length}</span>
+          <div className="left-sidebar-tabs">
+            <button 
+              className={leftSidebarTab === 'list' ? 'active' : ''} 
+              onClick={() => setLeftSidebarTab('list')}
+            >
+              🤖 Agents
+            </button>
+            <button 
+              className={leftSidebarTab === 'control' ? 'active' : ''} 
+              onClick={() => setLeftSidebarTab('control')}
+            >
+              🎛️ Control
+            </button>
           </div>
-          <AgentList agents={agents} />
+          
+          {leftSidebarTab === 'list' ? (
+            <>
+              <div className="panel-header">
+                <h3>🤖 Agents</h3>
+                <span className="badge">{onlineAgents}/{agents.length}</span>
+              </div>
+              <AgentList agents={agents} />
+            </>
+          ) : (
+            <ControlPanel locale={locale} />
+          )}
         </aside>
 
         {/* 中间 */}
         <main className="map-area">
-          {/* 强制显示3D视图 */}
-          <Scene3D agents={agents} selectedAgentId={selectedAgentId} onAgentClick={handleAgentClick} />
+          <ErrorBoundary
+            fallback={
+              <div className="scene-error-fallback">
+                <div className="scene-error-content">
+                  <span className="scene-error-icon">🗺️</span>
+                  <h3>3D 场景加载失败</h3>
+                  <p>请尝试刷新页面或检查 WebGL 支持</p>
+                  <button onClick={() => window.location.reload()}>🔃 刷新页面</button>
+                </div>
+              </div>
+            }
+          >
+            <ErrorBoundary
+              fallback={
+                <div className="scene-loading-fallback">
+                  <div className="scene-loading-spinner"></div>
+                  <p>加载 3D 场景中...</p>
+                </div>
+              }
+            >
+              <Scene3D 
+                agents={agents} 
+                selectedAgentId={selectedAgentId} 
+                onAgentClick={handleAgentClick} 
+              />
+            </ErrorBoundary>
+          </ErrorBoundary>
         </main>
 
         {/* 右侧 */}

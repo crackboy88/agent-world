@@ -3,6 +3,9 @@
  * Chen Company Agent World - Type Definitions
  */
 
+// Socket types
+export * from './socket';
+
 // Room types
 export * from './room';
 

@@ -80,6 +80,13 @@ interface AppState {
   
   // Actions - Tasks
   assignTask: (agentId: AgentId, taskType: Task['type']) => string;
+  sendTask: (agentId: AgentId | null, task: {
+    type: string;
+    title: string;
+    description?: string;
+    priority?: Task['priority'];
+    params?: Record<string, unknown>;
+  }) => string;
   updateTaskProgress: (taskId: string, progress: number) => void;
   completeTask: (taskId: string) => void;
   
@@ -313,6 +320,49 @@ export const useAppStore = create<AppState>()(
         return task.id;
       },
       
+      // Send task to Gateway via socket
+      sendTask: (agentId, task) => {
+        // Create local task first
+        const localTask = createTask(
+          task.type as Task['type'],
+          agentId ?? undefined,
+          'user'
+        );
+        
+        // Update local state
+        set((s) => ({
+          tasks: [...s.tasks, { ...localTask, status: 'assigned' as const }],
+          agents: agentId ? s.agents.map(a => 
+            a.id === agentId ? { 
+              ...a, 
+              state: 'working' as AgentState,
+              progress: 0
+            } : a
+          ) : s.agents
+        }));
+        
+        // Send to Gateway if connected
+        if (socketService.isConnected()) {
+          socketService.sendTask(
+            task.type,
+            agentId ?? undefined,
+            task.params
+          );
+          
+          get().addLog({
+            type: 'info',
+            message: `📤 任务已发送: ${task.title}`
+          });
+        } else {
+          get().addLog({
+            type: 'warning',
+            message: '⚠️ Gateway 未连接，任务仅保存在本地'
+          });
+        }
+        
+        return localTask.id;
+      },
+      
       updateTaskProgress: (taskId, progress) => {
         set((s) => ({
           tasks: s.tasks.map(t => 
@@ -433,10 +483,16 @@ export const useAppStore = create<AppState>()(
       name: 'chen-company-agent-world',
       storage: createJSONStorage(() => localStorage),
       partialize: (state) => ({
+        // Gateway connection config
+        gatewayUrl: state.gatewayUrl,
+        // User preferences
+        locale: state.locale,
+        // UI preferences
         mapScale: state.mapScale,
         mapOffset: state.mapOffset,
-        locale: state.locale,
-        sidebarOpen: state.sidebarOpen
+        sidebarOpen: state.sidebarOpen,
+        sidebarWidth: state.sidebarWidth,
+        sidebarTab: state.sidebarTab,
       })
     }
   )
