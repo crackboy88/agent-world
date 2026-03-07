@@ -86,7 +86,7 @@ export const Scene3D = ({ agents, selectedAgentId, onAgentClick }: { agents: Age
     AGENT_POSITIONS[agentId] || [Math.random() * 4 - 2, 0, Math.random() * 4 - 2];
 
   return (
-    <Canvas shadows gl={{ antialias: true, toneMapping: THREE.ACESFilmicToneMapping, toneMappingExposure: 1.1 }} dpr={[1, 2]}>
+    <Canvas gl={{ antialias: true, toneMapping: THREE.ACESFilmicToneMapping, toneMappingExposure: 1.1 }} shadows={{ type: THREE.PCFShadowMap }} dpr={[1, 2]}>
       <PerspectiveCamera makeDefault position={[8, 8, 8]} fov={50} />
       <OrbitControls enablePan enableZoom enableRotate minDistance={3} maxDistance={20} target={[0, 1, 0]} maxPolarAngle={Math.PI / 2 - 0.1} enableDamping dampingFactor={0.05} />
       <Environment preset="city" />
