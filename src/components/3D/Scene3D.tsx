@@ -90,6 +90,7 @@ export const Scene3D = ({ agents, selectedAgentId, onAgentClick, agentAppearance
               position={pos}
               scale={agentScale}
               color={appearance.color}
+              state={agent.state}
             />
           </group>
         );
