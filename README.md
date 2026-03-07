@@ -34,6 +34,7 @@
 
 - Node.js >= 18
 - npm >= 9
+- OpenClaw Gateway (for agent management)
 
 ### Installation
 
@@ -63,6 +64,112 @@ npm run build
 ```
 
 Build output in `dist/` directory
+
+## 🔗 Connecting to OpenClaw Gateway
+
+This section explains how to connect Agent World to your OpenClaw Gateway for real-time agent management.
+
+### Prerequisites
+
+1. **OpenClaw Gateway** - You need a running OpenClaw Gateway instance
+2. **Agent Pairing** - Your agents must be paired with the Gateway
+
+### Step 1: Verify Gateway Status
+
+Check if your Gateway is running:
+
+```bash
+# Check Gateway status
+openclaw gateway status
+
+# Start Gateway if not running
+openclaw gateway start
+```
+
+### Step 2: Pair Your Agents
+
+If your agents are not paired with the Gateway:
+
+```bash
+# List available devices/agents
+openclaw devices list
+
+# Pair a new agent (follow the on-screen instructions)
+openclaw devices pair
+
+# Or approve pending pairings
+openclaw devices approve --latest
+```
+
+### Step 3: Get Gateway WebSocket URL
+
+The Gateway WebSocket URL typically follows this format:
+
+```
+ws://localhost:3000/gateway
+```
+
+Or for remote Gateway:
+
+```
+ws://YOUR_GATEWAY_IP:3000/gateway
+```
+
+### Step 4: Configure Agent World
+
+1. Open the application in your browser
+2. Look for the Gateway connection panel in the header
+3. Enter your Gateway WebSocket URL
+4. Click "Connect"
+
+Alternatively, you can set the Gateway URL in the browser console:
+
+```javascript
+// In browser console
+localStorage.setItem('gatewayUrl', 'ws://localhost:3000/gateway');
+// Then refresh the page
+```
+
+### Troubleshooting
+
+#### "Device nonce mismatch" Error
+
+This usually means the device identity is outdated. Try:
+
+```bash
+# Re-pair the device
+openclaw devices pair
+
+# Or reset and re-approve
+openclaw devices approve --latest
+```
+
+#### Connection Timeout
+
+- Check if Gateway is running: `openclaw gateway status`
+- Verify firewall rules allow the connection
+- Check the Gateway logs for errors
+
+#### Agents Not Showing Online
+
+- Ensure agents are paired and approved
+- Check agent status: `openclaw agents list`
+- Restart the Gateway if needed
+
+### Network Architecture
+
+```
+┌─────────────────┐         ┌──────────────────┐
+│  Agent World    │ ──────▶ │  OpenClaw        │
+│  (Browser)      │  WS     │  Gateway         │
+└─────────────────┘         └──────────────────┘
+                                   │
+                                   ▼
+                            ┌──────────────────┐
+                            │  OpenClaw       │
+                            │  Agents          │
+                            └──────────────────┘
+```
 
 ## ⚙️ Configuration
 
