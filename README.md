@@ -1,15 +1,13 @@
 # Agent World
 
+[![React](https://img.shields.io/badge/React-18.2-blue?style=flat-square)](https://react.dev)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.3-blue?style=flat-square)](https://www.typescriptlang.org)
+[![Three.js](https://img.shields.io/badge/Three.js-0.160-green?style=flat-square)](https://threejs.org)
+[![License](https://img.shields.io/badge/License-MIT-green?style=flat-square)](LICENSE)
+
 > **Note**: This project uses [OpenClaw](https://github.com/openclaw) for multi-agent management. It's a demo application showcasing 3D multi-agent visualization with OpenClaw Gateway integration.
 
-<p align="center">
-  <img src="https://img.shields.io/badge/React-18.2-blue" alt="React">
-  <img src="https://img.shields.io/badge/TypeScript-5.3-blue" alt="TypeScript">
-  <img src="https://img.shields.io/badge/Three.js-0.160-green" alt="Three.js">
-  <img src="https://img.shields.io/badge/License-MIT-green" alt="License">
-</p>
-
-> 3D Multi-Agent Simulation Platform - Web-based Real-time Agent Visualization System
+3D Multi-Agent Simulation Platform - Web-based Real-time Agent Visualization System
 
 ## ✨ Features
 
@@ -22,7 +20,7 @@
 ## 🛠️ Tech Stack
 
 | Category | Technology |
-|----------|------------|
+|:---------|:-----------|
 | Frontend | React 18 + TypeScript |
 | 3D Rendering | Three.js + React Three Fiber |
 | State Management | Zustand |
@@ -100,7 +98,7 @@ npm run preview
 
 Visit http://localhost:5173
 
-**When Agent World starts, it will automatically attempt to connect to the Gateway and send a pairing request.**
+> **When Agent World starts, it will automatically attempt to connect to the Gateway and send a pairing request.**
 
 ### Step 3: Approve Pairing Request
 
@@ -120,6 +118,7 @@ openclaw devices approve <device-id>
 ### Step 4: Verify Connection
 
 After approval, the connection should be established. Check in the Agent World UI:
+
 - The Gateway status should show "Connected"
 - Your agents should appear online
 
@@ -227,22 +226,22 @@ Define your own room layout with positions, furniture, and agent assignments.
 
 ```
 agent-world/
-├── config/                # Configuration files
-│   ├── agents.default.ts  # Default agents
-│   ├── agents.local.example.ts
-│   ├── rooms.default.ts  # Default rooms
-│   ├── rooms.local.example.ts
-│   └── index.ts         # Config loader
-├── public/               # Static assets
-├── src/
-│   ├── components/      # React components
-│   │   ├── 3D/         # 3D scene components
-│   │   └── UI/         # UI components
-│   ├── services/        # Services (Socket, Gateway)
-│   ├── stores/          # Zustand state management
-│   └── types/           # TypeScript types
-├── docs/                # Documentation
-└── dist/                # Build output
+├── config/                      # Configuration files
+│   ├── agents.default.ts        # Default agents
+│   ├── agents.local.example.ts  # Local config example
+│   ├── rooms.default.ts        # Default rooms
+│   ├── rooms.local.example.ts  # Local config example
+│   └── index.ts               # Config loader
+├── public/                     # Static assets
+├── src/                        # Source code
+│   ├── components/            # React components
+│   │   ├── 3D/               # 3D scene components
+│   │   └── UI/               # UI components
+│   ├── services/              # Services (Socket, Gateway)
+│   ├── stores/                # Zustand state management
+│   └── types/                 # TypeScript types
+├── docs/                      # Documentation
+└── dist/                      # Build output
 ```
 
 ## 📝 License
@@ -251,4 +250,4 @@ MIT License - See [LICENSE](LICENSE) for details
 
 ## 👤 Author
 
-Built with [OpenClaw](https://github.com/openclaw) - https://github.com/openclaw
+Built with [OpenClaw](https://github.com/openclaw)
