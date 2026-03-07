@@ -4,9 +4,12 @@ node_modules/
 # Build output
 dist/
 
-# Local configuration (private configs)
+# Local configuration (user edits)
 src/config/map.local.ts
 src/config/agent.local.ts
+
+# User-added assets (optional - can be in repo or local)
+# To add your own assets, put files in public/assets/
 
 # Editor directories and files
 .vscode/

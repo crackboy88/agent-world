@@ -180,13 +180,24 @@ openclaw devices approve --latest
 
 ## ⚙️ Configuration
 
-### Agents
+### Assets Folder
 
-Agents are fetched automatically from your OpenClaw Gateway. The application displays all agents connected to the Gateway.
+All assets (3D models, sprites, textures) are stored in `public/assets/`:
 
-### Map Items
+```
+public/assets/
+├── models/      # 3D models (.glb, .gltf)
+├── sprites/     # 2D sprites (.png, .jpg)
+└── textures/    # Texture files
+```
 
-To customize the map with furniture and decorations:
+**Adding your own assets:**
+1. Add your files to the appropriate folder
+2. Reference them in the map/agent configuration
+
+### Map Configuration
+
+Edit `src/config/map.ts` to customize map items:
 
 1. Copy the example config:
    ```bash
