@@ -200,17 +200,12 @@ const Sidebar: React.FC<SidebarProps> = ({ locale = 'zh' }) => {
     return () => { socketService.onChat = originalOnChat; };
   }, [gatewayConnected, sessions, selectedAgentId]);
 
-  // 选择 Agent 时获取会话并自动选中
+  // 选择 Agent 时获取会话并自动选中第一个
   useEffect(() => {
-    if (selectedAgentId && gatewayConnected) {
-      // 立即设置一个临时会话 key 以避免 UI 闪烁
-      if (!selectedSessionKey) {
-        fetchSessions(selectedAgentId).then(() => {
-          // fetchSessions 内部会设置 selectedSessionKey
-        });
-      }
+    if (selectedAgentId && gatewayConnected && !selectedSessionKey) {
+      fetchSessions(selectedAgentId);
     }
-  }, [selectedAgentId, gatewayConnected]);
+  }, [selectedAgentId, gatewayConnected, selectedSessionKey, fetchSessions]);
 
   // 选择会话时加载历史消息
   useEffect(() => {
