@@ -1,11 +1,7 @@
 /**
  * Asset Manifest - 素材清单
  * 
- * 用户可以添加自己的素材到 assets/ 文件夹
- * 素材类型：
- * - models/: 3D 模型 (.glb, .gltf)
- * - sprites/: 2D 精灵图 (.png, .jpg)
- * - textures/: 纹理贴图
+ * 用户可以添加自己的素材到 public/assets/ 文件夹
  */
 
 export type AssetType = 'model' | 'sprite' | 'texture';
@@ -14,47 +10,39 @@ export interface Asset {
   id: string;
   name: string;
   type: AssetType;
-  filename: string;  // 文件名
-  category?: string;  // 分类: furniture, plant, character, etc.
-  defaultConfig?: Record<string, unknown>; // 默认配置
+  filename: string;
+  category?: string;
 }
 
 /**
  * 默认素材清单 - 内置素材
- * 用户可以替换这些文件或添加新文件
  */
 export const DEFAULT_ASSETS: Asset[] = [
   // Map Items - Furniture
-  { id: 'table-1', name: 'Table', type: 'model', category: 'furniture', filename: 'models/table.glb' },
-  { id: 'chair-1', name: 'Chair', type: 'model', category: 'furniture', filename: 'models/chair.glb' },
-  { id: 'desk-1', name: 'Desk', type: 'model', category: 'furniture', filename: 'models/desk.glb' },
-  { id: 'cabinet-1', name: 'Cabinet', type: 'model', category: 'furniture', filename: 'models/cabinet.glb' },
+  { id: 'table', name: 'Table', type: 'model', category: 'furniture', filename: 'models/table.glb' },
+  { id: 'chair', name: 'Chair', type: 'model', category: 'furniture', filename: 'models/chair.glb' },
+  { id: 'desk', name: 'Desk', type: 'model', category: 'furniture', filename: 'models/desk.glb' },
+  { id: 'cabinet', name: 'Cabinet', type: 'model', category: 'furniture', filename: 'models/cabinet.glb' },
   
   // Map Items - Plants
-  { id: 'plant-1', name: 'Small Plant', type: 'model', category: 'plant', filename: 'models/plant-small.glb' },
-  { id: 'plant-2', name: 'Large Plant', type: 'model', category: 'plant', filename: 'models/plant-large.glb' },
+  { id: 'plant-small', name: 'Small Plant', type: 'model', category: 'plant', filename: 'models/plant-small.glb' },
+  { id: 'plant-large', name: 'Large Plant', type: 'model', category: 'plant', filename: 'models/plant-large.glb' },
   
-  // Agent Models (3D)
-  { id: 'agent-default', name: 'Default Agent', type: 'model', category: 'character', filename: 'agents/agent-default.glb' },
+  // Agent Models (3D characters)
+  { id: 'agent-default', name: 'Simple Character', type: 'model', category: 'agent', filename: 'agents/agent-default.glb' },
+  { id: 'agent-soldier', name: 'Soldier', type: 'model', category: 'agent', filename: 'agents/animated-character.glb' },
+  { id: 'agent-xbot', name: 'XBot', type: 'model', category: 'agent', filename: 'agents/xbot.glb' },
+  { id: 'agent-cesium', name: 'Cesium Man', type: 'model', category: 'agent', filename: 'agents/character1.glb' },
 ];
 
-/**
- * 获取素材 URL
- */
 export function getAssetUrl(asset: Asset): string {
   return `/assets/${asset.filename}`;
 }
 
-/**
- * 根据 ID 获取素材
- */
 export function getAssetById(id: string): Asset | undefined {
   return DEFAULT_ASSETS.find(a => a.id === id);
 }
 
-/**
- * 根据分类获取素材
- */
 export function getAssetsByCategory(category: string): Asset[] {
   return DEFAULT_ASSETS.filter(a => a.category === category);
 }
