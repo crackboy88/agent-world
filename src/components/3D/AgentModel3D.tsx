@@ -13,6 +13,7 @@ interface AgentModel3DProps {
   color?: string;
   scale?: number;
   state?: string; // 'idle', 'walking', 'working', etc.
+  onClick?: () => void;
 }
 
 // 默认 Agent 模型 URL
@@ -24,7 +25,8 @@ export const AgentModel3D = ({
   modelUrl, 
   color, 
   scale = 1,
-  state = 'idle'
+  state = 'idle',
+  onClick
 }: AgentModel3DProps) => {
   // 使用用户选择的模型，或默认模型
   const modelToLoad = modelUrl || DEFAULT_AGENT_MODEL;
@@ -112,7 +114,7 @@ export const AgentModel3D = ({
   });
   
   return (
-    <group ref={groupRef}>
+    <group ref={groupRef} onClick={(e) => { e.stopPropagation(); onClick?.(); }}>
       <primitive
         object={clonedScene}
         position={position}
