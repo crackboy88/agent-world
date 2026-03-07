@@ -264,31 +264,39 @@ export const useAppStore = create<AppState>()(
         // 连接并检查是否已连接
         socketService.connect();
         
-        // 如果已经连接，立即获取 agent 列表
-        if (socketService.isConnected()) {
-          setTimeout(async () => {
-            try {
-              const gatewayAgents = await socketService.listAgents();
-              if (gatewayAgents && gatewayAgents.length > 0) {
-                const agents: Agent[] = gatewayAgents.map((a: Agent) => ({
-                  id: a.id,
-                  name: a.name || a.id,
-                  emoji: a.emoji || '🤖',
-                  isOnline: a.isOnline !== false,
-                  state: a.state || 'idle',
-                  currentRoom: a.currentRoom || 'lobby',
-                  position: a.position || { x: 512 + Math.random() * 200, y: 512 + Math.random() * 200 },
-                  targetPosition: a.targetPosition,
-                  animation: a.animation || 'idle',
-                  mood: a.mood || 'neutral',
-                }));
-                set({ agents });
-              }
-            } catch (e) {
-              console.error('Failed to fetch agents:', e);
+        // 无论连接状态如何，都尝试获取 agent 列表
+        // 如果未连接，延迟重试
+        const fetchAgents = async () => {
+          try {
+            const gatewayAgents = await socketService.listAgents();
+            if (gatewayAgents && gatewayAgents.length > 0) {
+              const agents: Agent[] = gatewayAgents.map((a: Agent) => ({
+                id: a.id,
+                name: a.name || a.id,
+                emoji: a.emoji || '🤖',
+                isOnline: a.isOnline !== false,
+                state: a.state || 'idle',
+                currentRoom: a.currentRoom || 'lobby',
+                position: a.position || { x: 512 + Math.random() * 200, y: 512 + Math.random() * 200 },
+                targetPosition: a.targetPosition,
+                animation: a.animation || 'idle',
+                mood: a.mood || 'neutral',
+              }));
+              set({ agents });
+              get().addLog({
+                type: 'success',
+                message: `📥 从 Gateway 获取到 ${agents.length} 个 Agents`
+              });
             }
-          }, 1000); // 延迟确保连接稳定
-        }
+          } catch (e) {
+            console.error('Failed to fetch agents:', e);
+            // 如果失败，1秒后重试
+            setTimeout(fetchAgents, 1000);
+          }
+        };
+        
+        // 延迟获取确保连接完成
+        setTimeout(fetchAgents, 1500);
       },
       
       disconnectSocket: () => {
