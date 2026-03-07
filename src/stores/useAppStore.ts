@@ -257,16 +257,8 @@ export const useAppStore = create<AppState>()(
           });
         };
         
-        socketService.onGatewayStatus = (status) => {
-          set({ 
-            gatewayConnected: status.connected,
-            gatewayUrl: status.url
-          });
-        };
-        
         socketService.onGatewayEvent = (event) => {
           console.log('Gateway event:', event.type, event.data);
-          // 可以在这里处理各种 Gateway 事件
         };
         
         // 连接并检查是否已连接
