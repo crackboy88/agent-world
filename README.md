@@ -88,18 +88,22 @@ openclaw gateway start
 
 ### Step 2: Pair Your Agents
 
-If your agents are not paired with the Gateway:
+When Agent World connects to Gateway, it will automatically send a pairing request. You just need to approve it on the Gateway side:
 
 ```bash
-# List available devices/agents
+# Check pending pairing requests
 openclaw devices list
 
-# Approve pending pairings
+# Approve the pending device (usually the most recent one)
 openclaw devices approve --latest
 
-# Or check pending approvals first
-openclaw devices pending
+# Or approve by specific device ID
+openclaw devices approve <device-id>
 ```
+
+If there's no pending request, you may need to:
+1. Restart the Gateway: `openclaw gateway restart`
+2. Refresh Agent World to trigger a new connection attempt
 
 ### Step 3: Get Gateway WebSocket URL
 
