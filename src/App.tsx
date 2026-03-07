@@ -55,8 +55,8 @@ const App: React.FC = () => {
     }
   };
 
-  const onlineAgents = agents.filter(a => a.isOnline).length;
-  const runningTasks = tasks.filter(t => t.status === 'running').length;
+  const onlineAgents = Array.isArray(agents) ? agents.filter(a => a.isOnline).length : 0;
+  const runningTasks = Array.isArray(tasks) ? tasks.filter(t => t.status === 'running').length : 0;
 
   return (
     <div className="app-container">

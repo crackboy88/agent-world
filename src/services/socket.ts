@@ -83,8 +83,12 @@ class OpenClawSocketService {
       
       switch (event.event) {
         case 'agent':
-          if (event.payload && typeof event.payload === 'object') {
-            this.onAgentUpdate?.(event.payload as unknown as Agent[]);
+          // 处理 agent 事件，payload 可能是对象或数组
+          if (event.payload) {
+            const agents = Array.isArray(event.payload) 
+              ? event.payload 
+              : [event.payload];
+            this.onAgentUpdate?.(agents as Agent[]);
           }
           break;
         case 'presence':
