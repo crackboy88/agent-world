@@ -19,6 +19,23 @@ import { getAllRoomConfigsSync, getAllAgentConfigsSync } from '../../config';
 import { createTask, updateTaskProgress } from '../types/task';
 import { socketService } from '../services/socket';
 
+// 后备 Agent 生成函数（当 Gateway 未连接时使用）
+function getFallbackAgents(): Agent[] {
+  const agentConfigs = getAllAgentConfigsSync();
+  return Object.values(agentConfigs).map(config => ({
+    id: config.id,
+    name: config.name,
+    emoji: config.emoji,
+    isOnline: true,
+    state: 'idle' as AgentState,
+    currentRoom: 'lobby',
+    position: { x: 512 + Math.random() * 200, y: 512 + Math.random() * 200 },
+    targetPosition: { x: 512, y: 512 },
+    animation: 'idle',
+    mood: 'neutral' as const,
+  }));
+}
+
 // 日志类型
 interface LogEntry {
   id: string;
@@ -140,25 +157,13 @@ export const useAppStore = create<AppState>()(
       // Initialize Store
       initializeStore: () => {
         const rooms = getAllRoomConfigsSync();
-        const agentConfigs = getAllAgentConfigsSync();
         
-        // Convert agent configs to Agent objects
-        const agents: Agent[] = Object.values(agentConfigs).map(config => ({
-          id: config.id,
-          name: config.name,
-          emoji: config.emoji,
-          isOnline: true,
-          state: 'idle' as AgentState,
-          currentRoom: 'lobby',
-          position: { x: 512 + Math.random() * 200, y: 512 + Math.random() * 200 },
-          targetPosition: { x: 512, y: 512 },
-          animation: 'idle',
-          mood: 'neutral' as const,
-        }));
+        // Start with empty agents list - will be fetched from Gateway after connection
+        // Fallback to config agents if Gateway not connected (demo mode)
         
         set({
           rooms,
-          agents,
+          agents: [],
           tasks: [],
           selectedAgentId: null,
           selectedRoomId: null,
@@ -177,22 +182,91 @@ export const useAppStore = create<AppState>()(
         // 设置事件回调 - 合并更新而非覆盖
         socketService.onAgentUpdate = (updatedAgents) => {
           const currentAgents = get().agents;
-          // 创建一个 map 来快速查找现有 agent
-          const agentMap = new Map(currentAgents.map(a => [a.id, a]));
           
-          // 获取本地有效的 agent ID 列表
-          const localAgentIds = new Set(currentAgents.map(a => a.id));
+          // 创建当前 agent 的 map
+          const currentMap = new Map(currentAgents.map(a => [a.id, a]));
           
-          // 只处理在本地定义的 agent，过滤掉 Gateway 返回的未知 agent
+          // 合并更新：保留现有 agent，更新匹配的，添加新的
           const mergedAgents = currentAgents.map(existing => {
             const updated = updatedAgents.find((a: Agent) => a.id === existing.id);
             if (updated) {
-              return { ...existing, ...updated };
+              // 合并更新，保持本地扩展的字段
+              return { 
+                ...existing, 
+                ...updated,
+                // 确保关键字段不被覆盖
+                position: updated.position || existing.position,
+                animation: updated.animation || existing.animation,
+              };
             }
             return existing;
           });
           
+          // 添加 Gateway 返回的 新 agent（不在当前列表中的）
+          updatedAgents.forEach((updated: Agent) => {
+            if (!currentMap.has(updated.id)) {
+              // 新 agent，使用 Gateway 数据，添加默认字段
+              mergedAgents.push({
+                id: updated.id,
+                name: updated.name || updated.id,
+                emoji: updated.emoji || '🤖',
+                isOnline: updated.isOnline !== false,
+                state: updated.state || 'idle',
+                currentRoom: updated.currentRoom || 'lobby',
+                position: updated.position || { x: 512 + Math.random() * 200, y: 512 + Math.random() * 200 },
+                targetPosition: updated.targetPosition,
+                animation: updated.animation || 'idle',
+                mood: updated.mood || 'neutral',
+              });
+            }
+          });
+          
           set({ agents: mergedAgents });
+        };
+        
+        // Gateway 连接后获取 agent 列表
+        socketService.onGatewayStatus = async (status) => {
+          set({ 
+            gatewayConnected: status.connected,
+            gatewayUrl: status.url
+          });
+          
+          if (status.connected) {
+            // 连接成功后从 Gateway 获取 agent 列表
+            try {
+              const gatewayAgents = await socketService.listAgents();
+              if (gatewayAgents && gatewayAgents.length > 0) {
+                // 使用 Gateway 返回的 agent 列表
+                const agents: Agent[] = gatewayAgents.map((a: Agent) => ({
+                  id: a.id,
+                  name: a.name || a.id,
+                  emoji: a.emoji || '🤖',
+                  isOnline: a.isOnline !== false,
+                  state: a.state || 'idle',
+                  currentRoom: a.currentRoom || 'lobby',
+                  position: a.position || { x: 512 + Math.random() * 200, y: 512 + Math.random() * 200 },
+                  targetPosition: a.targetPosition,
+                  animation: a.animation || 'idle',
+                  mood: a.mood || 'neutral',
+                }));
+                set({ agents });
+                
+                get().addLog({
+                  type: 'success',
+                  message: `📥 从 Gateway 获取到 ${agents.length} 个 Agents`
+                });
+              }
+            } catch (error) {
+              console.error('Failed to fetch agents from Gateway:', error);
+              // 使用配置作为后备
+              const fallbackAgents = getFallbackAgents();
+              set({ agents: fallbackAgents });
+            }
+          } else {
+            // 离线时使用后备 agent
+            const fallbackAgents = getFallbackAgents();
+            set({ agents: fallbackAgents });
+          }
         };
         
         socketService.onMessage = (data) => {
@@ -222,7 +296,41 @@ export const useAppStore = create<AppState>()(
           // 可以在这里处理各种 Gateway 事件
         };
         
+        // 连接并检查是否已连接
         socketService.connect();
+        
+        // 如果已经连接，立即获取 agent 列表
+        if (socketService.isConnected()) {
+          setTimeout(async () => {
+            try {
+              const gatewayAgents = await socketService.listAgents();
+              if (gatewayAgents && gatewayAgents.length > 0) {
+                const agents: Agent[] = gatewayAgents.map((a: Agent) => ({
+                  id: a.id,
+                  name: a.name || a.id,
+                  emoji: a.emoji || '🤖',
+                  isOnline: a.isOnline !== false,
+                  state: a.state || 'idle',
+                  currentRoom: a.currentRoom || 'lobby',
+                  position: a.position || { x: 512 + Math.random() * 200, y: 512 + Math.random() * 200 },
+                  targetPosition: a.targetPosition,
+                  animation: a.animation || 'idle',
+                  mood: a.mood || 'neutral',
+                }));
+                set({ agents });
+              } else {
+                // Gateway 连接但没有 agent，使用后备
+                const fallbackAgents = getFallbackAgents();
+                set({ agents: fallbackAgents });
+              }
+            } catch (e) {
+              console.error('Failed to fetch agents:', e);
+              // 使用后备 agent
+              const fallbackAgents = getFallbackAgents();
+              set({ agents: fallbackAgents });
+            }
+          }, 1000); // 延迟确保连接稳定
+        }
       },
       
       disconnectSocket: () => {
