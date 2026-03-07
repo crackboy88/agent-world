@@ -7,7 +7,7 @@
 export * from './socket';
 
 // Room types
-export * from './room';
+export * from './map';
 
 // Agent types
 export * from './agent';

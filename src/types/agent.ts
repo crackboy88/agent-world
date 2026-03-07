@@ -3,7 +3,7 @@
  * Agent World - Agent Types
  */
 
-import type { RoomId } from './room';
+import type { RoomId } from './map';
 
 // Agent ID类型 - 通用字符串类型
 export type AgentId = string;
