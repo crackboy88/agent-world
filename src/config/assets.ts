@@ -34,8 +34,8 @@ export const DEFAULT_ASSETS: Asset[] = [
   { id: 'plant-1', name: 'Small Plant', type: 'model', category: 'plant', filename: 'models/plant-small.glb' },
   { id: 'plant-2', name: 'Large Plant', type: 'model', category: 'plant', filename: 'models/plant-large.glb' },
   
-  // Agent Sprites (2D)
-  { id: 'agent-default', name: 'Default Agent', type: 'sprite', category: 'character', filename: 'sprites/agent-default.png' },
+  // Agent Sprites (3D models)
+  { id: 'agent-default', name: 'Default Agent', type: 'model', category: 'character', filename: 'sprites/agent-default.glb' },
 ];
 
 /**

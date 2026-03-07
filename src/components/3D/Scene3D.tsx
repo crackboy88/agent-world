@@ -4,13 +4,14 @@
 import { Canvas } from '@react-three/fiber';
 import { OrbitControls, PerspectiveCamera, ContactShadows, Environment } from '@react-three/drei';
 import * as THREE from 'three';
-import { Agent3D, AGENT_CONFIGS } from './Agent3D';
+import { AgentModel3D, preloadAgentModel } from './AgentModel3D';
 import { MapItem3D, preloadModels } from './MapItem3D';
 import type { Agent } from '../../types';
 import { DEFAULT_MAP_ITEMS, getModelUrl, type MapItem } from '../../config';
 
 // 预加载模型
 preloadModels();
+preloadAgentModel();
 
 // Simple flat floor
 const Floor = ({ size = 20 }: { size?: number }) => {
@@ -74,14 +75,20 @@ export const Scene3D = ({ agents, selectedAgentId, onAgentClick }: { agents: Age
       {/* Map Items from config */}
       <MapItems />
       
-      {/* Agents */}
+      {/* Agents - use model from assets */}
       {agents.map(agent => {
-        const config = AGENT_CONFIGS[agent.id] || AGENT_CONFIGS['main'];
         const pos = getAgentPosition(agent);
-        const agentState = agent.state as 'idle' | 'walking' | 'working' | 'thinking';
+        const agentScale = selectedAgentId === agent.id ? 1.1 : 1;
+        
         return (
           <group key={`agent-${agent.id}`} onClick={(e: unknown) => { (e as Event).stopPropagation(); onAgentClick?.(agent.id); }}>
-            <Agent3D key={`agent3d-${agent.id}`} config={config} position={pos} state={agentState} scale={selectedAgentId === agent.id ? 1.1 : 1} isSelected={selectedAgentId === agent.id} onClick={() => onAgentClick?.(agent.id)} />
+            <AgentModel3D
+              key={`agent3d-${agent.id}`}
+              agentId={agent.id}
+              position={pos}
+              scale={agentScale}
+              // TODO: 后续可以从配置中读取 agent 颜色
+            />
           </group>
         );
       })}
