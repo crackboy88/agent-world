@@ -1,8 +1,9 @@
 /**
- * 3D Agent Component - With animations
+ * 3D Agent Component - With animations and idle movement
  */
 import { useGLTF, useAnimations } from '@react-three/drei';
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
+import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 
 interface AgentModel3DProps {
@@ -30,7 +31,11 @@ export const AgentModel3D = ({
   
   // 加载模型和动画
   const { scene, animations } = useGLTF(modelToLoad);
-  const { actions, mixer } = useAnimations(animations);
+  const { actions } = useAnimations(animations, scene);
+  
+  // 用于 idle 动画的 ref
+  const groupRef = useRef<THREE.Group>(null);
+  const idleTimeRef = useRef(Math.random() * 100); // 随机起始时间
   
   const clonedScene = scene.clone();
   
@@ -52,19 +57,16 @@ export const AgentModel3D = ({
   // 播放动画
   useEffect(() => {
     if (actions && Object.keys(actions).length > 0) {
-      // 尝试找到匹配的动画
       const actionNames = Object.keys(actions);
       
-      // 常见动画名称映射
       const animationMap: Record<string, string[]> = {
-        idle: ['Idle', 'idle', 'Stand', 'stand', 'Waiting'],
+        idle: ['Idle', 'idle', 'Stand', 'stand', 'Waiting', 'Walk', 'walk'], // idle 时也播放 walk 让它动起来
         walking: ['Walk', 'walk', 'Running', 'running', 'Run'],
         working: ['Work', 'work', 'Working', 'working'],
       };
       
       const possibleNames = animationMap[state] || animationMap['idle'];
       
-      // 找到匹配的动画
       let foundAction = null;
       for (const name of possibleNames) {
         const action = actions[name];
@@ -74,15 +76,12 @@ export const AgentModel3D = ({
         }
       }
       
-      // 如果没找到，使用第一个动画
       if (!foundAction && actionNames.length > 0) {
         foundAction = actions[actionNames[0]];
       }
       
       if (foundAction) {
-        // 停止所有动画
         Object.values(actions).forEach(a => a?.stop());
-        // 播放选中的动画
         foundAction.reset().fadeIn(0.3).play();
       }
       
@@ -94,12 +93,28 @@ export const AgentModel3D = ({
     }
   }, [actions, state]);
   
+  // Idle 时的随机浮动动画
+  useFrame((_, delta) => {
+    if (groupRef.current && state === 'idle') {
+      idleTimeRef.current += delta;
+      // 轻微的上下浮动 + 轻微的左右摇摆
+      const floatY = Math.sin(idleTimeRef.current * 2) * 0.02;
+      const swayX = Math.sin(idleTimeRef.current * 1.5) * 0.01;
+      const swayZ = Math.cos(idleTimeRef.current * 1.2) * 0.01;
+      
+      groupRef.current.position.y = floatY;
+      groupRef.current.rotation.y = swayX;
+    }
+  });
+  
   return (
-    <primitive
-      object={clonedScene}
-      position={position}
-      scale={scale}
-    />
+    <group ref={groupRef}>
+      <primitive
+        object={clonedScene}
+        position={position}
+        scale={scale}
+      />
+    </group>
   );
 };
 
@@ -107,7 +122,6 @@ export const AgentModel3D = ({
 export function preloadAgentModel() {
   useGLTF.preload(DEFAULT_AGENT_MODEL);
   
-  // 预加载其他模型
   const models = [
     '/assets/agents/animated-character.glb',
     '/assets/agents/xbot.glb',
