@@ -302,20 +302,31 @@ const Sidebar: React.FC<SidebarProps> = ({ locale = 'zh' }) => {
       </div>
 
       {/* 对话面板 - 选中 agent 时显示 */}
-      {selectedAgentId && selectedSessionKey ? (
+      {selectedAgentId ? (
         <div className="chat-panel-compact">
           <div className="chat-header">
             <span className="chat-agent-icon">{selectedAgent?.skillTag?.icon || '🤖'}</span>
             <span>{selectedAgentId}</span>
             <button className="btn-close" onClick={() => { setSelectedAgentId(''); setSelectedSessionKey(''); }}>✕</button>
           </div>
+          
+          {/* 会话标签 - 如果有多个会话 */}
+          {sessions[selectedAgentId] && sessions[selectedAgentId].length > 0 && (
+            <div className="session-tabs">
+              {sessions[selectedAgentId].slice(0, 3).map((s: Session) => (
+                <button 
+                  key={s.sessionKey}
+                  className={`session-tab ${selectedSessionKey === s.sessionKey ? 'active' : ''}`}
+                  onClick={() => setSelectedSessionKey(s.sessionKey)}
+                >
+                  {s.title || s.sessionKey.split(':').pop() || 'Chat'}
+                </button>
+              ))}
+            </div>
+          )}
+          
           <div className="chat-messages">
-            {(messages[selectedAgentId]?.[selectedSessionKey] || []).length === 0 ? (
-              <div className="chat-empty">
-                <span className="icon">💬</span>
-                <span>{locale === 'zh' ? `开始和 ${selectedAgentId} 对话吧` : `Start chatting with ${selectedAgentId}`}</span>
-              </div>
-            ) : (
+            {selectedSessionKey && messages[selectedAgentId]?.[selectedSessionKey]?.length > 0 ? (
               messages[selectedAgentId]?.[selectedSessionKey].map((msg: ChatMessage) => (
                 <div key={msg.id} className={`chat-message ${msg.sender}`}>
                   <span className="msg-avatar">{msg.sender === 'agent' ? (selectedAgent?.skillTag?.icon || '🤖') : '👤'}</span>
@@ -325,6 +336,11 @@ const Sidebar: React.FC<SidebarProps> = ({ locale = 'zh' }) => {
                   </div>
                 </div>
               ))
+            ) : (
+              <div className="chat-empty">
+                <span className="icon">💬</span>
+                <span>{locale === 'zh' ? `开始和 ${selectedAgentId} 对话吧` : `Start chatting with ${selectedAgentId}`}</span>
+              </div>
             )}
             <div ref={chatEndRef} />
           </div>
