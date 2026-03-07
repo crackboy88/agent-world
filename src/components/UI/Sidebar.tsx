@@ -323,15 +323,22 @@ const Sidebar: React.FC<SidebarProps> = ({ locale = 'zh' }) => {
             <button className="btn-close" onClick={() => { setSelectedAgentId(''); setSelectedSessionKey(''); }}>✕</button>
           </div>
           <div className="chat-messages">
-            {(messages[selectedAgentId]?.[selectedSessionKey] || []).map((msg: ChatMessage) => (
-              <div key={msg.id} className={`chat-message ${msg.sender}`}>
-                <span className="msg-avatar">{msg.sender === 'agent' ? (selectedAgent?.skillTag?.icon || '🤖') : '👤'}</span>
-                <div className="msg-content">
-                  <span className="msg-text">{msg.text}</span>
-                  <span className="msg-time">{msg.time}</span>
-                </div>
+            {(messages[selectedAgentId]?.[selectedSessionKey] || []).length === 0 ? (
+              <div className="chat-empty">
+                <span className="icon">💬</span>
+                <span>{locale === 'zh' ? `开始和 ${selectedAgentId} 对话吧` : `Start chatting with ${selectedAgentId}`}</span>
               </div>
-            ))}
+            ) : (
+              messages[selectedAgentId]?.[selectedSessionKey].map((msg: ChatMessage) => (
+                <div key={msg.id} className={`chat-message ${msg.sender}`}>
+                  <span className="msg-avatar">{msg.sender === 'agent' ? (selectedAgent?.skillTag?.icon || '🤖') : '👤'}</span>
+                  <div className="msg-content">
+                    <span className="msg-text">{msg.text}</span>
+                    <span className="msg-time">{msg.time}</span>
+                  </div>
+                </div>
+              ))
+            )}
             <div ref={chatEndRef} />
           </div>
           <div className="chat-input">

@@ -2245,3 +2245,34 @@
   flex: 1;
   overflow-y: auto;
 }
+
+/* 增强选中状态的视觉反馈 */
+.agent-card-large.selected::after {
+  content: '💬';
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  font-size: 14px;
+  background: var(--accent-blue);
+  border-radius: 50%;
+  padding: 2px;
+}
+
+/* 添加空格提示 */
+.chat-panel-compact .chat-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: var(--text-secondary);
+  font-size: 12px;
+  text-align: center;
+  padding: 20px;
+}
+
+.chat-panel-compact .chat-empty .icon {
+  font-size: 32px;
+  margin-bottom: 8px;
+  opacity: 0.5;
+}
