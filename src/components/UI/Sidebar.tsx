@@ -60,6 +60,7 @@ const Sidebar: React.FC<SidebarProps> = ({ locale = 'zh' }) => {
   const [selectedTaskType, setSelectedTaskType] = useState<string>('research');
   const [showGatewayModal, setShowGatewayModal] = useState(false);
   const [tempGatewayUrl, setTempGatewayUrl] = useState(gatewayUrl || 'ws://localhost:18789');
+  const [cronJobs, setCronJobs] = useState<Array<{id: string; name: string; schedule: string; status: string; target: string; agentId: string}>>([]);
 
   // 消息状态: { agentId: { sessionKey: [messages] } }
   const [messages, setMessages] = useState<Record<string, Record<string, ChatMessage[]>>>({});
@@ -77,7 +78,7 @@ const Sidebar: React.FC<SidebarProps> = ({ locale = 'zh' }) => {
   const sections = [
     { id: 'gateway' as Section, icon: '🔗', labelZh: '连接', labelEn: 'Link' },
     { id: 'agents' as Section, icon: '🤖', labelZh: '智能体', labelEn: 'Agents' },
-    { id: 'tasks' as Section, icon: '📋', labelZh: '任务', labelEn: 'Tasks' },
+    { id: 'tasks' as Section, icon: '⏰', labelZh: '定时任务', labelEn: 'Cron' },
     { id: 'events' as Section, icon: '📜', labelZh: '日志', labelEn: 'Logs' },
   ];
 
@@ -90,6 +91,25 @@ const Sidebar: React.FC<SidebarProps> = ({ locale = 'zh' }) => {
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, selectedAgentId, selectedSessionKey]);
+
+  // 获取 Cron 任务列表
+  useEffect(() => {
+    if (activeSection !== 'tasks' || !gatewayConnected) return;
+    
+    const fetchCronJobs = async () => {
+      try {
+        const result = await socketService.listCronJobs();
+        console.log('[Cron] Result:', result);
+        if (result?.jobs) {
+          setCronJobs(result.jobs);
+        }
+      } catch (err) {
+        console.error('[Cron] Error:', err);
+      }
+    };
+    
+    fetchCronJobs();
+  }, [activeSection, gatewayConnected]);
 
   // 监听 Gateway 会话更新
   useEffect(() => {
@@ -339,7 +359,7 @@ const Sidebar: React.FC<SidebarProps> = ({ locale = 'zh' }) => {
               <span className="agent-name-lg">{agent.id}</span>
             </div>
             <div className="agent-footer">
-              <span className="agent-state-lg" style={{ color: getStatusColor(agent.state) }}>{getStatusText(agent.state)}</span>
+              <span className="agent-state-lg" style={{ color: getStatusColor(agent?.state) }}>{getStatusText(agent?.state)}</span>
             </div>
           </div>
         ))}
@@ -375,7 +395,7 @@ const Sidebar: React.FC<SidebarProps> = ({ locale = 'zh' }) => {
                 <div key={msg.id} className={`chat-message ${msg.sender}`}>
                   <span className="msg-avatar">{msg.sender === 'agent' ? (selectedAgent?.skillTag?.icon || '🤖') : '👤'}</span>
                   <div className="msg-content">
-                    <span className="msg-text">{msg.text}</span>
+                    <span className="msg-text">{msg?.text || ''}</span>
                     <span className="msg-time">{msg.time}</span>
                   </div>
                 </div>
@@ -402,8 +422,8 @@ const Sidebar: React.FC<SidebarProps> = ({ locale = 'zh' }) => {
   const renderTasks = () => (
     <div className="sidebar-section">
       <div className="section-header">
-        <h3>📋 {locale === 'zh' ? '任务' : 'Tasks'}</h3>
-        <span className="badge">{tasks.length}</span>
+        <h3>📋 {locale === 'zh' ? '定时任务' : 'Cron Jobs'}</h3>
+        <span className="badge">{cronJobs.length}</span>
       </div>
       <div className="task-form">
         <select value={selectedAgentId} onChange={(e) => setSelectedAgentId(e.target.value)}>
@@ -419,12 +439,11 @@ const Sidebar: React.FC<SidebarProps> = ({ locale = 'zh' }) => {
         </button>
       </div>
       <div className="task-list">
-        {tasks.length === 0 ? <div className="empty">{locale === 'zh' ? '暂无任务' : 'No tasks'}</div> : 
-          tasks.slice().reverse().slice(0, 10).map((task: Task) => (
-            <div key={task.id} className={`task-item ${task.status}`}>
-              <div className="task-header"><span>{locale === 'zh' ? task.titleZh : task.titleEn}</span><span className={`status ${task.status}`}>{task.status}</span></div>
-              <div className="task-meta"><span>👤 {task.assignee}</span><span>{task.progress}%</span></div>
-              {task.status === 'running' && <div className="progress"><div style={{ width: `${task.progress}%` }}></div></div>}
+        {cronJobs.length === 0 ? <div className="empty">{locale === 'zh' ? '暂无定时任务' : 'No cron jobs'}</div> : 
+          cronJobs.map((job: any) => (
+            <div key={job?.id || Math.random()} className={`task-item ${job?.status || ''}`}>
+              <div className="task-header"><span>{job?.name || 'Unknown'}</span><span className={`status ${job?.status || ''}`}>{job?.status || 'N/A'}</span></div>
+              <div className="task-meta"><span>📅 {job?.schedule || 'N/A'}</span><span>🎯 {job?.target || '-'}</span></div>
             </div>
           ))
         }

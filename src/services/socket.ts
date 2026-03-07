@@ -199,6 +199,14 @@ class OpenClawSocketService {
   }
 
   /**
+   * 获取 Cron 任务列表
+   */
+  async listCronJobs(): Promise<any> {
+    if (!this.client) throw new Error('Not connected');
+    return this.client.listCronJobs({});
+  }
+
+  /**
    * 发送任务
    */
   async sendTask(agentId: string | null, task: {

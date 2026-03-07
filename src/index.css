@@ -54,11 +54,11 @@
 }
 
 .logo-icon {
-  font-size: 24px;
+  font-size: 14px;
 }
 
 .logo-text {
-  font-size: 16px;
+  font-size: 14px;
   font-weight: bold;
   color: var(--text-primary);
 }
@@ -78,7 +78,7 @@
   border: 1px solid var(--border-color);
   border-radius: 6px;
   color: var(--text-secondary);
-  font-size: 12px;
+  font-size: 14px;
   cursor: pointer;
   transition: all 0.2s;
 }
@@ -110,7 +110,7 @@
   border: 1px solid var(--border-color);
   border-radius: 6px;
   color: var(--text-secondary);
-  font-size: 12px;
+  font-size: 14px;
   cursor: pointer;
 }
 
@@ -134,7 +134,7 @@
   border: 1px solid var(--border-color);
   border-radius: 4px;
   color: var(--text-primary);
-  font-size: 12px;
+  font-size: 14px;
   font-family: var(--font-mono);
 }
 
@@ -144,7 +144,7 @@
   border: none;
   border-radius: 4px;
   color: white;
-  font-size: 12px;
+  font-size: 14px;
   cursor: pointer;
 }
 
@@ -158,8 +158,8 @@
 
 /* ===== 左侧边栏 - Agent 列表 ===== */
 .sidebar-left {
-  width: 320px;
-  min-width: 320px;
+  width: 500px;
+  min-width: 500px;
   background: var(--bg-medium);
   border-right: 1px solid var(--border-color);
   display: flex;
@@ -177,7 +177,7 @@
 }
 
 .panel-header h3 {
-  font-size: 13px;
+  font-size: 14px;
   font-weight: bold;
 }
 
@@ -185,7 +185,7 @@
   padding: 2px 8px;
   background: var(--bg-light);
   border-radius: 10px;
-  font-size: 11px;
+  font-size: 14px;
   color: var(--text-secondary);
 }
 
@@ -225,7 +225,7 @@
   background: var(--bg-medium);
   border: 2px solid var(--border-color);
   border-radius: 8px;
-  font-size: 18px;
+  font-size: 14px;
 }
 
 .agent-avatar .online-dot {
@@ -245,7 +245,7 @@
 }
 
 .agent-name {
-  font-size: 12px;
+  font-size: 14px;
   font-weight: bold;
   color: var(--text-primary);
   white-space: nowrap;
@@ -254,7 +254,7 @@
 }
 
 .agent-state {
-  font-size: 10px;
+  font-size: 14px;
   color: var(--text-secondary);
 }
 
@@ -324,7 +324,7 @@
   background: transparent;
   border: none;
   color: var(--text-secondary);
-  font-size: 12px;
+  font-size: 14px;
   cursor: pointer;
   transition: all 0.2s;
 }
@@ -356,7 +356,7 @@
   margin-bottom: 4px;
   background: var(--bg-dark);
   border-radius: 4px;
-  font-size: 11px;
+  font-size: 14px;
   border-left: 2px solid var(--border-color);
   animation: fadeIn 0.2s ease;
 }
@@ -371,12 +371,12 @@
 
 .log-time {
   color: var(--text-secondary);
-  font-size: 10px;
+  font-size: 14px;
   white-space: nowrap;
 }
 
 .log-emoji {
-  font-size: 12px;
+  font-size: 14px;
 }
 
 .log-content {
@@ -398,7 +398,7 @@
   margin-bottom: 6px;
   background: var(--bg-dark);
   border-radius: 6px;
-  font-size: 12px;
+  font-size: 14px;
 }
 
 .task-item .task-title {
@@ -408,7 +408,7 @@
 .task-item .task-status {
   padding: 2px 8px;
   border-radius: 4px;
-  font-size: 10px;
+  font-size: 14px;
   text-transform: uppercase;
 }
 
@@ -445,7 +445,7 @@
   margin-bottom: 8px;
   background: var(--bg-dark);
   border-radius: 8px;
-  font-size: 12px;
+  font-size: 14px;
 }
 
 .chat-messages .message.system {
@@ -468,7 +468,7 @@
   border: 1px solid var(--border-color);
   border-radius: 6px;
   color: var(--text-primary);
-  font-size: 12px;
+  font-size: 14px;
 }
 
 .chat-input button {
@@ -486,7 +486,7 @@
   padding: 24px;
   text-align: center;
   color: var(--text-secondary);
-  font-size: 12px;
+  font-size: 14px;
 }
 
 /* ===== 底部状态栏 ===== */
@@ -510,7 +510,7 @@
 }
 
 .status-item {
-  font-size: 11px;
+  font-size: 14px;
   color: var(--text-secondary);
 }
 
@@ -528,7 +528,7 @@
   border: 1px solid var(--border-color);
   border-radius: 4px;
   color: var(--text-secondary);
-  font-size: 12px;
+  font-size: 14px;
   cursor: pointer;
 }
 
@@ -540,7 +540,7 @@
 .zoom-level {
   min-width: 40px;
   text-align: center;
-  font-size: 11px;
+  font-size: 14px;
   color: var(--text-secondary);
 }
 
@@ -591,7 +591,7 @@
 
 .view-toggle button {
   padding: 6px 12px;
-  font-size: 12px;
+  font-size: 14px;
   font-family: var(--font-mono);
   background: transparent;
   border: none;
@@ -633,7 +633,7 @@
 }
 
 .control-section .section-header h4 {
-  font-size: 12px;
+  font-size: 14px;
   font-weight: bold;
   color: var(--text-primary);
   margin: 0;
@@ -642,7 +642,7 @@
 .status-badge {
   padding: 2px 8px;
   border-radius: 10px;
-  font-size: 10px;
+  font-size: 14px;
   text-transform: uppercase;
 }
 
@@ -666,7 +666,7 @@
 
 .gateway-url {
   flex: 1;
-  font-size: 10px;
+  font-size: 14px;
   color: var(--text-secondary);
   white-space: nowrap;
   overflow: hidden;
@@ -686,7 +686,7 @@
   border: 1px solid var(--border-color);
   border-radius: 4px;
   color: var(--text-primary);
-  font-size: 11px;
+  font-size: 14px;
 }
 
 .gateway-input-group button {
@@ -695,7 +695,7 @@
   border: none;
   border-radius: 4px;
   color: white;
-  font-size: 11px;
+  font-size: 14px;
   cursor: pointer;
 }
 
@@ -704,7 +704,7 @@
   padding: 2px 8px;
   background: var(--bg-light);
   border-radius: 10px;
-  font-size: 10px;
+  font-size: 14px;
   color: var(--text-secondary);
 }
 
@@ -775,13 +775,13 @@
 }
 
 .agent-card-name {
-  font-size: 11px;
+  font-size: 14px;
   font-weight: bold;
   color: var(--text-primary);
 }
 
 .agent-card-state {
-  font-size: 10px;
+  font-size: 14px;
 }
 
 .agent-task-progress {
@@ -807,7 +807,7 @@
 }
 
 .progress-text {
-  font-size: 10px;
+  font-size: 14px;
   color: var(--text-secondary);
   min-width: 28px;
   text-align: right;
@@ -821,7 +821,7 @@
 .task-form label {
   display: block;
   margin-bottom: 4px;
-  font-size: 11px;
+  font-size: 14px;
   color: var(--text-secondary);
 }
 
@@ -833,7 +833,7 @@
   border: 1px solid var(--border-color);
   border-radius: 4px;
   color: var(--text-primary);
-  font-size: 12px;
+  font-size: 14px;
   font-family: var(--font-mono);
 }
 
@@ -854,7 +854,7 @@
   border: none;
   border-radius: 6px;
   color: white;
-  font-size: 12px;
+  font-size: 14px;
   font-weight: bold;
   cursor: pointer;
   transition: all 0.2s;
@@ -874,7 +874,7 @@
   padding: 2px 8px;
   background: var(--bg-light);
   border-radius: 10px;
-  font-size: 10px;
+  font-size: 14px;
   color: var(--text-secondary);
 }
 
@@ -890,7 +890,7 @@
   padding: 16px;
   text-align: center;
   color: var(--text-secondary);
-  font-size: 11px;
+  font-size: 14px;
 }
 
 .log-item {
@@ -920,7 +920,7 @@
 }
 
 .log-task-title {
-  font-size: 11px;
+  font-size: 14px;
   color: var(--text-primary);
   white-space: nowrap;
   overflow: hidden;
@@ -931,7 +931,7 @@
 .log-task-status {
   padding: 2px 6px;
   border-radius: 4px;
-  font-size: 9px;
+  font-size: 14px;
   text-transform: uppercase;
 }
 
@@ -953,7 +953,7 @@
 .log-task-meta {
   display: flex;
   justify-content: space-between;
-  font-size: 10px;
+  font-size: 14px;
   color: var(--text-secondary);
 }
 
@@ -983,7 +983,7 @@
   background: transparent;
   border: none;
   color: var(--text-secondary);
-  font-size: 11px;
+  font-size: 14px;
   font-family: var(--font-mono);
   cursor: pointer;
   transition: all 0.2s;
@@ -1047,11 +1047,11 @@
 }
 
 .nav-icon {
-  font-size: 16px;
+  font-size: 14px;
 }
 
 .nav-label {
-  font-size: 9px;
+  font-size: 14px;
   font-family: var(--font-mono);
 }
 
@@ -1083,7 +1083,7 @@
 }
 
 .section-header h3 {
-  font-size: 12px;
+  font-size: 14px;
   font-weight: 600;
   color: var(--text-primary);
   margin: 0;
@@ -1093,7 +1093,7 @@
 .status-badge {
   padding: 2px 8px;
   border-radius: 10px;
-  font-size: 10px;
+  font-size: 14px;
   font-family: var(--font-mono);
 }
 
@@ -1120,7 +1120,7 @@
 .info-row {
   display: flex;
   justify-content: space-between;
-  font-size: 11px;
+  font-size: 14px;
 }
 
 .info-row .label {
@@ -1130,14 +1130,14 @@
 .info-row .value {
   color: var(--text-primary);
   font-family: var(--font-mono);
-  font-size: 10px;
+  font-size: 14px;
 }
 
 .btn-primary {
   padding: 10px;
   border: none;
   border-radius: 6px;
-  font-size: 11px;
+  font-size: 14px;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s;
@@ -1171,7 +1171,7 @@
   border: 1px solid var(--border-color);
   border-radius: 4px;
   color: var(--text-primary);
-  font-size: 11px;
+  font-size: 14px;
   font-family: var(--font-mono);
 }
 
@@ -1181,7 +1181,7 @@
   border: none;
   border-radius: 4px;
   color: white;
-  font-size: 11px;
+  font-size: 14px;
   cursor: pointer;
 }
 
@@ -1207,7 +1207,7 @@
 }
 
 .agent-card-mini .agent-icon {
-  font-size: 18px;
+  font-size: 14px;
 }
 
 .agent-card-mini .agent-info {
@@ -1217,12 +1217,12 @@
 }
 
 .agent-card-mini .agent-name {
-  font-size: 11px;
+  font-size: 14px;
   color: var(--text-primary);
 }
 
 .agent-card-mini .agent-state {
-  font-size: 9px;
+  font-size: 14px;
   font-family: var(--font-mono);
 }
 
@@ -1257,7 +1257,7 @@
   border: 1px solid var(--border-color);
   border-radius: 4px;
   color: var(--text-primary);
-  font-size: 11px;
+  font-size: 14px;
   font-family: var(--font-mono);
 }
 
@@ -1278,7 +1278,7 @@
   border: none;
   border-radius: 6px;
   color: white;
-  font-size: 11px;
+  font-size: 14px;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s;
@@ -1329,14 +1329,14 @@
 }
 
 .task-title {
-  font-size: 11px;
+  font-size: 14px;
   color: var(--text-primary);
 }
 
 .task-status {
   padding: 2px 6px;
   border-radius: 4px;
-  font-size: 9px;
+  font-size: 14px;
   font-family: var(--font-mono);
   text-transform: uppercase;
 }
@@ -1359,7 +1359,7 @@
 .task-meta {
   display: flex;
   justify-content: space-between;
-  font-size: 10px;
+  font-size: 14px;
   color: var(--text-secondary);
 }
 
@@ -1408,13 +1408,13 @@
 
 .event-message {
   flex: 1;
-  font-size: 10px;
+  font-size: 14px;
   color: var(--text-primary);
   line-height: 1.4;
 }
 
 .event-time {
-  font-size: 9px;
+  font-size: 14px;
   color: var(--text-secondary);
   font-family: var(--font-mono);
   margin-left: 8px;
@@ -1436,7 +1436,7 @@
 }
 
 .chat-messages .avatar {
-  font-size: 20px;
+  font-size: 14px;
 }
 
 .chat-messages .content {
@@ -1449,12 +1449,12 @@
   padding: 8px 12px;
   background: var(--bg-darker);
   border-radius: 8px;
-  font-size: 11px;
+  font-size: 14px;
   color: var(--text-primary);
 }
 
 .chat-messages .time {
-  font-size: 9px;
+  font-size: 14px;
   color: var(--text-secondary);
 }
 
@@ -1473,7 +1473,7 @@
   border: 1px solid var(--border-color);
   border-radius: 6px;
   color: var(--text-primary);
-  font-size: 11px;
+  font-size: 14px;
 }
 
 .chat-input input:focus {
@@ -1487,7 +1487,7 @@
   border: none;
   border-radius: 6px;
   color: white;
-  font-size: 12px;
+  font-size: 14px;
   cursor: pointer;
 }
 
@@ -1495,7 +1495,7 @@
   padding: 20px;
   text-align: center;
   color: var(--text-secondary);
-  font-size: 11px;
+  font-size: 14px;
 }
 
 /* Agent 对话面板 */
@@ -1520,7 +1520,7 @@
   border-radius: 4px;
   color: var(--text-secondary);
   cursor: pointer;
-  font-size: 10px;
+  font-size: 14px;
 }
 
 .agent-chat .btn-close:hover {
@@ -1551,7 +1551,7 @@
 }
 
 .agent-chat .avatar {
-  font-size: 18px;
+  font-size: 14px;
   flex-shrink: 0;
 }
 
@@ -1570,7 +1570,7 @@
   padding: 8px 12px;
   background: var(--bg-dark);
   border-radius: 12px;
-  font-size: 11px;
+  font-size: 14px;
   color: var(--text-primary);
   line-height: 1.4;
 }
@@ -1581,7 +1581,7 @@
 }
 
 .agent-chat .time {
-  font-size: 9px;
+  font-size: 14px;
   color: var(--text-secondary);
   font-family: var(--font-mono);
 }
@@ -1599,7 +1599,7 @@
   border: 1px solid var(--border-color);
   border-radius: 6px;
   color: var(--text-primary);
-  font-size: 11px;
+  font-size: 14px;
 }
 
 .agent-chat .chat-input input:focus {
@@ -1613,7 +1613,7 @@
   border: none;
   border-radius: 6px;
   color: white;
-  font-size: 12px;
+  font-size: 14px;
   cursor: pointer;
 }
 
@@ -1666,7 +1666,7 @@
 }
 
 .agent-row .agent-icon {
-  font-size: 16px;
+  font-size: 14px;
 }
 
 .agent-row .agent-info {
@@ -1677,7 +1677,7 @@
 }
 
 .agent-row .name {
-  font-size: 10px;
+  font-size: 14px;
   color: var(--text-primary);
   white-space: nowrap;
   overflow: hidden;
@@ -1685,7 +1685,7 @@
 }
 
 .agent-row .state {
-  font-size: 8px;
+  font-size: 14px;
   font-family: var(--font-mono);
 }
 
@@ -1719,12 +1719,12 @@
   padding: 10px;
   background: var(--bg-dark);
   border-bottom: 1px solid var(--border-color);
-  font-size: 11px;
+  font-size: 14px;
   font-weight: 600;
 }
 
 .chat-header .chat-agent-icon {
-  font-size: 16px;
+  font-size: 14px;
 }
 
 .chat-header .btn-close {
@@ -1735,7 +1735,7 @@
   border-radius: 4px;
   color: var(--text-secondary);
   cursor: pointer;
-  font-size: 10px;
+  font-size: 14px;
 }
 
 .chat-header .btn-close:hover {
@@ -1781,7 +1781,7 @@
   padding: 6px 10px;
   background: var(--bg-dark);
   border-radius: 10px;
-  font-size: 10px;
+  font-size: 14px;
   line-height: 1.4;
 }
 
@@ -1791,7 +1791,7 @@
 }
 
 .chat-message .msg-time {
-  font-size: 8px;
+  font-size: 14px;
   color: var(--text-secondary);
   font-family: var(--font-mono);
 }
@@ -1810,7 +1810,7 @@
   border: 1px solid var(--border-color);
   border-radius: 6px;
   color: var(--text-primary);
-  font-size: 10px;
+  font-size: 14px;
 }
 
 .chat-input input:focus {
@@ -1835,7 +1835,7 @@
   background: var(--bg-darker);
   border-radius: 8px;
   color: var(--text-secondary);
-  font-size: 11px;
+  font-size: 14px;
   text-align: center;
   padding: 20px;
 }
@@ -1846,7 +1846,7 @@
   padding: 10px;
   border: none;
   border-radius: 6px;
-  font-size: 11px;
+  font-size: 14px;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s;
@@ -1870,7 +1870,7 @@
   border: 1px solid var(--border-color);
   border-radius: 4px;
   color: var(--text-primary);
-  font-size: 11px;
+  font-size: 14px;
   font-family: var(--font-mono);
 }
 
@@ -1897,7 +1897,7 @@
   border: 1px solid var(--border-color);
   border-radius: 4px;
   color: var(--text-primary);
-  font-size: 11px;
+  font-size: 14px;
 }
 
 .task-list {
@@ -1919,20 +1919,20 @@
 .task-item .task-header {
   display: flex;
   justify-content: space-between;
-  font-size: 10px;
+  font-size: 14px;
   margin-bottom: 4px;
 }
 
 .task-item .status {
   padding: 1px 4px;
   border-radius: 3px;
-  font-size: 8px;
+  font-size: 14px;
 }
 
 .task-item .task-meta {
   display: flex;
   justify-content: space-between;
-  font-size: 9px;
+  font-size: 14px;
   color: var(--text-secondary);
 }
 
@@ -1961,7 +1961,7 @@
   background: var(--bg-darker);
   border-radius: 4px;
   border-left: 2px solid var(--text-secondary);
-  font-size: 9px;
+  font-size: 14px;
 }
 
 .event-item.info { border-left-color: var(--accent-blue); }
@@ -1983,7 +1983,7 @@
   padding: 20px;
   text-align: center;
   color: var(--text-secondary);
-  font-size: 11px;
+  font-size: 14px;
 }
 
 /* ===== Agents 全屏布局 ===== */
@@ -2030,7 +2030,7 @@
 }
 
 .agent-card-large .agent-icon-lg {
-  font-size: 28px;
+  font-size: 14px;
 }
 
 .agent-card-large .agent-name-lg {
@@ -2046,7 +2046,7 @@
 }
 
 .agent-card-large .agent-state-lg {
-  font-size: 11px;
+  font-size: 14px;
   font-family: var(--font-mono);
 }
 
@@ -2081,12 +2081,12 @@
   padding: 10px;
   background: var(--bg-dark);
   border-bottom: 1px solid var(--border-color);
-  font-size: 12px;
+  font-size: 14px;
   font-weight: 600;
 }
 
 .chat-panel-compact .chat-agent-icon {
-  font-size: 18px;
+  font-size: 14px;
 }
 
 .chat-panel-compact .btn-close {
@@ -2097,7 +2097,7 @@
   border-radius: 4px;
   color: var(--text-secondary);
   cursor: pointer;
-  font-size: 10px;
+  font-size: 14px;
 }
 
 .chat-panel-compact .chat-messages {
@@ -2120,7 +2120,7 @@
   border: 1px solid var(--border-color);
   border-radius: 6px;
   color: var(--text-primary);
-  font-size: 11px;
+  font-size: 14px;
 }
 
 .chat-panel-compact .chat-input button {
@@ -2146,7 +2146,7 @@
 }
 
 .sessions-list h4 {
-  font-size: 11px;
+  font-size: 14px;
   font-weight: 600;
   color: var(--text-primary);
   margin: 0;
@@ -2179,7 +2179,7 @@
 }
 
 .session-title {
-  font-size: 11px;
+  font-size: 14px;
   color: var(--text-primary);
 }
 
@@ -2266,13 +2266,13 @@
   justify-content: center;
   height: 100%;
   color: var(--text-secondary);
-  font-size: 12px;
+  font-size: 14px;
   text-align: center;
   padding: 20px;
 }
 
 .chat-panel-compact .chat-empty .icon {
-  font-size: 32px;
+  font-size: 14px;
   margin-bottom: 8px;
   opacity: 0.5;
 }
