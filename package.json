@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "postinstall": "node -e \"const fs=require('fs');const p='node_modules/three/build/three.module.js';let c=fs.readFileSync(p,'utf8');if(c.includes('THREE.Clock')){c=c.replace(/THREE\\.Clock/g,'THREE.Timer').replace(/new THREE\\.Clock\\(\\)/g,'new THREE.Timer()');fs.writeFileSync(p,c);console.log('Patched THREE.Clock -> THREE.Timer');}\""
   },
   "dependencies": {
     "@react-three/drei": "^10.7.7",
