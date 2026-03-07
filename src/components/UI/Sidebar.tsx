@@ -284,7 +284,7 @@ const Sidebar: React.FC<SidebarProps> = ({ locale = 'zh' }) => {
             {sessions[selectedAgentId].map((session: Session) => (
               <div key={session.sessionKey} className={`session-item ${selectedSessionKey === session.sessionKey ? 'selected' : ''}`}
                 onClick={() => setSelectedSessionKey(session.sessionKey)}>
-                <span className="session-title">{session.title || session.sessionKey.split(':').pop()}</span>
+                <span className="session-title">{session.title || session.sessionKey?.split(':').pop() || 'Session'}</span>
               </div>
             ))}
           </div>
