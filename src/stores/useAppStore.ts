@@ -15,7 +15,6 @@ import type {
   SidebarTab,
   GlobalStats 
 } from '../types';
-import { getAllRoomConfigsSync } from '../../config';
 import { createTask, updateTaskProgress } from '../types/task';
 import { socketService } from '../services/socket';
 
@@ -139,12 +138,11 @@ export const useAppStore = create<AppState>()(
       
       // Initialize Store
       initializeStore: () => {
-        const rooms = getAllRoomConfigsSync();
-        
         // Start with empty agents list - will be fetched from Gateway after connection
+        // Simple flat map - no predefined rooms
         
         set({
-          rooms,
+          rooms: [],
           agents: [],
           tasks: [],
           selectedAgentId: null,
@@ -344,13 +342,10 @@ export const useAppStore = create<AppState>()(
       },
       
       updateAgentRoom: (agentId, roomId) => {
-        const room = get().rooms.find(r => r.id === roomId);
-        if (!room) return;
-        
-        // 计算房间中心位置
+        // Simple flat map - just move to a random position
         const targetPosition = {
-          x: room.position.x + room.position.width / 2,
-          y: room.position.y + room.position.height / 2
+          x: Math.random() * 800 + 100,
+          y: Math.random() * 600 + 100
         };
         
         set((s) => ({

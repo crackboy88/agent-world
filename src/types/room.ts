@@ -1,14 +1,26 @@
 /**
  * 房间类型定义
+ * Simple flat map - no predefined rooms
  */
 
-export type { Room, RoomName, RoomPosition, Furniture, Window, RoomId } from '../../config/rooms';
-export { getRoomById, getRoomDisplayName, DEFAULT_ROOMS } from '../../config/rooms';
+export type RoomId = string;
 
-import { DEFAULT_ROOMS } from '../../config/rooms';
+export interface Room {
+  id: RoomId;
+  name: string;
+}
 
-export const ROOMS_CONFIG = DEFAULT_ROOMS;
+// 简单的空地图
+export const DEFAULT_ROOMS: Room[] = [];
 
-export function getRoomByIdLegacy(id: string) {
-  return ROOMS_CONFIG.find(room => room.id === id);
+export function getRoomById(id: string): Room | undefined {
+  return DEFAULT_ROOMS.find(room => room.id === id);
+}
+
+export function getAllRoomConfigs(): Room[] {
+  return DEFAULT_ROOMS;
+}
+
+export function getAllRoomConfigsSync(): Room[] {
+  return DEFAULT_ROOMS;
 }
