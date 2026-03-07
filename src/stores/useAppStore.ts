@@ -272,21 +272,12 @@ export const useAppStore = create<AppState>()(
         // 连接 Socket
         socketService.connect();
         
-        // 等待连接成功后获取 agent 列表
-        socketService.onConnectionChange = (connected) => {
-          if (connected) {
-            // 连接成功后获取 agents
-            setTimeout(() => fetchAgents(), 500);
-          }
-        };
-        
-        // 初始尝试获取（如果已连接）
-        if (socketService.isConnected()) {
-          setTimeout(() => fetchAgents(), 1500);
-        }
-        
-        // 获取 agent 列表函数
+        // 获取 agent 列表函数（只调用一次）
+        let agentsFetched = false;
         const fetchAgents = async () => {
+          if (agentsFetched) return; // 防止重复获取
+          agentsFetched = true;
+          
           try {
             const gatewayAgents = await socketService.listAgents();
             if (gatewayAgents && gatewayAgents.length > 0) {
@@ -314,12 +305,22 @@ export const useAppStore = create<AppState>()(
           } catch (e) {
             console.error('Failed to fetch agents:', e);
             // 如果失败，1秒后重试
+            agentsFetched = false; // 允许重试
             setTimeout(fetchAgents, 1000);
           }
         };
         
-        // 延迟获取确保连接完成
-        setTimeout(fetchAgents, 1500);
+        // 等待连接成功后获取 agent 列表
+        socketService.onConnectionChange = (connected) => {
+          if (connected) {
+            setTimeout(() => fetchAgents(), 500);
+          }
+        };
+        
+        // 初始尝试获取（如果已连接）
+        if (socketService.isConnected()) {
+          setTimeout(() => fetchAgents(), 1500);
+        }
       },
       
       disconnectSocket: () => {
