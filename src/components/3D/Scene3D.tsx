@@ -1,11 +1,16 @@
 /**
- * 3D Scene Component - Simple flat map
+ * 3D Scene Component - Loads models from assets folder
  */
 import { Canvas } from '@react-three/fiber';
 import { OrbitControls, PerspectiveCamera, ContactShadows, Environment } from '@react-three/drei';
 import * as THREE from 'three';
 import { Agent3D, AGENT_CONFIGS } from './Agent3D';
+import { MapItem3D, preloadModels } from './MapItem3D';
 import type { Agent } from '../../types';
+import { DEFAULT_MAP_ITEMS, getModelUrl, type MapItem } from '../../config';
+
+// 预加载模型
+preloadModels();
 
 // Simple flat floor
 const Floor = ({ size = 20 }: { size?: number }) => {
@@ -18,6 +23,32 @@ const Floor = ({ size = 20 }: { size?: number }) => {
       {/* Grid lines for reference */}
       <gridHelper args={[size, size, '#CCC', '#DDD']} position={[0, 0.01, 0]} />
     </group>
+  );
+};
+
+// Map Items from config
+const MapItems = () => {
+  const items = DEFAULT_MAP_ITEMS;
+  
+  return (
+    <>
+      {items.map((item: MapItem) => {
+        // Convert 2D position to 3D
+        const x = (item.position.x - 512) / 100;
+        const z = (item.position.y - 512) / 100;
+        const modelUrl = getModelUrl(item.type);
+        
+        return (
+          <MapItem3D
+            key={item.id}
+            modelUrl={modelUrl}
+            position={[x, 0, z]}
+            rotation={item.rotation || 0}
+            color={item.color}
+          />
+        );
+      })}
+    </>
   );
 };
 
@@ -40,6 +71,10 @@ export const Scene3D = ({ agents, selectedAgentId, onAgentClick }: { agents: Age
       
       <Floor size={20} />
       
+      {/* Map Items from config */}
+      <MapItems />
+      
+      {/* Agents */}
       {agents.map(agent => {
         const config = AGENT_CONFIGS[agent.id] || AGENT_CONFIGS['main'];
         const pos = getAgentPosition(agent);

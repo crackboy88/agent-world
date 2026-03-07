@@ -14,11 +14,48 @@ export interface MapItem {
   rotation?: number;
 }
 
+// Map item type to model file mapping
+export const ITEM_MODEL_MAP: Record<ItemType, string> = {
+  plant: '/assets/models/plant-small.glb',
+  table: '/assets/models/table.glb',
+  chair: '/assets/models/chair.glb',
+  desk: '/assets/models/desk.glb',
+  cabinet: '/assets/models/cabinet.glb',
+  other: '/assets/models/table.glb', // fallback
+};
+
 /**
- * Default map items - empty
- * Users can configure their own map items in map.local.ts
+ * Get model URL for an item type
  */
-export const DEFAULT_MAP_ITEMS: MapItem[] = [];
+export function getModelUrl(type: ItemType): string {
+  return ITEM_MODEL_MAP[type] || '/assets/models/table.glb';
+}
+
+/**
+ * Default map items - sample items for demo
+ */
+export const DEFAULT_MAP_ITEMS: MapItem[] = [
+  // Plants
+  { id: 'plant-1', type: 'plant', name: 'Plant 1', position: { x: 200, y: 200 }, color: '#4CAF50' },
+  { id: 'plant-2', type: 'plant', name: 'Plant 2', position: { x: 800, y: 200 }, color: '#4CAF50' },
+  { id: 'plant-3', type: 'plant', name: 'Plant 3', position: { x: 200, y: 800 }, color: '#4CAF50' },
+  
+  // Tables
+  { id: 'table-1', type: 'table', name: 'Meeting Table', position: { x: 512, y: 512 }, color: '#5D4037' },
+  
+  // Chairs around the table
+  { id: 'chair-1', type: 'chair', name: 'Chair 1', position: { x: 450, y: 460 }, rotation: 0, color: '#1565C0' },
+  { id: 'chair-2', type: 'chair', name: 'Chair 2', position: { x: 574, y: 460 }, rotation: Math.PI, color: '#1565C0' },
+  { id: 'chair-3', type: 'chair', name: 'Chair 3', position: { x: 450, y: 564 }, rotation: 0, color: '#1565C0' },
+  { id: 'chair-4', type: 'chair', name: 'Chair 4', position: { x: 574, y: 564 }, rotation: Math.PI, color: '#1565C0' },
+  
+  // Desks
+  { id: 'desk-1', type: 'desk', name: 'Work Desk 1', position: { x: 200, y: 400 }, color: '#795548' },
+  { id: 'desk-2', type: 'desk', name: 'Work Desk 2', position: { x: 800, y: 400 }, color: '#795548' },
+  
+  // Cabinets
+  { id: 'cabinet-1', type: 'cabinet', name: 'Storage Cabinet', position: { x: 100, y: 700 }, color: '#8D6E63' },
+];
 
 /**
  * Available item templates for users to choose from
