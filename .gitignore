@@ -11,6 +11,7 @@ dist/
 
 # Local configuration (private configs)
 config/map.local.ts
+config/agent.local.ts
 
 # Editor directories and files
 .vscode/

@@ -180,33 +180,54 @@ openclaw devices approve --latest
 
 ## ⚙️ Configuration
 
-### Default Configuration
+### Agents
 
-The project comes with generic default agents and room layouts in:
+Agents are fetched automatically from your OpenClaw Gateway. The application displays all agents connected to the Gateway.
 
-- `config/agents.default.ts` - Default agent definitions
-- `config/rooms.default.ts` - Default room layout
+### Map Items
 
-### Private Configuration (Local Only)
+To customize the map with furniture and decorations:
 
-To customize for your own use case without committing to the repository:
-
-1. Copy the example files:
+1. Copy the example config:
    ```bash
-   cp config/agents.local.example.ts config/agents.local.ts
-   cp config/rooms.local.example.ts config/rooms.local.ts
+   cp config/map.local.example.ts config/map.local.ts
    ```
 
-2. Edit the `*.local.ts` files with your own agents and rooms
+2. Edit `config/map.local.ts` to add items:
+   ```typescript
+   export const LOCAL_MAP_ITEMS: MapItem[] = [
+     { id: 'plant-1', type: 'plant', name: 'Plant', position: { x: 100, y: 100 } },
+     { id: 'table-1', type: 'table', name: 'Meeting Table', position: { x: 512, y: 512 } },
+   ];
+   ```
 
-3. The `.gitignore` already excludes these files from version control
+Available item types: `plant`, `table`, `chair`, `cabinet`, `desk`, `other`
 
-### Agent Configuration
+### Agent Appearance
 
-```typescript
-// config/agents.local.ts
-export const LOCAL_AGENTS: Record<string, AgentConfig> = {
-  'my-agent': {
+To customize agent appearances:
+
+1. Copy the example config:
+   ```bash
+   cp config/agent.local.example.ts config/agent.local.ts
+   ```
+
+2. Edit `config/agent.local.ts` to customize:
+   ```typescript
+   export const LOCAL_AGENT_APPEARANCES: AgentAppearance[] = [
+     {
+       id: 'main',
+       name: 'My Agent',
+       skinColor: '#FCD34D',
+       hairColor: '#1F2937',
+       clothesColor: '#3B82F6',
+       accentColor: '#F59E0B',
+       accessory: '💼',
+     },
+   ];
+   ```
+
+The `.gitignore` already excludes local configs from version control.
     id: 'my-agent',
     name: 'My Agent',
     emoji: '🤖',
