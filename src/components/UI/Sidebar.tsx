@@ -91,41 +91,35 @@ const Sidebar: React.FC<SidebarProps> = ({ locale = 'zh' }) => {
     chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, selectedAgentId, selectedSessionKey]);
 
-  // 获取会话列表
+  // 获取真实会话列表（从 Gateway）
   const fetchSessions = useCallback(async (agentId: string) => {
     if (!gatewayConnected) return;
     try {
       const result = await socketService.listSessions(agentId);
-      const sessionList = result?.sessions || [];
+      let sessionList = result?.sessions || [];
       
-      // 如果没有会话，创建一个默认会话
+      // 如果没有真实会话，显示提示
       if (sessionList.length === 0) {
-        const defaultSession = {
-          sessionKey: `session:${agentId}:default`,
-          title: locale === 'zh' ? '默认会话' : 'Default Chat',
-          updatedAt: Date.now()
-        };
-        sessionList.push(defaultSession);
+        // 不创建假会话，让用户知道没有历史会话
+        setSessions(prev => ({ ...prev, [agentId]: [] }));
+        // 仍然设置一个临时会话用于新对话
+        setSelectedSessionKey(`new:${agentId}`);
+        return;
       }
       
       setSessions(prev => ({ ...prev, [agentId]: sessionList }));
       
-      // 自动选择第一个会话
+      // 自动选择最新的会话
       if (sessionList.length > 0) {
+        // 按更新时间排序，选最新的
+        sessionList.sort((a, b) => b.updatedAt - a.updatedAt);
         setSelectedSessionKey(sessionList[0].sessionKey);
       }
     } catch (err) {
       console.error('Failed to fetch sessions:', err);
-      // 即使失败也创建一个默认会话
-      const defaultSession = {
-        sessionKey: `session:${agentId}:default`,
-        title: locale === 'zh' ? '默认会话' : 'Default Chat',
-        updatedAt: Date.now()
-      };
-      setSessions(prev => ({ ...prev, [agentId]: [defaultSession] }));
-      setSelectedSessionKey(defaultSession.sessionKey);
+      setSelectedSessionKey(`new:${agentId}`);
     }
-  }, [gatewayConnected, locale]);
+  }, [gatewayConnected]);
 
   // 发送聊天消息
   const handleSendMessage = useCallback(async (text: string) => {
@@ -283,24 +277,17 @@ const Sidebar: React.FC<SidebarProps> = ({ locale = 'zh' }) => {
         <span className="badge">{onlineAgents.length}/{totalAgents}</span>
       </div>
 
-      {/* Agent 网格 - 点击直接进入对话 */}
+      {/* Agent 网格 - 点击获取真实会话 */}
       <div className="agent-grid-full">
         {agents.map((agent: Agent) => (
           <div key={agent.id} className={`agent-card-large ${selectedAgentId === agent.id ? 'selected' : ''}`}
             onClick={() => {
               if (selectedAgentId === agent.id) {
-                // 取消选中
                 setSelectedAgentId('');
                 setSelectedSessionKey('');
               } else {
-                // 选中 agent，直接创建默认会话
                 setSelectedAgentId(agent.id);
-                const defaultSessionKey = `session:${agent.id}:main`;
-                setSelectedSessionKey(defaultSessionKey);
-                setSessions(prev => ({
-                  ...prev,
-                  [agent.id]: [{ sessionKey: defaultSessionKey, title: locale === 'zh' ? '对话' : 'Chat', updatedAt: Date.now() }]
-                }));
+                fetchSessions(agent.id);
               }
             }}>
             <div className="agent-header">
