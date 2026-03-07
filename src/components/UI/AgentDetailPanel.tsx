@@ -65,7 +65,7 @@ const AgentDetailPanel: React.FC<AgentDetailPanelProps> = ({ agent, onClose, loc
             {locale === 'zh' ? '当前房间' : 'Current Room'}
           </span>
           <span className="agent-stat-value">
-            {agent.currentRoom}
+            {agent.currentLocation}
           </span>
         </div>
 

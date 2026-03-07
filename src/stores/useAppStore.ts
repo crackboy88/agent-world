@@ -6,11 +6,11 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import type { 
-  Room, 
+  MapItem,
   Agent, 
   Task, 
   AgentId, 
-  RoomId, 
+  MapId, 
   AgentState, 
   SidebarTab,
   GlobalStats 
@@ -38,7 +38,7 @@ interface MessageEntry {
 // Store 状态接口
 interface AppState {
   // Data
-  rooms: Room[];
+  maps: MapItem[];
   agents: Agent[];
   tasks: Task[];
   
@@ -48,7 +48,7 @@ interface AppState {
   
   // Selection
   selectedAgentId: AgentId | null;
-  selectedRoomId: RoomId | null;
+  selectedMapId: MapId | null;
   
   // UI State
   sidebarOpen: boolean;
@@ -72,7 +72,7 @@ interface AppState {
   updateAgentState: (agentId: AgentId, state: AgentState) => void;
   setAgentState: (agentId: string, state: string, progress?: number) => void;
   updateAgentPosition: (agentId: AgentId, position: { x: number; y: number }) => void;
-  updateAgentRoom: (agentId: AgentId, roomId: RoomId) => void;
+  updateAgentLocation: (agentId: AgentId, locationId: MapId) => void;
   setAgentOnline: (agentId: AgentId, isOnline: boolean) => void;
   setAgentMood: (agentId: AgentId, mood: 'positive' | 'neutral' | 'negative') => void;
   
@@ -95,7 +95,7 @@ interface AppState {
   
   // Actions - Selection
   selectAgent: (agentId: AgentId | null) => void;
-  selectRoom: (roomId: RoomId | null) => void;
+  selectMap: (locationId: MapId | null) => void;
   
   // Actions - UI
   toggleSidebar: () => void;
@@ -109,7 +109,7 @@ interface AppState {
   
   // Getters
   getAgentById: (id: AgentId) => Agent | undefined;
-  getRoomById: (id: RoomId) => Room | undefined;
+  getMapById: (id: MapId) => MapItem | undefined;
   getTasksByAgent: (agentId: AgentId) => Task[];
   getGlobalStats: () => GlobalStats;
 }
@@ -119,13 +119,13 @@ export const useAppStore = create<AppState>()(
   persist(
     (set, get) => ({
       // Initial State
-      rooms: [],
+      maps: [],
       agents: [],
       tasks: [],
       logs: [],
       messages: [],
       selectedAgentId: null,
-      selectedRoomId: null,
+      selectedMapId: null,
       sidebarOpen: true,
       sidebarTab: 'tasks',
       sidebarWidth: 720,
@@ -142,11 +142,11 @@ export const useAppStore = create<AppState>()(
         // Simple flat map - no predefined rooms
         
         set({
-          rooms: [],
+          maps: [],
           agents: [],
           tasks: [],
           selectedAgentId: null,
-          selectedRoomId: null,
+          selectedMapId: null,
         });
         
         // 启动时间更新
@@ -195,7 +195,7 @@ export const useAppStore = create<AppState>()(
                 emoji: updated.emoji || '🤖',
                 isOnline: updated.isOnline !== false,
                 state: updated.state || 'idle',
-                currentRoom: updated.currentRoom || 'lobby',
+                currentLocation: updated.currentLocation || 'lobby',
                 position: updated.position || { x: 512 + Math.random() * 200, y: 512 + Math.random() * 200 },
                 targetPosition: updated.targetPosition,
                 animation: updated.animation || 'idle',
@@ -226,7 +226,7 @@ export const useAppStore = create<AppState>()(
                   emoji: a.emoji || '🤖',
                   isOnline: a.isOnline !== false,
                   state: a.state || 'idle',
-                  currentRoom: a.currentRoom || 'lobby',
+                  currentLocation: a.currentLocation || 'lobby',
                   position: a.position || { x: 512 + Math.random() * 200, y: 512 + Math.random() * 200 },
                   targetPosition: a.targetPosition,
                   animation: a.animation || 'idle',
@@ -282,7 +282,7 @@ export const useAppStore = create<AppState>()(
                 emoji: a.emoji || '🤖',
                 isOnline: a.isOnline !== false,
                 state: a.state || 'idle',
-                currentRoom: a.currentRoom || 'lobby',
+                currentLocation: a.currentLocation || 'lobby',
                 position: a.position || { x: 512 + Math.random() * 200, y: 512 + Math.random() * 200 },
                 targetPosition: a.targetPosition,
                 animation: a.animation || 'idle',
@@ -347,7 +347,7 @@ export const useAppStore = create<AppState>()(
         }));
       },
       
-      updateAgentRoom: (agentId, roomId) => {
+      updateAgentLocation: (agentId, locationId) => {
         // Simple flat map - just move to a random position
         const targetPosition = {
           x: Math.random() * 800 + 100,
@@ -358,7 +358,7 @@ export const useAppStore = create<AppState>()(
           agents: s.agents.map(a => 
             a.id === agentId ? { 
               ...a, 
-              currentRoom: roomId,
+              currentLocation: locationId,
               targetPosition,
               animation: 'walk'
             } : a
@@ -519,8 +519,8 @@ export const useAppStore = create<AppState>()(
         });
       },
       
-      selectRoom: (roomId) => {
-        set({ selectedRoomId: roomId });
+      selectMap: (locationId) => {
+        set({ selectedMapId: locationId });
       },
       
       // UI Actions
@@ -567,8 +567,8 @@ export const useAppStore = create<AppState>()(
         return get().agents.find(a => a.id === id);
       },
       
-      getRoomById: (id) => {
-        return get().rooms.find(r => r.id === id);
+      getMapById: (id) => {
+        return get().maps.find(r => r.id === id);
       },
       
       getTasksByAgent: (agentId) => {

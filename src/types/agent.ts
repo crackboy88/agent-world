@@ -1,57 +1,49 @@
 /**
- * Agent类型定义
- * Agent World - Agent Types
+ * Agent types - Agent World
  */
 
-import type { RoomId } from './map';
+import type { MapId } from './map';
 
-// Agent ID类型 - 通用字符串类型
+// Agent ID type
 export type AgentId = string;
 
-// Agent状态类型
+// Agent state
 export type AgentState = 
-  | 'idle'        // 空闲
-  | 'working'     // 工作/忙碌
-  | 'busy'        // 忙碌中
-  | 'thinking'    // 思考/等待
-  | 'chatting'    // 对话中
-  | 'offline';    // 离线
+  | 'idle'
+  | 'working'
+  | 'busy'
+  | 'thinking'
+  | 'chatting'
+  | 'offline';
 
-// Agent情绪类型
+// Agent mood
 export type AgentMood = 
-  | 'positive'    // 积极
-  | 'neutral'     // 中性
-  | 'negative';   // 消极
+  | 'positive'
+  | 'neutral'
+  | 'negative';
 
-// 动画类型
+// Animation type
 export type AnimationType = 
-  | 'idle'        // 站立待机
-  | 'walk'        // 行走
-  | 'work'        // 工作
-  | 'think';      // 思考
+  | 'idle'
+  | 'walk'
+  | 'work'
+  | 'think';
 
-// 位置
+// Position
 export interface Position {
   x: number;
   y: number;
 }
 
-// 技能标签
-export interface SkillTag {
-  icon: string;   // Emoji图标
-  labelZh: string; // 中文标签
-  labelEn: string; // 英文标签
-}
-
-// Agent接口
+// Agent interface
 export interface Agent {
   id: AgentId;
   name: string;
-  nameZh?: string;  // 可选的中文名
-  nameEn?: string;  // 可选的英文名
+  nameZh?: string;
+  nameEn?: string;
   emoji?: string;
-  skillTag?: SkillTag;  // 可选的技能标签
-  currentRoom: RoomId;
+  skillTag?: { icon: string; labelZh: string; labelEn: string };
+  currentLocation: MapId;
   position: Position;
   targetPosition?: Position;
   state: AgentState;
@@ -62,25 +54,16 @@ export interface Agent {
   direction?: 'up' | 'down' | 'left' | 'right' | 'up-left' | 'up-right' | 'down-left' | 'down-right';
 }
 
-// Agent移动到指定房间
-export function moveAgentToRoom(agent: Agent, roomId: RoomId, rooms: { id: RoomId; position: { x: number; y: number }; width: number; height: number }[]): Agent {
-  const room = rooms.find(r => r.id === roomId);
-  if (!room) return agent;
-  
-  const targetPosition = {
-    x: room.position.x + room.width / 2,
-    y: room.position.y + room.height / 2
-  };
-  
+// Move agent to location
+export function moveAgentToLocation(agent: Agent, locationId: MapId): Agent {
   return {
     ...agent,
-    currentRoom: roomId,
-    targetPosition,
+    currentLocation: locationId,
     animation: 'walk'
   };
 }
 
-// 获取Agent显示名称
+// Get agent display name
 export function getAgentDisplayName(agent: Agent, locale: 'zh' | 'en' = 'en'): string {
   if (locale === 'zh' && agent.nameZh) return agent.nameZh;
   if (locale === 'en' && agent.nameEn) return agent.nameEn;
