@@ -164,20 +164,17 @@ export const useAppStore = create<AppState>()(
           // 创建一个 map 来快速查找现有 agent
           const agentMap = new Map(currentAgents.map(a => [a.id, a]));
           
-          // 更新传入的 agent，保留现有 agent
-          const mergedAgents = updatedAgents.map((updated: Agent) => {
-            const existing = agentMap.get(updated.id);
-            if (existing) {
+          // 获取本地有效的 agent ID 列表
+          const localAgentIds = new Set(currentAgents.map(a => a.id));
+          
+          // 只处理在本地定义的 agent，过滤掉 Gateway 返回的未知 agent
+          const mergedAgents = currentAgents.map(existing => {
+            const updated = updatedAgents.find((a: Agent) => a.id === existing.id);
+            if (updated) {
               return { ...existing, ...updated };
             }
-            return updated;
+            return existing;
           });
-          
-          // 添加未在更新中的现有 agent
-          updatedAgents.forEach((a: Agent) => agentMap.delete(a.id));
-          for (const existing of agentMap.values()) {
-            mergedAgents.push(existing);
-          }
           
           set({ agents: mergedAgents });
         };
