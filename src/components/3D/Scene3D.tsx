@@ -105,7 +105,7 @@ export const Scene3D = ({ agents, selectedAgentId, onAgentClick }: { agents: Age
         const pos = getAgentPosition(agent.id);
         const agentState = agent.state as 'idle' | 'walking' | 'working' | 'thinking';
         return (
-          <group key={agent.id} onClick={e => { e.stopPropagation(); onAgentClick?.(agent.id); }}>
+          <group key={agent.id} onClick={(e: unknown) => { (e as Event).stopPropagation(); onAgentClick?.(agent.id); }}>
             <Float speed={agentState === 'idle' ? 1.5 : 0} rotationIntensity={agentState === 'idle' ? 0.1 : 0} floatIntensity={agentState === 'idle' ? 0.2 : 0}>
               <Agent3D config={config} position={pos} state={agentState} scale={selectedAgentId === agent.id ? 1.1 : 1} isSelected={selectedAgentId === agent.id} onClick={() => onAgentClick?.(agent.id)} />
             </Float>

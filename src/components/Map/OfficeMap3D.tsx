@@ -42,7 +42,7 @@ const Agent3D: React.FC<{
         ref={meshRef} 
         position={position}
         onClick={onClick}
-        onPointerOver={(e) => { e.stopPropagation(); document.body.style.cursor = 'pointer'; }}
+        onPointerOver={(e: unknown) => { (e as Event).stopPropagation(); document.body.style.cursor = 'pointer'; }}
         onPointerOut={() => { document.body.style.cursor = 'auto'; }}
       >
         {/* 身体 */}

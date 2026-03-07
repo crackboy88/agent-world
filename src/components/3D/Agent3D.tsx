@@ -310,16 +310,16 @@ export const Agent3D: React.FC<{
       ref={groupRef} 
       position={position} 
       scale={scale}
-      onClick={(e) => {
-        e.stopPropagation();
+      onClick={(e: unknown) => {
+        (e as Event).stopPropagation();
         onClick?.();
       }}
-      onPointerOver={(e) => {
-        e.stopPropagation();
+      onPointerOver={(e: unknown) => {
+        (e as Event).stopPropagation();
         document.body.style.cursor = 'pointer';
       }}
-      onPointerOut={(e) => {
-        e.stopPropagation();
+      onPointerOut={(e: unknown) => {
+        (e as Event).stopPropagation();
         document.body.style.cursor = 'default';
       }}
     >
