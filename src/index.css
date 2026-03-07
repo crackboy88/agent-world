@@ -2220,3 +2220,28 @@
   transform: translateY(-1px);
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
+
+/* Agents 面板布局 */
+.agents-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  height: 100%;
+  overflow: hidden;
+}
+
+.agents-panel .agent-grid-full {
+  flex: 0 0 auto;
+}
+
+.agents-panel .chat-panel-compact {
+  flex: 1;
+  min-height: 200px;
+  display: flex;
+  flex-direction: column;
+}
+
+.agents-panel .chat-messages {
+  flex: 1;
+  overflow-y: auto;
+}
