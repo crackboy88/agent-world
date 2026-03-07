@@ -163,12 +163,15 @@ export const useAppStore = create<AppState>()(
         socketService.onAgentUpdate = (updatedAgents) => {
           const currentAgents = get().agents;
           
+          // 过滤掉无效的 agent
+          const validUpdated = updatedAgents.filter((a: Agent) => a.id && a.id.trim() !== '');
+          
           // 创建当前 agent 的 map
           const currentMap = new Map(currentAgents.map(a => [a.id, a]));
           
           // 合并更新：保留现有 agent，更新匹配的，添加新的
           const mergedAgents = currentAgents.map(existing => {
-            const updated = updatedAgents.find((a: Agent) => a.id === existing.id);
+            const updated = validUpdated.find((a: Agent) => a.id === existing.id);
             if (updated) {
               // 合并更新，保持本地扩展的字段
               return { 
@@ -183,7 +186,7 @@ export const useAppStore = create<AppState>()(
           });
           
           // 添加 Gateway 返回的 新 agent（不在当前列表中的）
-          updatedAgents.forEach((updated: Agent) => {
+          validUpdated.forEach((updated: Agent) => {
             if (!currentMap.has(updated.id)) {
               // 新 agent，使用 Gateway 数据，添加默认字段
               mergedAgents.push({
@@ -270,7 +273,10 @@ export const useAppStore = create<AppState>()(
           try {
             const gatewayAgents = await socketService.listAgents();
             if (gatewayAgents && gatewayAgents.length > 0) {
-              const agents: Agent[] = gatewayAgents.map((a: Agent) => ({
+              // 过滤掉无效的 agent（没有 id）
+              const validAgents = gatewayAgents.filter((a: Agent) => a.id && a.id.trim() !== '');
+              
+              const agents: Agent[] = validAgents.map((a: Agent) => ({
                 id: a.id,
                 name: a.name || a.id,
                 emoji: a.emoji || '🤖',
