@@ -319,7 +319,7 @@ const Sidebar: React.FC<SidebarProps> = ({ locale = 'zh' }) => {
                   className={`session-tab ${selectedSessionKey === s.sessionKey ? 'active' : ''}`}
                   onClick={() => setSelectedSessionKey(s.sessionKey)}
                 >
-                  {s.title || s.sessionKey.split(':').pop() || 'Chat'}
+                  {s.title ||  (s.sessionKey || '').split(':').pop() || 'Chat'}
                 </button>
               ))}
             </div>
