@@ -164,6 +164,12 @@ export const useAppStore = create<AppState>()(
       
       // Socket 连接
       connectSocket: () => {
+        // 确保回调只设置一次
+        if ((socketService as unknown as { _callbacksSet: boolean })._callbacksSet) {
+          return;
+        }
+        (socketService as unknown as { _callbacksSet: boolean })._callbacksSet = true;
+        
         // 设置事件回调 - 合并更新而非覆盖
         socketService.onAgentUpdate = (updatedAgents) => {
           const currentAgents = get().agents;
@@ -272,11 +278,10 @@ export const useAppStore = create<AppState>()(
         // 连接 Socket
         socketService.connect();
         
-        // 获取 agent 列表函数（只调用一次）
-        let agentsFetched = false;
+        // 获取 agent 列表（只调用一次）
+        const agentsFetched = { done: false };
         const fetchAgents = async () => {
-          if (agentsFetched) return; // 防止重复获取
-          agentsFetched = true;
+          if (agentsFetched.done) return;
           
           try {
             const gatewayAgents = await socketService.listAgents();
@@ -305,20 +310,15 @@ export const useAppStore = create<AppState>()(
           } catch (e) {
             console.error('Failed to fetch agents:', e);
             // 如果失败，1秒后重试
-            agentsFetched = false; // 允许重试
-            setTimeout(fetchAgents, 1000);
+            setTimeout(() => {
+              agentsFetched.done = false;
+              fetchAgents();
+            }, 1000);
           }
         };
         
-        // 等待连接成功后获取 agent 列表（通过回调）
-        socketService.onConnectionChange = (connected) => {
-          if (connected) {
-            setTimeout(() => fetchAgents(), 500);
-          }
-        };
-        
-        // 初始尝试（如果已连接）
-        setTimeout(() => fetchAgents(), 2000);
+        // 延迟获取确保连接完成
+        setTimeout(fetchAgents, 2000);
       },
       
       disconnectSocket: () => {
