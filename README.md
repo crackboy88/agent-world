@@ -249,5 +249,4 @@ MIT License - See [LICENSE](LICENSE) for details
 
 ## 👤 Author
 
-**Chen Company**
 - GitHub: [@crackboy88](https://github.com/crackboy88)
