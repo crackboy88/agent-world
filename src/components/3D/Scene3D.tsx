@@ -80,14 +80,19 @@ export const Scene3D = ({
   
   // Handle floor click
   const handleFloorClick = (event: THREE.Event) => {
-    if (!selectedAgentId || !onMapClick) return;
-    
+    console.log('[DEBUG] Floor clicked, selectedAgentId:', selectedAgentId);
+    if (!selectedAgentId || !onMapClick) {
+      console.log('[DEBUG] Floor click ignored - no selected agent');
+      return;
+    }    
     // Get click point in 3D
     const point = (event as unknown as { point: THREE.Vector3 }).point;
+    console.log('[DEBUG] Floor click at point:', point);
     
     // Convert 3D to 2D
     const x = Math.round(point.x * 100 + 512);
     const y = Math.round(point.z * 100 + 512);
+    console.log('[DEBUG] Moving to:', { x, y });
     
     onMapClick({ x, y });
   };
@@ -113,7 +118,7 @@ export const Scene3D = ({
         const appearance = agentAppearances[agent.id] || {};
         
         return (
-          <group key={`agent-${agent.id}`} onClick={(e: unknown) => { (e as Event).stopPropagation(); onAgentClick?.(agent.id); }}>
+          <group key={`agent-${agent.id}`} onClick={(e: unknown) => { console.log("[DEBUG] Agent clicked:", agent.id); (e as Event).stopPropagation(); onAgentClick?.(agent.id); }}>
             <AgentModel3D
               key={`agent3d-${agent.id}`}
               agentId={agent.id}
