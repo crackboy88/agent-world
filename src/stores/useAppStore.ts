@@ -310,17 +310,15 @@ export const useAppStore = create<AppState>()(
           }
         };
         
-        // 等待连接成功后获取 agent 列表
+        // 等待连接成功后获取 agent 列表（通过回调）
         socketService.onConnectionChange = (connected) => {
           if (connected) {
             setTimeout(() => fetchAgents(), 500);
           }
         };
         
-        // 初始尝试获取（如果已连接）
-        if (socketService.isConnected()) {
-          setTimeout(() => fetchAgents(), 1500);
-        }
+        // 初始尝试（如果已连接）
+        setTimeout(() => fetchAgents(), 2000);
       },
       
       disconnectSocket: () => {
