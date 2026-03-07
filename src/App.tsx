@@ -97,7 +97,7 @@ const App: React.FC = () => {
               type="text"
               value={gatewayUrl}
               onChange={(e) => setGatewayUrl(e.target.value)}
-              placeholder="ws://gateway:18789/?token=..."
+              placeholder="ws://localhost:18789"
             />
             <button onClick={handleConnectGateway}>
               {gatewayConnected ? '断开' : '连接'}

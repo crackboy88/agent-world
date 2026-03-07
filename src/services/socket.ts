@@ -47,14 +47,12 @@ class OpenClawSocketService {
   /**
    * 连接到 Gateway (使用设备身份)
    */
-  connect(token?: string): void {
+  connect(): void {
     const gatewayUrl = 'ws://localhost:18789';
-    // 使用初始 token 进行配对
-    const initialToken = token || '5a8d91273cf067511ba6aebff67361ced57f54e2c5fb6d8e';
     
     this.client = new OpenClawClient({
       gatewayUrl,
-      token: initialToken,
+      token: '', // 配对后使用设备令牌，token 字段不再需要
       clientId: 'webchat',
       clientVersion: '1.0.0',
       platform: 'web',

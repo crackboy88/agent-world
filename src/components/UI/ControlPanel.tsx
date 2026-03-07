@@ -33,7 +33,7 @@ const ControlPanel: React.FC<ControlPanelProps> = ({ locale = 'zh' }) => {
   const [selectedAgentId, setSelectedAgentId] = useState<string>('');
   const [taskContent, setTaskContent] = useState<string>('');
   const [showGatewayModal, setShowGatewayModal] = useState(false);
-  const [tempGatewayUrl, setTempGatewayUrl] = useState(gatewayUrl || 'ws://localhost:18789/?token=...');
+  const [tempGatewayUrl, setTempGatewayUrl] = useState(gatewayUrl || 'ws://localhost:18789');
 
   // 任务类型选项
   const taskTypes = [
@@ -149,7 +149,7 @@ const ControlPanel: React.FC<ControlPanelProps> = ({ locale = 'zh' }) => {
               type="text"
               value={tempGatewayUrl}
               onChange={(e) => setTempGatewayUrl(e.target.value)}
-              placeholder="ws://gateway:18789/?token=..."
+              placeholder="ws://localhost:18789"
             />
             <button onClick={handleGatewayToggle}>{locale === 'zh' ? '确认' : 'Confirm'}</button>
           </div>
