@@ -200,12 +200,17 @@ const Sidebar: React.FC<SidebarProps> = ({ locale = 'zh' }) => {
     return () => { socketService.onChat = originalOnChat; };
   }, [gatewayConnected, sessions, selectedAgentId]);
 
-  // 选择 Agent 时获取会话
+  // 选择 Agent 时获取会话并自动选中
   useEffect(() => {
     if (selectedAgentId && gatewayConnected) {
-      fetchSessions(selectedAgentId);
+      // 立即设置一个临时会话 key 以避免 UI 闪烁
+      if (!selectedSessionKey) {
+        fetchSessions(selectedAgentId).then(() => {
+          // fetchSessions 内部会设置 selectedSessionKey
+        });
+      }
     }
-  }, [selectedAgentId, gatewayConnected, fetchSessions]);
+  }, [selectedAgentId, gatewayConnected]);
 
   // 选择会话时加载历史消息
   useEffect(() => {
@@ -307,7 +312,7 @@ const Sidebar: React.FC<SidebarProps> = ({ locale = 'zh' }) => {
             {sessions[selectedAgentId].map((session: Session) => (
               <div key={session.sessionKey} className={`session-item ${selectedSessionKey === session.sessionKey ? 'selected' : ''}`}
                 onClick={() => setSelectedSessionKey(session.sessionKey)}>
-                <span className="session-title">{session.title || session.sessionKey?.split(':').pop() || 'Session'}</span>
+                <span className="session-title">{session.title || session.sessionKey?.split(':').slice(-2).join(':') || 'Chat'}</span>
               </div>
             ))}
           </div>
