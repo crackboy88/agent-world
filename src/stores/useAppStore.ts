@@ -175,6 +175,16 @@ export const useAppStore = create<AppState>()(
         
         // 连接 Socket
         get().connectSocket();
+        
+        // 后备机制：5秒后如果还没有 agents（Gateway 未连接），使用后备
+        setTimeout(() => {
+          const currentAgents = get().agents;
+          if (currentAgents.length === 0) {
+            const fallbackAgents = getFallbackAgents();
+            set({ agents: fallbackAgents });
+            console.log('Using fallback agents (demo mode)');
+          }
+        }, 5000);
       },
       
       // Socket 连接
