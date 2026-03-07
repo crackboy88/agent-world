@@ -2,7 +2,7 @@
  * 3D Scene Component - Simplified without postprocessing
  */
 import { Canvas } from '@react-three/fiber';
-import { OrbitControls, PerspectiveCamera, ContactShadows, Environment, Float, Sparkles, Stars } from '@react-three/drei';
+import { OrbitControls, PerspectiveCamera, ContactShadows, Environment } from '@react-three/drei';
 import * as THREE from 'three';
 import { Agent3D, AGENT_CONFIGS } from './Agent3D';
 import type { Agent } from '../../types';
@@ -106,16 +106,12 @@ export const Scene3D = ({ agents, selectedAgentId, onAgentClick }: { agents: Age
         const agentState = agent.state as 'idle' | 'walking' | 'working' | 'thinking';
         return (
           <group key={`agent-${agent.id}`} onClick={(e: unknown) => { (e as Event).stopPropagation(); onAgentClick?.(agent.id); }}>
-            <Float key={`float-${agent.id}`} speed={agentState === 'idle' ? 1.5 : 0} rotationIntensity={agentState === 'idle' ? 0.1 : 0} floatIntensity={agentState === 'idle' ? 0.2 : 0}>
-              <Agent3D key={`agent3d-${agent.id}`} config={config} position={pos} state={agentState} scale={selectedAgentId === agent.id ? 1.1 : 1} isSelected={selectedAgentId === agent.id} onClick={() => onAgentClick?.(agent.id)} />
-            </Float>
+            <Agent3D key={`agent3d-${agent.id}`} config={config} position={pos} state={agentState} scale={selectedAgentId === agent.id ? 1.1 : 1} isSelected={selectedAgentId === agent.id} onClick={() => onAgentClick?.(agent.id)} />
           </group>
         );
       })}
       
       <ContactShadows position={[0, 0.01, 0]} opacity={0.5} scale={20} blur={2.5} far={6} resolution={512} color="#1a1a1a" />
-      <Sparkles count={100} scale={12} size={2} speed={0.3} opacity={0.3} color="#FFF8E7" />
-      <Stars radius={50} depth={50} count={1000} factor={4} saturation={0} fade speed={0.5} />
     </Canvas>
   );
 };
