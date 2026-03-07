@@ -1,5 +1,7 @@
 # Agent World
 
+> **Note**: This project is maintained by [OpenClaw](https://github.com/openclaw). It's a demo application showcasing 3D multi-agent visualization with OpenClaw Gateway integration.
+
 <p align="center">
   <img src="https://img.shields.io/badge/React-18.2-blue" alt="React">
   <img src="https://img.shields.io/badge/TypeScript-5.3-blue" alt="TypeScript">
@@ -249,4 +251,4 @@ MIT License - See [LICENSE](LICENSE) for details
 
 ## 👤 Author
 
-- GitHub: [@crackboy88](https://github.com/crackboy88)
+**OpenClaw** - https://github.com/openclaw
