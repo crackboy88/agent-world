@@ -27,7 +27,7 @@ const App: React.FC = () => {
   } = useAppStore();
   
   const [showGatewayInput, setShowGatewayInput] = useState(false);
-  const [gatewayUrl, setGatewayUrl] = useState('ws://localhost:18789/?token=5a8d91273cf067511ba6aebff67361ced57f54e2c5fb6d8e');
+  const [gatewayUrl, setGatewayUrl] = useState('ws://localhost:18789');
   const [activePanel, setActivePanel] = useState<'events' | 'tasks' | 'chat'>('events');
   const [leftSidebarTab, setLeftSidebarTab] = useState<'list' | 'control'>('list');
   const [selectedAgentId, setSelectedAgentId] = useState<string | undefined>();
