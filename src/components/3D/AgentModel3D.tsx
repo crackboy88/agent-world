@@ -123,7 +123,7 @@ export function preloadAgentModel() {
   useGLTF.preload(DEFAULT_AGENT_MODEL);
   
   const models = [
-    '/assets/agents/animated-character.glb',
+    '/assets/agents/soldier-animated.glb',
     '/assets/agents/xbot.glb',
     '/assets/agents/character1.glb',
   ];
