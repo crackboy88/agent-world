@@ -1,14 +1,19 @@
 /**
- * 统一侧边栏组件
+ * 统一侧边栏组件 - 完整版
  * Chen Company Agent World - Unified Sidebar
  * 
- * 设计理念: 对话与智能体不分离
- * - Agent 列表始终显示
- * - 选中 Agent 后，对话直接在旁边显示
+ * 功能:
+ * - Gateway 连接控制
+ * - Agent 列表与状态
+ * - 会话列表管理
+ * - 实时聊天 (通过 Gateway)
+ * - 任务管理
+ * - 事件日志
  */
 
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { useAppStore } from '../../stores';
+import { socketService } from '../../services/socket';
 import type { Task, AgentId, Agent } from '../../types';
 
 interface SidebarProps {
@@ -16,6 +21,22 @@ interface SidebarProps {
 }
 
 type Section = 'gateway' | 'agents' | 'tasks' | 'events';
+
+// 会话类型
+interface Session {
+  sessionKey: string;
+  title: string;
+  lastMessage?: string;
+  updatedAt: number;
+}
+
+// 消息类型
+interface ChatMessage {
+  id: string;
+  text: string;
+  sender: 'user' | 'agent';
+  time: string;
+}
 
 const Sidebar: React.FC<SidebarProps> = ({ locale = 'zh' }) => {
   const {
@@ -30,17 +51,18 @@ const Sidebar: React.FC<SidebarProps> = ({ locale = 'zh' }) => {
     addLog
   } = useAppStore();
 
+  // UI 状态
   const [activeSection, setActiveSection] = useState<Section>('agents');
   const [selectedAgentId, setSelectedAgentId] = useState<string>('');
+  const [selectedSessionKey, setSelectedSessionKey] = useState<string>('');
+  const [sessions, setSessions] = useState<Record<string, Session[]>>({});
   const [taskContent, setTaskContent] = useState<string>('');
   const [selectedTaskType, setSelectedTaskType] = useState<string>('research');
   const [showGatewayModal, setShowGatewayModal] = useState(false);
   const [tempGatewayUrl, setTempGatewayUrl] = useState(gatewayUrl || 'ws://localhost:18789');
 
-  // 对话消息
-  const [messages, setMessages] = useState<Record<string, { id: string; text: string; sender: 'user' | 'agent'; time: string }[]>>({
-    'assistant': [{ id: '1', text: '你好！我是你的 AI 助手。', sender: 'agent', time: '12:00' }]
-  });
+  // 消息状态: { agentId: { sessionKey: [messages] } }
+  const [messages, setMessages] = useState<Record<string, Record<string, ChatMessage[]>>>({});
   const chatEndRef = useRef<HTMLDivElement>(null);
 
   // 任务类型
@@ -59,16 +81,135 @@ const Sidebar: React.FC<SidebarProps> = ({ locale = 'zh' }) => {
     { id: 'events' as Section, icon: '📜', labelZh: '日志', labelEn: 'Logs' },
   ];
 
-  // 所有智能体都算作"在线"（无论 idle/working），只有真正离线才算离线
+  // 计算属性
   const onlineAgents = agents.filter((a: Agent) => a.isOnline || a.state !== 'offline');
   const totalAgents = agents.length;
   const selectedAgent = agents.find((a: Agent) => a.id === selectedAgentId);
 
-  // 自动滚动到对话底部
+  // 自动滚动
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages, selectedAgentId]);
+  }, [messages, selectedAgentId, selectedSessionKey]);
 
+  // 获取会话列表
+  const fetchSessions = useCallback(async (agentId: string) => {
+    if (!gatewayConnected) return;
+    try {
+      const result = await socketService.listSessions(agentId);
+      if (result?.sessions) {
+        setSessions(prev => ({ ...prev, [agentId]: result.sessions }));
+      }
+    } catch (err) {
+      console.error('Failed to fetch sessions:', err);
+    }
+  }, [gatewayConnected]);
+
+  // 发送聊天消息
+  const handleSendMessage = useCallback(async (text: string) => {
+    if (!text.trim() || !selectedAgentId || !selectedSessionKey) return;
+    
+    const msgId = `msg_${Date.now()}`;
+    const newMsg: ChatMessage = { 
+      id: msgId, 
+      text, 
+      sender: 'user', 
+      time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) 
+    };
+    
+    // 添加用户消息到 UI
+    setMessages(prev => ({
+      ...prev,
+      [selectedAgentId]: {
+        ...(prev[selectedAgentId] || {}),
+        [selectedSessionKey]: [...(prev[selectedAgentId]?.[selectedSessionKey] || []), newMsg]
+      }
+    }));
+
+    try {
+      // 通过 Gateway 发送
+      await socketService.sendChat(selectedSessionKey, text);
+      addLog({ type: 'info', message: locale === 'zh' ? `📤 已发送` : `📤 Sent` });
+    } catch (err) {
+      console.error('Failed to send:', err);
+      addLog({ type: 'error', message: locale === 'zh' ? `❌ 发送失败` : `❌ Failed` });
+    }
+  }, [selectedAgentId, selectedSessionKey, locale, addLog]);
+
+  // 监听聊天事件
+  useEffect(() => {
+    if (!gatewayConnected) return;
+    
+    const originalOnChat = socketService.onChat;
+    socketService.onChat = (data: unknown) => {
+      const chatData = data as { sessionKey?: string; message?: { content?: string; role?: string } };
+      if (chatData.sessionKey && chatData.message) {
+        const sessionKey = chatData.sessionKey;
+        
+        // 找到对应的 agent
+        let targetAgentId = selectedAgentId;
+        for (const [agentId, agentSessions] of Object.entries(sessions)) {
+          if (agentSessions.some(s => s.sessionKey === sessionKey)) {
+            targetAgentId = agentId;
+            break;
+          }
+        }
+        
+        if (targetAgentId && sessionKey) {
+          const agentMsg: ChatMessage = {
+            id: `recv_${Date.now()}`,
+            text: chatData.message.content || '',
+            sender: chatData.message.role === 'assistant' ? 'agent' : 'user',
+            time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+          };
+          
+          setMessages(prev => ({
+            ...prev,
+            [targetAgentId]: {
+              ...(prev[targetAgentId] || {}),
+              [sessionKey]: [...(prev[targetAgentId]?.[sessionKey] || []), agentMsg]
+            }
+          }));
+        }
+      }
+      originalOnChat?.(data);
+    };
+
+    return () => { socketService.onChat = originalOnChat; };
+  }, [gatewayConnected, sessions, selectedAgentId]);
+
+  // 选择 Agent 时获取会话
+  useEffect(() => {
+    if (selectedAgentId && gatewayConnected) {
+      fetchSessions(selectedAgentId);
+    }
+  }, [selectedAgentId, gatewayConnected, fetchSessions]);
+
+  // 选择会话时加载历史消息
+  useEffect(() => {
+    if (selectedAgentId && selectedSessionKey && gatewayConnected) {
+      socketService.getChatHistory(selectedSessionKey)
+        .then(result => {
+          if (result?.messages) {
+            const history: ChatMessage[] = result.messages.map((m: { role: string; content: string; timestamp: number }) => ({
+              id: `hist_${m.timestamp}`,
+              text: m.content,
+              sender: m.role === 'assistant' ? 'agent' : 'user',
+              time: new Date(m.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+            }));
+            setMessages(prev => ({
+              ...prev,
+              [selectedAgentId]: {
+                ...(prev[selectedAgentId] || {}),
+                [selectedSessionKey]: history
+              }
+            }));
+          }
+        })
+        .catch(console.error);
+    }
+  }, [selectedAgentId, selectedSessionKey, gatewayConnected]);
+
+  // 状态样式
   const getStatusColor = (state: string) => {
     const colors: Record<string, string> = {
       working: '#10B981', thinking: '#8B5CF6', chatting: '#3B82F6', busy: '#F59E0B'
@@ -85,46 +226,6 @@ const Sidebar: React.FC<SidebarProps> = ({ locale = 'zh' }) => {
     return map[state]?.[locale] || state;
   };
 
-  const handleGatewayToggle = () => {
-    if (gatewayConnected) {
-      disconnectGateway();
-      addLog({ type: 'info', message: locale === 'zh' ? '已断开' : 'Disconnected' });
-    } else {
-      connectGateway(tempGatewayUrl);
-      setShowGatewayModal(false);
-      addLog({ type: 'info', message: locale === 'zh' ? '连接中...' : 'Connecting...' });
-    }
-  };
-
-  const handleSendTask = () => {
-    if (!selectedAgentId || !taskContent.trim()) return;
-    assignTask(selectedAgentId as AgentId, selectedTaskType as Task['type']);
-    const agent = agents.find((a: Agent) => a.id === selectedAgentId);
-    addLog({ type: 'info', message: locale === 'zh' ? `📤 已向 ${agent?.nameZh} 发送任务` : `📤 Task sent` });
-    setTaskContent('');
-  };
-
-  const handleSendMessage = (text: string) => {
-    if (!text.trim() || !selectedAgentId) return;
-    const newMsg = { id: Date.now().toString(), text, sender: 'user' as const, time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) };
-    setMessages(prev => ({ ...prev, [selectedAgentId]: [...(prev[selectedAgentId] || []), newMsg] }));
-    
-    // 模拟回复
-    setTimeout(() => {
-      const reply = { 
-        id: (Date.now() + 1).toString(), 
-        text: locale === 'zh' ? `收到: ${text}` : `Got: ${text}`, 
-        sender: 'agent' as const, 
-        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) 
-      };
-      setMessages(prev => ({ ...prev, [selectedAgentId]: [...(prev[selectedAgentId] || []), reply] }));
-    }, 600);
-  };
-
-  const handleAgentClick = (agentId: string) => {
-    setSelectedAgentId(agentId === selectedAgentId ? '' : agentId);
-  };
-
   // ========== 渲染函数 ==========
 
   const renderGateway = () => (
@@ -139,19 +240,19 @@ const Sidebar: React.FC<SidebarProps> = ({ locale = 'zh' }) => {
         <div className="info-row"><span>{locale === 'zh' ? '地址' : 'URL'}:</span><span className="mono">{gatewayUrl || '-'}</span></div>
         <div className="info-row"><span>{locale === 'zh' ? '在线' : 'Online'}:</span><span>{onlineAgents.length}/{totalAgents}</span></div>
       </div>
-      <button className={`btn-full ${gatewayConnected ? 'btn-disconnect' : 'btn-connect'}`} onClick={() => gatewayConnected ? handleGatewayToggle() : setShowGatewayModal(!showGatewayModal)}>
+      <button className={`btn-full ${gatewayConnected ? 'btn-disconnect' : 'btn-connect'}`} onClick={() => gatewayConnected ? disconnectGateway() : setShowGatewayModal(!showGatewayModal)}>
         {gatewayConnected ? (locale === 'zh' ? '断开' : 'Disconnect') : (locale === 'zh' ? '连接' : 'Connect')}
       </button>
       {showGatewayModal && (
         <div className="input-group">
           <input type="text" value={tempGatewayUrl} onChange={(e) => setTempGatewayUrl(e.target.value)} placeholder="ws://localhost:18789" />
-          <button onClick={handleGatewayToggle}>{locale === 'zh' ? '确定' : 'OK'}</button>
+          <button onClick={() => { connectGateway(tempGatewayUrl); setShowGatewayModal(false); }}>{locale === 'zh' ? '确定' : 'OK'}</button>
         </div>
       )}
     </div>
   );
 
-  // Agents + Chat 整合面板
+  // Agents + Sessions + Chat
   const renderAgents = () => (
     <div className="sidebar-section agents-panel">
       <div className="section-header">
@@ -159,39 +260,49 @@ const Sidebar: React.FC<SidebarProps> = ({ locale = 'zh' }) => {
         <span className="badge">{onlineAgents.length}/{totalAgents}</span>
       </div>
 
-      {/* Agent 网格 - 始终显示所有智能体 */}
+      {/* Agent 网格 */}
       <div className="agent-grid-full">
         {agents.map((agent: Agent) => (
-          <div 
-            key={agent.id} 
-            className={`agent-card-large ${selectedAgentId === agent.id ? 'selected' : ''}`}
-            onClick={() => handleAgentClick(agent.id)}
-          >
+          <div key={agent.id} className={`agent-card-large ${selectedAgentId === agent.id ? 'selected' : ''}`}
+            onClick={() => { setSelectedAgentId(agent.id === selectedAgentId ? '' : agent.id); setSelectedSessionKey(''); }}>
             <div className="agent-header">
               <span className="agent-icon-lg">{agent.skillTag?.icon || '🤖'}</span>
               <span className="agent-name-lg">{agent.id}</span>
             </div>
             <div className="agent-footer">
-              <span className="agent-state-lg" style={{ color: getStatusColor(agent.state) }}>
-                {agent.state === 'idle' ? '🟢 空闲' : agent.state === 'working' ? '🔵 工作中' : agent.state === 'thinking' ? '🟣 思考中' : '⚪ 离线'}
-              </span>
+              <span className="agent-state-lg" style={{ color: getStatusColor(agent.state) }}>{getStatusText(agent.state)}</span>
             </div>
           </div>
         ))}
       </div>
 
-      {/* 对话面板 - 选中 Agent 时显示在底部 */}
-      {selectedAgent ? (
+      {/* 会话列表 */}
+      {selectedAgentId && sessions[selectedAgentId] && sessions[selectedAgentId].length > 0 && (
+        <div className="sessions-list">
+          <div className="section-header"><h4>💬 {locale === 'zh' ? '会话' : 'Sessions'}</h4></div>
+          <div className="session-items">
+            {sessions[selectedAgentId].map((session: Session) => (
+              <div key={session.sessionKey} className={`session-item ${selectedSessionKey === session.sessionKey ? 'selected' : ''}`}
+                onClick={() => setSelectedSessionKey(session.sessionKey)}>
+                <span className="session-title">{session.title || session.sessionKey.split(':').pop()}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* 对话面板 */}
+      {selectedAgentId && selectedSessionKey ? (
         <div className="chat-panel-compact">
           <div className="chat-header">
-            <span className="chat-agent-icon">{selectedAgent.skillTag?.icon || '🤖'}</span>
-            <span>{selectedAgent.id}</span>
-            <button className="btn-close" onClick={() => setSelectedAgentId('')}>✕</button>
+            <span className="chat-agent-icon">{selectedAgent?.skillTag?.icon || '🤖'}</span>
+            <span>{selectedAgentId}</span>
+            <button className="btn-close" onClick={() => setSelectedSessionKey('')}>✕</button>
           </div>
           <div className="chat-messages">
-            {(messages[selectedAgentId] || []).map(msg => (
+            {(messages[selectedAgentId]?.[selectedSessionKey] || []).map((msg: ChatMessage) => (
               <div key={msg.id} className={`chat-message ${msg.sender}`}>
-                <span className="msg-avatar">{msg.sender === 'agent' ? (selectedAgent.skillTag?.icon || '🤖') : '👤'}</span>
+                <span className="msg-avatar">{msg.sender === 'agent' ? (selectedAgent?.skillTag?.icon || '🤖') : '👤'}</span>
                 <div className="msg-content">
                   <span className="msg-text">{msg.text}</span>
                   <span className="msg-time">{msg.time}</span>
@@ -201,66 +312,54 @@ const Sidebar: React.FC<SidebarProps> = ({ locale = 'zh' }) => {
             <div ref={chatEndRef} />
           </div>
           <div className="chat-input">
-            <input 
-              type="text" 
-              placeholder={locale === 'zh' ? '发送消息...' : 'Type...'}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter') {
-                  handleSendMessage((e.target as HTMLInputElement).value);
-                  (e.target as HTMLInputElement).value = '';
-                }
-              }}
-            />
-            <button onClick={(e) => {
-              const input = (e.target as HTMLElement).previousElementSibling as HTMLInputElement;
-              handleSendMessage(input.value);
-              input.value = '';
-            }}>➤</button>
+            <input type="text" placeholder={locale === 'zh' ? '发送消息...' : 'Type...'}
+              onKeyDown={(e) => { if (e.key === 'Enter') { handleSendMessage((e.target as HTMLInputElement).value); (e.target as HTMLInputElement).value = ''; } }} />
+            <button onClick={(e) => { const input = (e.target as HTMLElement).previousElementSibling as HTMLInputElement; handleSendMessage(input.value); input.value = ''; }}>➤</button>
           </div>
+        </div>
+      ) : selectedAgentId ? (
+        <div className="chat-placeholder">
+          <span>{locale === 'zh' ? '👆 选择会话开始对话' : '👆 Select a session to chat'}</span>
         </div>
       ) : null}
     </div>
   );
 
-  const renderTasks = () => {
-    interface LogEntry { id: string; message: string; timestamp: number; type: string; }
-    
-    return (
-      <div className="sidebar-section">
-        <div className="section-header">
-          <h3>📋 {locale === 'zh' ? '任务' : 'Tasks'}</h3>
-          <span className="badge">{tasks.length}</span>
-        </div>
-        
-        <div className="task-form">
-          <select value={selectedAgentId} onChange={(e) => setSelectedAgentId(e.target.value)}>
-            <option value="">{locale === 'zh' ? '-- 选择智能体 --' : '-- Select Agent --'}</option>
-            {onlineAgents.map((a: Agent) => <option key={a.id} value={a.id}>{a.id}</option>)}
-          </select>
-          <select value={selectedTaskType} onChange={(e) => setSelectedTaskType(e.target.value)}>
-            {taskTypes.map(t => <option key={t.value} value={t.value}>{locale === 'zh' ? t.labelZh : t.labelEn}</option>)}
-          </select>
-          <textarea value={taskContent} onChange={(e) => setTaskContent(e.target.value)} placeholder={locale === 'zh' ? '任务描述...' : 'Task...'} rows={2} />
-          <button className="btn-full btn-submit" onClick={handleSendTask} disabled={!selectedAgentId || !taskContent.trim()}>
-            {locale === 'zh' ? '发送任务' : 'Send Task'}
-          </button>
-        </div>
-
-        <div className="task-list">
-          {tasks.length === 0 ? <div className="empty">{locale === 'zh' ? '暂无任务' : 'No tasks'}</div> : 
-            tasks.slice().reverse().slice(0, 10).map((task: Task) => (
-              <div key={task.id} className={`task-item ${task.status}`}>
-                <div className="task-header"><span>{locale === 'zh' ? task.titleZh : task.titleEn}</span><span className={`status ${task.status}`}>{task.status}</span></div>
-                <div className="task-meta"><span>👤 {task.assignee}</span><span>{task.progress}%</span></div>
-                {task.status === 'running' && <div className="progress"><div style={{ width: `${task.progress}%` }}></div></div>}
-              </div>
-            ))
-          }
-        </div>
+  // Tasks
+  const renderTasks = () => (
+    <div className="sidebar-section">
+      <div className="section-header">
+        <h3>📋 {locale === 'zh' ? '任务' : 'Tasks'}</h3>
+        <span className="badge">{tasks.length}</span>
       </div>
-    );
-  };
+      <div className="task-form">
+        <select value={selectedAgentId} onChange={(e) => setSelectedAgentId(e.target.value)}>
+          <option value="">{locale === 'zh' ? '-- 选择智能体 --' : '-- Select Agent --'}</option>
+          {onlineAgents.map((a: Agent) => <option key={a.id} value={a.id}>{a.id}</option>)}
+        </select>
+        <select value={selectedTaskType} onChange={(e) => setSelectedTaskType(e.target.value)}>
+          {taskTypes.map(t => <option key={t.value} value={t.value}>{locale === 'zh' ? t.labelZh : t.labelEn}</option>)}
+        </select>
+        <textarea value={taskContent} onChange={(e) => setTaskContent(e.target.value)} placeholder={locale === 'zh' ? '任务描述...' : 'Task...'} rows={2} />
+        <button className="btn-full btn-submit" onClick={() => { if (selectedAgentId && taskContent) { assignTask(selectedAgentId as AgentId, selectedTaskType as Task['type']); setTaskContent(''); } }} disabled={!selectedAgentId || !taskContent.trim()}>
+          {locale === 'zh' ? '发送任务' : 'Send Task'}
+        </button>
+      </div>
+      <div className="task-list">
+        {tasks.length === 0 ? <div className="empty">{locale === 'zh' ? '暂无任务' : 'No tasks'}</div> : 
+          tasks.slice().reverse().slice(0, 10).map((task: Task) => (
+            <div key={task.id} className={`task-item ${task.status}`}>
+              <div className="task-header"><span>{locale === 'zh' ? task.titleZh : task.titleEn}</span><span className={`status ${task.status}`}>{task.status}</span></div>
+              <div className="task-meta"><span>👤 {task.assignee}</span><span>{task.progress}%</span></div>
+              {task.status === 'running' && <div className="progress"><div style={{ width: `${task.progress}%` }}></div></div>}
+            </div>
+          ))
+        }
+      </div>
+    </div>
+  );
 
+  // Events
   const renderEvents = () => {
     interface LogEntry { id: string; message: string; timestamp: number; type: string; }
     return (
