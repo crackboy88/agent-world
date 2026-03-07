@@ -128,8 +128,19 @@ const Sidebar: React.FC<SidebarProps> = ({ locale = 'zh' }) => {
       console.log('[Session] Fetching sessions for:', agentId);
       const result = await socketService.listSessions(agentId);
       console.log('[Session] Result:', result);
-      let sessionList = result?.sessions || [];
-      console.log('[Session] Session list:', sessionList);
+      let sessionList: Session[] = [];
+      
+      // 处理 Gateway 返回的会话格式
+      const rawSessions = (result as any)?.sessions || [];
+      console.log('[Session] Raw sessions:', rawSessions);
+      
+      sessionList = rawSessions.map((s: any) => ({
+        sessionKey: s.key || s.sessionKey || '',
+        title: s.displayName || s.title || s.label || s.key?.split(':').pop() || 'Chat',
+        updatedAt: s.updatedAt || s.lastMessage?.timestamp || Date.now()
+      }));
+      
+      console.log('[Session] Parsed sessions:', sessionList);
       
       // 如果没有真实会话，显示提示
       if (sessionList.length === 0) {
