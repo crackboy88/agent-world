@@ -94,11 +94,11 @@ If your agents are not paired with the Gateway:
 # List available devices/agents
 openclaw devices list
 
-# Pair a new agent (follow the on-screen instructions)
-openclaw devices pair
-
-# Or approve pending pairings
+# Approve pending pairings
 openclaw devices approve --latest
+
+# Or check pending approvals first
+openclaw devices pending
 ```
 
 ### Step 3: Get Gateway WebSocket URL

@@ -47,9 +47,10 @@ class OpenClawSocketService {
 
   /**
    * 连接到 Gateway (使用设备身份)
+   * URL 可通过 localStorage['gatewayUrl'] 配置
    */
   connect(): void {
-    const gatewayUrl = 'ws://localhost:18789';
+    const gatewayUrl = this.getGatewayUrl();
     
     this.client = new OpenClawClient({
       gatewayUrl,
