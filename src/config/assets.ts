@@ -32,9 +32,6 @@ export const DEFAULT_ASSETS: Asset[] = [
   { id: 'agent-soldier', name: 'Soldier (Animated)', type: 'model', category: 'agent', filename: 'agents/soldier-animated.glb' },
   { id: 'agent-xbot', name: 'XBot (Animated)', type: 'model', category: 'agent', filename: 'agents/xbot.glb' },
   { id: 'agent-michelle', name: 'Michelle (Animated)', type: 'model', category: 'agent', filename: 'agents/mixamo-character.glb' },
-  { id: 'c3d-idle', name: 'C3D Idle (Animated)', type: 'model', category: 'agent', filename: 'agents/c3d-idle.glb' },
-  { id: 'c3d-professional', name: 'C3D Professional (Animated)', type: 'model', category: 'agent', filename: 'agents/c3d-professional.glb' },
-  { id: 'c3d-walk', name: 'C3D Walk (Animated)', type: 'model', category: 'agent', filename: 'agents/c3d-walk.glb' },
 ];
 
 export function getAssetUrl(asset: Asset): string {
