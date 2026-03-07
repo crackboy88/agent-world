@@ -166,7 +166,7 @@ export const useAppStore = create<AppState>()(
       connectSocket: () => {
         // 只设置一次回调
         const alreadyCalled = (window as unknown as { _socketCallbacksSet?: boolean })._socketCallbacksSet;
-        console.log("[DEBUG] connectSocket called, alreadyCalled:", alreadyCalled);
+        // connectSocket called
         if (alreadyCalled) return;
         (window as unknown as { _socketCallbacksSet?: boolean })._socketCallbacksSet = true;
         
@@ -281,7 +281,7 @@ export const useAppStore = create<AppState>()(
         // 获取 agent 列表（只调用一次）
         const agentsFetched = { done: false };
         const fetchAgents = async () => {
-          console.log("[DEBUG] fetchAgents called, done:", agentsFetched.done); if (agentsFetched.done) return;
+          // fetchAgents called if (agentsFetched.done) return;
           
           try {
             const gatewayAgents = await socketService.listAgents();
