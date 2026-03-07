@@ -1486,3 +1486,128 @@
   color: var(--text-secondary);
   font-size: 11px;
 }
+
+/* Agent 对话面板 */
+.agent-chat {
+  margin-top: 12px;
+  padding: 12px;
+  background: var(--bg-darker);
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+}
+
+.agent-chat .section-header {
+  margin-bottom: 10px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.agent-chat .btn-close {
+  padding: 2px 8px;
+  background: transparent;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  color: var(--text-secondary);
+  cursor: pointer;
+  font-size: 10px;
+}
+
+.agent-chat .btn-close:hover {
+  background: var(--bg-light);
+  color: var(--text-primary);
+}
+
+.agent-chat .chat-messages {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.agent-chat .message {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+}
+
+.agent-chat .message.agent {
+  flex-direction: row;
+}
+
+.agent-chat .message.user {
+  flex-direction: row-reverse;
+}
+
+.agent-chat .avatar {
+  font-size: 18px;
+  flex-shrink: 0;
+}
+
+.agent-chat .content {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  max-width: 80%;
+}
+
+.agent-chat .message.user .content {
+  align-items: flex-end;
+}
+
+.agent-chat .text {
+  padding: 8px 12px;
+  background: var(--bg-dark);
+  border-radius: 12px;
+  font-size: 11px;
+  color: var(--text-primary);
+  line-height: 1.4;
+}
+
+.agent-chat .message.user .text {
+  background: var(--accent-blue);
+  color: white;
+}
+
+.agent-chat .time {
+  font-size: 9px;
+  color: var(--text-secondary);
+  font-family: var(--font-mono);
+}
+
+.agent-chat .chat-input {
+  display: flex;
+  gap: 6px;
+  margin-top: 10px;
+}
+
+.agent-chat .chat-input input {
+  flex: 1;
+  padding: 8px;
+  background: var(--bg-dark);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  color: var(--text-primary);
+  font-size: 11px;
+}
+
+.agent-chat .chat-input input:focus {
+  outline: none;
+  border-color: var(--accent-blue);
+}
+
+.agent-chat .chat-input button {
+  padding: 8px 12px;
+  background: var(--accent-blue);
+  border: none;
+  border-radius: 6px;
+  color: white;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+/* Agent 卡片选中状态 */
+.agent-card-mini.selected {
+  border-left-color: var(--accent-blue) !important;
+  background: rgba(59, 130, 246, 0.1);
+}

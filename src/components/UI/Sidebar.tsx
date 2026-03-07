@@ -4,30 +4,21 @@
  * 
  * 整合功能:
  * - Gateway 连接控制
- * - Agent 列表与状态
+ * - Agent 列表与对话
  * - 任务管理与创建
  * - 事件日志
- * - 聊天面板
  */
 
 import React, { useState } from 'react';
 import { useAppStore } from '../../stores';
 import type { Task, AgentId, Agent } from '../../types';
 
-// 本地 LogEntry 类型 (兼容现有代码)
-interface LogEntry {
-  id: string;
-  message: string;
-  timestamp: number;
-  type: string;
-}
-
 interface SidebarProps {
   locale?: 'zh' | 'en';
 }
 
 // 功能区类型
-type Section = 'gateway' | 'agents' | 'tasks' | 'events' | 'chat';
+type Section = 'gateway' | 'agents' | 'tasks' | 'events';
 
 const Sidebar: React.FC<SidebarProps> = ({ locale = 'zh' }) => {
   const {
@@ -51,6 +42,11 @@ const Sidebar: React.FC<SidebarProps> = ({ locale = 'zh' }) => {
   const [taskContent, setTaskContent] = useState<string>('');
   const [selectedTaskType, setSelectedTaskType] = useState<string>('research');
 
+  // 对话状态
+  const [chatMessages, setChatMessages] = useState<{ id: string; agentId: string; text: string; sender: 'user' | 'agent'; time: string }[]>([
+    { id: '1', agentId: '', text: '你好！', sender: 'agent', time: '12:00' }
+  ]);
+
   // 任务类型选项
   const taskTypes = [
     { value: 'research', labelZh: '研究任务', labelEn: 'Research' },
@@ -59,17 +55,19 @@ const Sidebar: React.FC<SidebarProps> = ({ locale = 'zh' }) => {
     { value: 'communication', labelZh: '沟通任务', labelEn: 'Comm' },
   ];
 
-  // 功能区配置
+  // 功能区配置 (移除 Chat)
   const sections: { id: Section; icon: string; labelZh: string; labelEn: string }[] = [
     { id: 'gateway', icon: '🔗', labelZh: '连接', labelEn: 'Link' },
     { id: 'agents', icon: '🤖', labelZh: '智能体', labelEn: 'Agents' },
     { id: 'tasks', icon: '📋', labelZh: '任务', labelEn: 'Tasks' },
     { id: 'events', icon: '📜', labelZh: '日志', labelEn: 'Logs' },
-    { id: 'chat', icon: '💬', labelZh: '对话', labelEn: 'Chat' },
   ];
 
   // 获取在线 Agent 列表
   const onlineAgents = agents.filter((a: Agent) => a.isOnline);
+
+  // 获取当前选中的 Agent
+  const selectedAgent = agents.find((a: Agent) => a.id === selectedAgentId);
 
   // 获取状态颜色
   const getStatusColor = (state: string) => {
@@ -119,7 +117,38 @@ const Sidebar: React.FC<SidebarProps> = ({ locale = 'zh' }) => {
         : `📤 Task sent to ${agent?.nameEn || selectedAgentId}`
     });
     setTaskContent('');
-    setSelectedAgentId('');
+  };
+
+  // 发送消息
+  const handleSendMessage = (text: string) => {
+    if (!text.trim()) return;
+    const newMsg = {
+      id: Date.now().toString(),
+      agentId: selectedAgentId,
+      text,
+      sender: 'user' as const,
+      time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+    };
+    setChatMessages([...chatMessages, newMsg]);
+    
+    // 模拟 Agent 回复
+    setTimeout(() => {
+      const reply = {
+        id: (Date.now() + 1).toString(),
+        agentId: selectedAgentId,
+        text: selectedAgent 
+          ? (locale === 'zh' ? `收到消息: ${text}` : `Got it: ${text}`)
+          : (locale === 'zh' ? '请先选择一个智能体' : 'Please select an agent first'),
+        sender: 'agent' as const,
+        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+      };
+      setChatMessages(prev => [...prev, reply]);
+    }, 500);
+  };
+
+  // 处理 Agent 点击
+  const handleAgentClick = (agentId: string) => {
+    setSelectedAgentId(agentId === selectedAgentId ? '' : agentId);
   };
 
   // ========== 渲染函数 ==========
@@ -168,7 +197,7 @@ const Sidebar: React.FC<SidebarProps> = ({ locale = 'zh' }) => {
     </div>
   );
 
-  // Agents 面板
+  // Agents 面板 (包含对话功能)
   const renderAgents = () => (
     <div className="sidebar-section agents-section">
       <div className="section-header">
@@ -180,7 +209,8 @@ const Sidebar: React.FC<SidebarProps> = ({ locale = 'zh' }) => {
         {agents.map((agent: Agent) => (
           <div 
             key={agent.id} 
-            className={`agent-card-mini ${agent.isOnline ? 'online' : 'offline'}`}
+            className={`agent-card-mini ${agent.isOnline ? 'online' : 'offline'} ${selectedAgentId === agent.id ? 'selected' : ''}`}
+            onClick={() => handleAgentClick(agent.id)}
           >
             <div className="agent-icon">{agent.skillTag?.icon || '🤖'}</div>
             <div className="agent-info">
@@ -198,6 +228,53 @@ const Sidebar: React.FC<SidebarProps> = ({ locale = 'zh' }) => {
           </div>
         ))}
       </div>
+
+      {/* 对话区域 - 选中 Agent 后显示 */}
+      {selectedAgent && (
+        <div className="agent-chat">
+          <div className="section-header">
+            <h4>💬 {locale === 'zh' ? selectedAgent.nameZh : selectedAgent.nameEn}</h4>
+            <button 
+              className="btn-close"
+              onClick={() => setSelectedAgentId('')}
+            >✕</button>
+          </div>
+          
+          <div className="chat-messages">
+            {chatMessages
+              .filter(m => m.agentId === selectedAgentId || m.agentId === '')
+              .map(msg => (
+                <div key={msg.id} className={`message ${msg.sender}`}>
+                  <span className="avatar">
+                    {msg.sender === 'agent' ? (selectedAgent?.skillTag?.icon || '🤖') : '👤'}
+                  </span>
+                  <div className="content">
+                    <span className="text">{msg.text}</span>
+                    <span className="time">{msg.time}</span>
+                  </div>
+                </div>
+              ))}
+          </div>
+
+          <div className="chat-input">
+            <input 
+              type="text" 
+              placeholder={locale === 'zh' ? '发送消息...' : 'Type...'}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  handleSendMessage((e.target as HTMLInputElement).value);
+                  (e.target as HTMLInputElement).value = '';
+                }
+              }}
+            />
+            <button onClick={(e) => {
+              const input = (e.target as HTMLElement).previousElementSibling as HTMLInputElement;
+              handleSendMessage(input.value);
+              input.value = '';
+            }}>➤</button>
+          </div>
+        </div>
+      )}
     </div>
   );
 
@@ -218,7 +295,7 @@ const Sidebar: React.FC<SidebarProps> = ({ locale = 'zh' }) => {
             <option value="">
               {locale === 'zh' ? '-- 选择智能体 --' : '-- Select Agent --'}
             </option>
-            {onlineAgents.map(agent => (
+            {onlineAgents.map((agent: Agent) => (
               <option key={agent.id} value={agent.id}>
                 {locale === 'zh' ? agent.nameZh : agent.nameEn}
               </option>
@@ -292,53 +369,39 @@ const Sidebar: React.FC<SidebarProps> = ({ locale = 'zh' }) => {
   );
 
   // Events 面板
-  const renderEvents = () => (
-    <div className="sidebar-section events-section">
-      <div className="section-header">
-        <h3>📜 {locale === 'zh' ? '事件日志' : 'Event Logs'}</h3>
-        <span className="badge">{logs.length}</span>
-      </div>
+  const renderEvents = () => {
+    // 本地 LogEntry 类型
+    interface LogEntry {
+      id: string;
+      message: string;
+      timestamp: number;
+      type: string;
+    }
+    
+    return (
+      <div className="sidebar-section events-section">
+        <div className="section-header">
+          <h3>📜 {locale === 'zh' ? '事件日志' : 'Event Logs'}</h3>
+          <span className="badge">{logs.length}</span>
+        </div>
 
-      <div className="event-list">
-        {logs.length === 0 ? (
-          <div className="empty-state">{locale === 'zh' ? '等待事件...' : 'Waiting for events...'}</div>
-        ) : (
-          logs.slice().reverse().slice(0, 50).map((log: LogEntry) => (
-            <div key={log.id} className={`event-item ${log.type}`}>
-              <span className="event-message">{log.message}</span>
-              <span className="event-time">
-                {new Date(log.timestamp).toLocaleTimeString()}
-              </span>
-            </div>
-          ))
-        )}
-      </div>
-    </div>
-  );
-
-  // Chat 面板
-  const renderChat = () => (
-    <div className="sidebar-section chat-section">
-      <div className="section-header">
-        <h3>💬 {locale === 'zh' ? '对话' : 'Chat'}</h3>
-      </div>
-
-      <div className="chat-messages">
-        <div className="message system">
-          <span className="avatar">👋</span>
-          <div className="content">
-            <span className="text">{locale === 'zh' ? '你好！' : 'Hello!'}</span>
-            <span className="time">{new Date().toLocaleTimeString()}</span>
-          </div>
+        <div className="event-list">
+          {logs.length === 0 ? (
+            <div className="empty-state">{locale === 'zh' ? '等待事件...' : 'Waiting for events...'}</div>
+          ) : (
+            logs.slice().reverse().slice(0, 50).map((log: LogEntry) => (
+              <div key={log.id} className={`event-item ${log.type}`}>
+                <span className="event-message">{log.message}</span>
+                <span className="event-time">
+                  {new Date(log.timestamp).toLocaleTimeString()}
+                </span>
+              </div>
+            ))
+          )}
         </div>
       </div>
-
-      <div className="chat-input">
-        <input type="text" placeholder={locale === 'zh' ? '发送消息...' : 'Type a message...'} />
-        <button>➤</button>
-      </div>
-    </div>
-  );
+    );
+  };
 
   // 渲染当前面板
   const renderContent = () => {
@@ -347,7 +410,6 @@ const Sidebar: React.FC<SidebarProps> = ({ locale = 'zh' }) => {
       case 'agents': return renderAgents();
       case 'tasks': return renderTasks();
       case 'events': return renderEvents();
-      case 'chat': return renderChat();
       default: return null;
     }
   };
