@@ -15,8 +15,7 @@ import type {
   SidebarTab,
   GlobalStats 
 } from '../types';
-import { ROOMS_CONFIG } from '../types/room';
-import { INITIAL_AGENTS } from '../types/agent';
+import { getAllRoomConfigsSync, getAllAgentConfigsSync } from '../../config';
 import { createTask, updateTaskProgress } from '../types/task';
 import { socketService } from '../services/socket';
 
@@ -140,9 +139,26 @@ export const useAppStore = create<AppState>()(
       
       // Initialize Store
       initializeStore: () => {
+        const rooms = getAllRoomConfigsSync();
+        const agentConfigs = getAllAgentConfigsSync();
+        
+        // Convert agent configs to Agent objects
+        const agents: Agent[] = Object.values(agentConfigs).map(config => ({
+          id: config.id,
+          name: config.name,
+          emoji: config.emoji,
+          isOnline: true,
+          state: 'idle' as AgentState,
+          currentRoom: 'lobby',
+          position: { x: 512 + Math.random() * 200, y: 512 + Math.random() * 200 },
+          targetPosition: { x: 512, y: 512 },
+          animation: 'idle',
+          mood: 'neutral' as const,
+        }));
+        
         set({
-          rooms: ROOMS_CONFIG,
-          agents: INITIAL_AGENTS,
+          rooms,
+          agents,
           tasks: [],
           selectedAgentId: null,
           selectedRoomId: null,

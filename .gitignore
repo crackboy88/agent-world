@@ -9,6 +9,10 @@ dist/
 .env.local
 .env.*.local
 
+# Local configuration (private configs)
+config/agents.local.ts
+config/rooms.local.ts
+
 # Editor directories and files
 .vscode/
 .idea/

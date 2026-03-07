@@ -7,85 +7,134 @@
   <img src="https://img.shields.io/badge/License-MIT-green" alt="License">
 </p>
 
-> Chen Company 3D多智能体模拟平台 - 基于Web的实时多智能体可视化系统
+> 3D Multi-Agent Simulation Platform - Web-based Real-time Agent Visualization System
 
-## ✨ 特性
+## ✨ Features
 
-- 🏢 **3D 办公室场景** - 精细的9房间3D环境建模
-- 🤖 **多智能体可视化** - 实时展示Agent状态与移动
-- 💬 **实时通信** - WebSocket/Socket.io 实时消息传递
-- 🎮 **交互控制** - 右键菜单派发任务、视角控制
-- 🔗 **OpenClaw 集成** - 连接 Gateway 实现Agent管理
+- 🏢 **3D Office Scene** - 9-room 3D environment with detailed furniture
+- 🤖 **Multi-Agent Visualization** - Real-time agent status and movement
+- 💬 **Real-time Communication** - WebSocket/Socket.io messaging
+- 🎮 **Interactive Control** - Right-click menu for task dispatch, camera control
+- 🔗 **OpenClaw Integration** - Connect to Gateway for agent management
 
-## 🛠️ 技术栈
+## 🛠️ Tech Stack
 
-| 类别 | 技术 |
-|------|------|
-| 前端框架 | React 18 + TypeScript |
-| 3D 渲染 | Three.js + React Three Fiber |
-| 状态管理 | Zustand |
-| 后端服务 | Express + Socket.io |
-| 构建工具 | Vite |
-| 通信协议 | WebSocket / SSE |
+| Category | Technology |
+|----------|------------|
+| Frontend | React 18 + TypeScript |
+| 3D Rendering | Three.js + React Three Fiber |
+| State Management | Zustand |
+| Backend | Express + Socket.io |
+| Build Tool | Vite |
+| Communication | WebSocket / SSE |
 
-## 🚀 快速开始
+## 🚀 Quick Start
 
-### 前置要求
+### Prerequisites
 
 - Node.js >= 18
 - npm >= 9
 
-### 安装
+### Installation
 
 ```bash
-# 克隆仓库
+# Clone the repository
 git clone https://github.com/crackboy88/agent-world.git
 cd agent-world
 
-# 安装依赖
+# Install dependencies
 npm install
 ```
 
-### 开发
+### Development
 
 ```bash
-# 启动开发服务器
+# Start development server
 npm run dev
 ```
 
-访问 http://localhost:5173
+Visit http://localhost:5173
 
-### 构建
+### Build
 
 ```bash
-# 生产构建
+# Production build
 npm run build
 ```
 
-构建产物在 `dist/` 目录
+Build output in `dist/` directory
 
-## 📁 项目结构
+## ⚙️ Configuration
+
+### Default Configuration
+
+The project comes with generic default agents and room layouts in:
+
+- `config/agents.default.ts` - Default agent definitions
+- `config/rooms.default.ts` - Default room layout
+
+### Private Configuration (Local Only)
+
+To customize for your own use case without committing to the repository:
+
+1. Copy the example files:
+   ```bash
+   cp config/agents.local.example.ts config/agents.local.ts
+   cp config/rooms.local.example.ts config/rooms.local.ts
+   ```
+
+2. Edit the `*.local.ts` files with your own agents and rooms
+
+3. The `.gitignore` already excludes these files from version control
+
+### Agent Configuration
+
+```typescript
+// config/agents.local.ts
+export const LOCAL_AGENTS: Record<string, AgentConfig> = {
+  'my-agent': {
+    id: 'my-agent',
+    name: 'My Agent',
+    emoji: '🤖',
+    clothes: '#3B82F6',
+    accent: '#F59E0B',
+    hair: '#1F2937',
+    accessory: '⚙️'
+  },
+};
+```
+
+### Room Configuration
+
+Define your own room layout with positions, furniture, and agent assignments.
+
+## 📁 Project Structure
 
 ```
 agent-world/
-├── public/              # 静态资源
+├── config/                # Configuration files
+│   ├── agents.default.ts  # Default agents
+│   ├── agents.local.example.ts
+│   ├── rooms.default.ts  # Default rooms
+│   ├── rooms.local.example.ts
+│   └── index.ts         # Config loader
+├── public/               # Static assets
 ├── src/
-│   ├── components/      # React 组件
-│   │   ├── 3D/         # 3D 场景组件
-│   │   └── UI/         # UI 组件
-│   ├── services/       # 服务层 (Socket, Gateway)
-│   ├── stores/         # Zustand 状态管理
-│   ├── styles/         # 样式文件
-│   └── types/          # TypeScript 类型定义
-├── docs/               # 项目文档
-└── dist/               # 构建输出
+│   ├── components/      # React components
+│   │   ├── 3D/         # 3D scene components
+│   │   └── UI/         # UI components
+│   ├── services/        # Services (Socket, Gateway)
+│   ├── stores/          # Zustand state management
+│   └── types/           # TypeScript types
+├── docs/                # Documentation
+└── dist/                # Build output
 ```
 
-## 📝 许可证
+## 📝 License
 
-MIT License - 查看 [LICENSE](LICENSE) 了解详情
+MIT License - See [LICENSE](LICENSE) for details
 
-## 👤 作者
+## 👤 Author
 
 **Chen Company**
 - GitHub: [@crackboy88](https://github.com/crackboy88)

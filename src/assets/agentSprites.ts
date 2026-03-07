@@ -3,7 +3,7 @@
  * 预生成所有 Agent 的动画帧为图片
  */
 
-import { AGENT_ASSETS, PALETTE } from './agentAssets';
+import { getAllAgentConfigsSync, getPalette } from '../../config';
 
 // 生成单个 Agent 的单个动画帧
 function generateAgentFrame(
@@ -12,7 +12,9 @@ function generateAgentFrame(
   totalFrames: number,
   size: number = 64
 ): string {
-  const config = AGENT_ASSETS[agentId] || AGENT_ASSETS['main'];
+  const agentConfigs = getAllAgentConfigsSync();
+  const config = agentConfigs[agentId] || agentConfigs['agent-1'];
+  const PALETTE = getPalette();
   const canvas = document.createElement('canvas');
   canvas.width = size;
   canvas.height = size;
@@ -91,9 +93,10 @@ export interface AgentSprite {
 export function generateAllSprites(): Map<string, AgentSprite> {
   const sprites = new Map<string, AgentSprite>();
   const frameCount = 4;
-  const spriteSize = 256; // 提高分辨率
+  const spriteSize = 256;
+  const agentConfigs = getAllAgentConfigsSync();
 
-  Object.keys(AGENT_ASSETS).forEach(agentId => {
+  Object.keys(agentConfigs).forEach(agentId => {
     // 生成 idle 动画帧
     const frames: string[] = [];
     for (let i = 0; i < frameCount; i++) {
