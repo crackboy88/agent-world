@@ -125,7 +125,14 @@ export const useAppStore = create<AppState>()(
       // Initial State
       maps: [],
       agents: [],
-      agentAppearances: {},
+      agentAppearances: (() => {
+        try {
+          const saved = localStorage.getItem('agent-appearances');
+          return saved ? JSON.parse(saved) : {};
+        } catch {
+          return {};
+        }
+      })(),
       tasks: [],
       logs: [],
       messages: [],
@@ -428,15 +435,18 @@ export const useAppStore = create<AppState>()(
       },
       
       updateAgentAppearance: (agentId, appearance) => {
-        set((s) => ({
-          agentAppearances: {
+        set((s) => {
+          const newAppearances = {
             ...s.agentAppearances,
             [agentId]: {
               ...s.agentAppearances[agentId],
               ...appearance
             }
-          }
-        }));
+          };
+          // 保存到 localStorage
+          localStorage.setItem('agent-appearances', JSON.stringify(newAppearances));
+          return { agentAppearances: newAppearances };
+        });
       },
       
       // Logs & Messages Actions

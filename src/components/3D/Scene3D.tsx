@@ -127,6 +127,7 @@ export const Scene3D = ({
               scale={agentScale}
               color={appearance.color}
               state={agent.state}
+              onClick={() => { console.log("[DEBUG] AgentModel3D clicked:", agent.id); onAgentClick?.(agent.id); }}
             />
           </group>
         );
