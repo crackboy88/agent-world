@@ -13,7 +13,7 @@ interface AgentModel3DProps {
 }
 
 // 默认 Agent 模型 URL
-const DEFAULT_AGENT_MODEL = '/assets/sprites/agent-default.glb';
+const DEFAULT_AGENT_MODEL = '/assets/agents/agent-default.glb';
 
 export const AgentModel3D = ({ agentId, position, color, scale = 1 }: AgentModel3DProps) => {
   // 加载默认 Agent 模型
