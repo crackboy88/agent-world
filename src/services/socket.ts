@@ -162,15 +162,32 @@ class OpenClawSocketService {
   }
 
   /**
-   * 发送聊天消息
+   * 发送聊天消息到指定会话
    */
-  async sendChat(agentId: string, content: string): Promise<unknown> {
+  async sendChat(sessionKey: string, content: string): Promise<unknown> {
     if (!this.client) throw new Error('Not connected');
-    return this.client.send({ 
-      to: agentId, 
+    return this.client.sendChat({ 
+      sessionKey, 
       message: content,
       idempotencyKey: `msg_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
     });
+  }
+
+  /**
+   * 获取会话列表
+   */
+  async listSessions(agentId?: string): Promise<{ sessions: Array<{ sessionKey: string; title: string; updatedAt: number }> }> {
+    if (!this.client) throw new Error('Not connected');
+    const result = await this.client.listSessions({ agentId });
+    return result;
+  }
+
+  /**
+   * 获取会话历史
+   */
+  async getChatHistory(sessionKey: string): Promise<{ messages: Array<{ role: string; content: string; timestamp: number }> }> {
+    if (!this.client) throw new Error('Not connected');
+    return this.client.getChatHistory({ sessionKey });
   }
 
   /**
