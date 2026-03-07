@@ -60,7 +60,7 @@ export const AgentModel3D = ({
       const actionNames = Object.keys(actions);
       
       const animationMap: Record<string, string[]> = {
-        idle: ['Idle', 'idle', 'Stand', 'stand', 'Waiting', 'Walk', 'walk'], // idle 时也播放 walk 让它动起来
+        idle: ['Idle', 'idle', 'Stand', 'stand', 'Waiting', 'Walk', 'walk'],
         walking: ['Walk', 'walk', 'Running', 'running', 'Run'],
         working: ['Work', 'work', 'Working', 'working'],
       };
@@ -93,14 +93,18 @@ export const AgentModel3D = ({
     }
   }, [actions, state]);
   
-  // Idle 时的随机浮动动画
+  // 随机浮动动画 - 对所有模型都启用（无论是否有 GLB 动画）
   useFrame((_, delta) => {
-    if (groupRef.current && state === 'idle') {
+    if (groupRef.current) {
       idleTimeRef.current += delta;
+      
+      // 状态相关的浮动幅度
+      const floatSpeed = state === 'working' ? 1.5 : (state === 'walking' ? 3 : 2);
+      const floatAmplitude = state === 'working' ? 0.015 : 0.02;
+      
       // 轻微的上下浮动 + 轻微的左右摇摆
-      const floatY = Math.sin(idleTimeRef.current * 2) * 0.02;
-      const swayX = Math.sin(idleTimeRef.current * 1.5) * 0.01;
-      const swayZ = Math.cos(idleTimeRef.current * 1.2) * 0.01;
+      const floatY = Math.sin(idleTimeRef.current * floatSpeed) * floatAmplitude;
+      const swayX = Math.sin(idleTimeRef.current * floatSpeed * 0.75) * 0.01;
       
       groupRef.current.position.y = floatY;
       groupRef.current.rotation.y = swayX;
