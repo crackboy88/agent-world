@@ -159,69 +159,66 @@ const Sidebar: React.FC<SidebarProps> = ({ locale = 'zh' }) => {
         <span className="badge">{onlineAgents.length}/{totalAgents}</span>
       </div>
 
-      <div className="agents-layout">
-        {/* Agent 列表 */}
-        <div className="agent-list">
-          {agents.map((agent: Agent) => (
-            <div 
-              key={agent.id} 
-              className={`agent-row ${selectedAgentId === agent.id ? 'selected' : ''} ${agent.isOnline ? 'online' : 'offline'}`}
-              onClick={() => handleAgentClick(agent.id)}
-            >
-              <span className="agent-icon">{agent.skillTag?.icon || '🤖'}</span>
-              <div className="agent-info">
-                <span className="name">{locale === 'zh' ? agent.nameZh : agent.nameEn}</span>
-                <span className="state" style={{ color: getStatusColor(agent.state) }}>{getStatusText(agent.state)}</span>
-              </div>
-              <span className={`status-dot ${agent.isOnline ? 'active' : ''}`}></span>
+      {/* Agent 网格 - 始终显示所有智能体 */}
+      <div className="agent-grid-full">
+        {agents.map((agent: Agent) => (
+          <div 
+            key={agent.id} 
+            className={`agent-card-large ${selectedAgentId === agent.id ? 'selected' : ''}`}
+            onClick={() => handleAgentClick(agent.id)}
+          >
+            <div className="agent-header">
+              <span className="agent-icon-lg">{agent.skillTag?.icon || '🤖'}</span>
+              <span className="agent-name-lg">{agent.nameZh}</span>
             </div>
-          ))}
-        </div>
-
-        {/* 对话面板 - 选中 Agent 时显示 */}
-        {selectedAgent ? (
-          <div className="chat-panel">
-            <div className="chat-header">
-              <span className="chat-agent-icon">{selectedAgent.skillTag?.icon || '🤖'}</span>
-              <span>{locale === 'zh' ? selectedAgent.nameZh : selectedAgent.nameEn}</span>
-              <button className="btn-close" onClick={() => setSelectedAgentId('')}>✕</button>
-            </div>
-            <div className="chat-messages">
-              {(messages[selectedAgentId] || []).map(msg => (
-                <div key={msg.id} className={`chat-message ${msg.sender}`}>
-                  <span className="msg-avatar">{msg.sender === 'agent' ? (selectedAgent.skillTag?.icon || '🤖') : '👤'}</span>
-                  <div className="msg-content">
-                    <span className="msg-text">{msg.text}</span>
-                    <span className="msg-time">{msg.time}</span>
-                  </div>
-                </div>
-              ))}
-              <div ref={chatEndRef} />
-            </div>
-            <div className="chat-input">
-              <input 
-                type="text" 
-                placeholder={locale === 'zh' ? '发送消息...' : 'Type...'}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') {
-                    handleSendMessage((e.target as HTMLInputElement).value);
-                    (e.target as HTMLInputElement).value = '';
-                  }
-                }}
-              />
-              <button onClick={(e) => {
-                const input = (e.target as HTMLElement).previousElementSibling as HTMLInputElement;
-                handleSendMessage(input.value);
-                input.value = '';
-              }}>➤</button>
+            <div className="agent-footer">
+              <span className="agent-state-lg" style={{ color: getStatusColor(agent.state) }}>
+                {agent.state === 'idle' ? '🟢 空闲' : agent.state === 'working' ? '🔵 工作中' : agent.state === 'thinking' ? '🟣 思考中' : '⚪ 离线'}
+              </span>
             </div>
           </div>
-        ) : (
-          <div className="chat-placeholder">
-            <span>{locale === 'zh' ? '👈 选择一个智能体开始对话' : '👈 Select an agent to chat'}</span>
-          </div>
-        )}
+        ))}
       </div>
+
+      {/* 对话面板 - 选中 Agent 时显示在底部 */}
+      {selectedAgent ? (
+        <div className="chat-panel-compact">
+          <div className="chat-header">
+            <span className="chat-agent-icon">{selectedAgent.skillTag?.icon || '🤖'}</span>
+            <span>{locale === 'zh' ? selectedAgent.nameZh : selectedAgent.nameEn}</span>
+            <button className="btn-close" onClick={() => setSelectedAgentId('')}>✕</button>
+          </div>
+          <div className="chat-messages">
+            {(messages[selectedAgentId] || []).map(msg => (
+              <div key={msg.id} className={`chat-message ${msg.sender}`}>
+                <span className="msg-avatar">{msg.sender === 'agent' ? (selectedAgent.skillTag?.icon || '🤖') : '👤'}</span>
+                <div className="msg-content">
+                  <span className="msg-text">{msg.text}</span>
+                  <span className="msg-time">{msg.time}</span>
+                </div>
+              </div>
+            ))}
+            <div ref={chatEndRef} />
+          </div>
+          <div className="chat-input">
+            <input 
+              type="text" 
+              placeholder={locale === 'zh' ? '发送消息...' : 'Type...'}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  handleSendMessage((e.target as HTMLInputElement).value);
+                  (e.target as HTMLInputElement).value = '';
+                }
+              }}
+            />
+            <button onClick={(e) => {
+              const input = (e.target as HTMLElement).previousElementSibling as HTMLInputElement;
+              handleSendMessage(input.value);
+              input.value = '';
+            }}>➤</button>
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 
