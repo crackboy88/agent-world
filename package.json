@@ -6,12 +6,11 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
-    "preview": "vite preview",
-    "postinstall": "node -e \"const fs=require('fs');const p='node_modules/three/build/three.module.js';let c=fs.readFileSync(p,'utf8');if(c.includes('THREE.Clock')){c=c.replace(/THREE\\.Clock/g,'THREE.Timer').replace(/new THREE\\.Clock\\(\\)/g,'new THREE.Timer()');fs.writeFileSync(p,c);console.log('Patched THREE.Clock -> THREE.Timer');}\""
+    "preview": "vite preview"
   },
   "dependencies": {
     "@react-three/drei": "^10.7.7",
-    "@react-three/fiber": "^10.0.0-alpha.0",
+    "@react-three/fiber": "^9.5.0",
     "@react-three/postprocessing": "^3.0.4",
     "@types/three": "^0.183.1",
     "i18next": "^23.7.0",
