@@ -365,7 +365,8 @@ export const useAppStore = create<AppState>()(
               ...a, 
               currentLocation: locationId,
               targetPosition,
-              animation: 'walk'
+              animation: 'walk',
+              state: 'walking' as AgentState
             } : a
           )
         }));
