@@ -275,7 +275,7 @@ const Sidebar: React.FC<SidebarProps> = ({ locale = 'zh' }) => {
     </div>
   );
 
-  // Agents + Sessions + Chat
+  // Agents + Chat (简化版：直接对话，无需会话列表)
   const renderAgents = () => (
     <div className="sidebar-section agents-panel">
       <div className="section-header">
@@ -283,11 +283,26 @@ const Sidebar: React.FC<SidebarProps> = ({ locale = 'zh' }) => {
         <span className="badge">{onlineAgents.length}/{totalAgents}</span>
       </div>
 
-      {/* Agent 网格 */}
+      {/* Agent 网格 - 点击直接进入对话 */}
       <div className="agent-grid-full">
         {agents.map((agent: Agent) => (
           <div key={agent.id} className={`agent-card-large ${selectedAgentId === agent.id ? 'selected' : ''}`}
-            onClick={() => { setSelectedAgentId(agent.id === selectedAgentId ? '' : agent.id); setSelectedSessionKey(''); }}>
+            onClick={() => {
+              if (selectedAgentId === agent.id) {
+                // 取消选中
+                setSelectedAgentId('');
+                setSelectedSessionKey('');
+              } else {
+                // 选中 agent，直接创建默认会话
+                setSelectedAgentId(agent.id);
+                const defaultSessionKey = `session:${agent.id}:main`;
+                setSelectedSessionKey(defaultSessionKey);
+                setSessions(prev => ({
+                  ...prev,
+                  [agent.id]: [{ sessionKey: defaultSessionKey, title: locale === 'zh' ? '对话' : 'Chat', updatedAt: Date.now() }]
+                }));
+              }
+            }}>
             <div className="agent-header">
               <span className="agent-icon-lg">{agent.skillTag?.icon || '🤖'}</span>
               <span className="agent-name-lg">{agent.id}</span>
@@ -299,28 +314,13 @@ const Sidebar: React.FC<SidebarProps> = ({ locale = 'zh' }) => {
         ))}
       </div>
 
-      {/* 会话列表 */}
-      {selectedAgentId && sessions[selectedAgentId] && sessions[selectedAgentId].length > 0 && (
-        <div className="sessions-list">
-          <div className="section-header"><h4>💬 {locale === 'zh' ? '会话' : 'Sessions'}</h4></div>
-          <div className="session-items">
-            {sessions[selectedAgentId].map((session: Session) => (
-              <div key={session.sessionKey} className={`session-item ${selectedSessionKey === session.sessionKey ? 'selected' : ''}`}
-                onClick={() => setSelectedSessionKey(session.sessionKey)}>
-                <span className="session-title">{session.title || session.sessionKey?.split(':').slice(-2).join(':') || 'Chat'}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* 对话面板 */}
+      {/* 对话面板 - 选中 agent 时显示 */}
       {selectedAgentId && selectedSessionKey ? (
         <div className="chat-panel-compact">
           <div className="chat-header">
             <span className="chat-agent-icon">{selectedAgent?.skillTag?.icon || '🤖'}</span>
             <span>{selectedAgentId}</span>
-            <button className="btn-close" onClick={() => setSelectedSessionKey('')}>✕</button>
+            <button className="btn-close" onClick={() => { setSelectedAgentId(''); setSelectedSessionKey(''); }}>✕</button>
           </div>
           <div className="chat-messages">
             {(messages[selectedAgentId]?.[selectedSessionKey] || []).map((msg: ChatMessage) => (
@@ -339,10 +339,6 @@ const Sidebar: React.FC<SidebarProps> = ({ locale = 'zh' }) => {
               onKeyDown={(e) => { if (e.key === 'Enter') { handleSendMessage((e.target as HTMLInputElement).value); (e.target as HTMLInputElement).value = ''; } }} />
             <button onClick={(e) => { const input = (e.target as HTMLElement).previousElementSibling as HTMLInputElement; handleSendMessage(input.value); input.value = ''; }}>➤</button>
           </div>
-        </div>
-      ) : selectedAgentId ? (
-        <div className="chat-placeholder">
-          <span>{locale === 'zh' ? '👆 选择会话开始对话' : '👆 Select a session to chat'}</span>
         </div>
       ) : null}
     </div>
