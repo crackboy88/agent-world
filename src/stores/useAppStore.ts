@@ -269,11 +269,23 @@ export const useAppStore = create<AppState>()(
           console.log('Gateway event:', event.type, event.data);
         };
         
-        // 连接并检查是否已连接
+        // 连接 Socket
         socketService.connect();
         
-        // 无论连接状态如何，都尝试获取 agent 列表
-        // 如果未连接，延迟重试
+        // 等待连接成功后获取 agent 列表
+        socketService.onConnectionChange = (connected) => {
+          if (connected) {
+            // 连接成功后获取 agents
+            setTimeout(() => fetchAgents(), 500);
+          }
+        };
+        
+        // 初始尝试获取（如果已连接）
+        if (socketService.isConnected()) {
+          setTimeout(() => fetchAgents(), 1500);
+        }
+        
+        // 获取 agent 列表函数
         const fetchAgents = async () => {
           try {
             const gatewayAgents = await socketService.listAgents();

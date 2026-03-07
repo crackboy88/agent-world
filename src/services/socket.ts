@@ -24,6 +24,7 @@ const createBrowserStore = <T>(key: string): {
 
 class OpenClawSocketService {
   private client: OpenClawClient | null = null;
+  private _isConnected: boolean = false;
   
   // 事件回调
   onAgentUpdate?: (agents: Agent[]) => void;
@@ -34,6 +35,7 @@ class OpenClawSocketService {
   onChat?: (data: unknown) => void;
   onSessionsUpdate?: (sessions: unknown[]) => void;
   onGatewayEvent?: (event: { type: string; data: unknown }) => void;
+  onConnectionChange?: (connected: boolean) => void;
 
   // 设备身份存储
   private identityStore: DeviceIdentityStore;
@@ -43,6 +45,13 @@ class OpenClawSocketService {
     // 初始化设备身份存储
     this.identityStore = createBrowserStore<DeviceIdentityRecord>('oc-device-identity');
     this.tokenStore = createBrowserStore<string>('oc-device-token');
+  }
+  
+  /**
+   * 检查是否已连接
+   */
+  isConnected(): boolean {
+    return this.client?.isConnected() || this._isConnected;
   }
 
   /**
@@ -63,7 +72,9 @@ class OpenClawSocketService {
       deviceIdentity: this.identityStore,
       deviceToken: this.tokenStore,
       onConnection: (connected) => {
+        this._isConnected = connected;
         this.onGatewayStatus?.({ connected, url: gatewayUrl });
+        this.onConnectionChange?.(connected);
         if (connected) {
           this.onLog?.({ message: '✅ Gateway 连接成功', level: 'info', timestamp: Date.now() });
         } else {
@@ -138,13 +149,6 @@ class OpenClawSocketService {
       this.client.disconnect();
       this.client = null;
     }
-  }
-
-  /**
-   * 是否已连接
-   */
-  isConnected(): boolean {
-    return this.client?.isConnected() || false;
   }
 
   // ========== 公开 API ==========
