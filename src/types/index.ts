@@ -52,3 +52,27 @@ export interface AppConfig {
   mapScale: number;
   showGrid: boolean;
 }
+
+// ==================== Device Identity Types (for openclaw-client) ====================
+
+/** 设备身份记录 (与 openclaw-client 兼容) */
+export interface DeviceIdentityRecord {
+  /** Hex-encoded SHA-256 of the raw 32-byte public key */
+  id: string;
+  /** Base64url-encoded (no padding) raw 32-byte public key */
+  publicKey: string;
+  /** JWK of the Ed25519 private key (for re-import) */
+  privateKeyJwk?: JsonWebKey;
+}
+
+/** 设备身份存储接口 */
+export interface DeviceIdentityStore {
+  load(): Promise<DeviceIdentityRecord | null>;
+  save(record: DeviceIdentityRecord): Promise<void>;
+}
+
+/** 设备 Token 存储接口 */
+export interface DeviceTokenStore {
+  load(): Promise<string | null>;
+  save(token: string): Promise<void>;
+}
