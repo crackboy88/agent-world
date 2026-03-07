@@ -96,13 +96,36 @@ const Sidebar: React.FC<SidebarProps> = ({ locale = 'zh' }) => {
     if (!gatewayConnected) return;
     try {
       const result = await socketService.listSessions(agentId);
-      if (result?.sessions) {
-        setSessions(prev => ({ ...prev, [agentId]: result.sessions }));
+      const sessionList = result?.sessions || [];
+      
+      // 如果没有会话，创建一个默认会话
+      if (sessionList.length === 0) {
+        const defaultSession = {
+          sessionKey: `session:${agentId}:default`,
+          title: locale === 'zh' ? '默认会话' : 'Default Chat',
+          updatedAt: Date.now()
+        };
+        sessionList.push(defaultSession);
+      }
+      
+      setSessions(prev => ({ ...prev, [agentId]: sessionList }));
+      
+      // 自动选择第一个会话
+      if (sessionList.length > 0) {
+        setSelectedSessionKey(sessionList[0].sessionKey);
       }
     } catch (err) {
       console.error('Failed to fetch sessions:', err);
+      // 即使失败也创建一个默认会话
+      const defaultSession = {
+        sessionKey: `session:${agentId}:default`,
+        title: locale === 'zh' ? '默认会话' : 'Default Chat',
+        updatedAt: Date.now()
+      };
+      setSessions(prev => ({ ...prev, [agentId]: [defaultSession] }));
+      setSelectedSessionKey(defaultSession.sessionKey);
     }
-  }, [gatewayConnected]);
+  }, [gatewayConnected, locale]);
 
   // 发送聊天消息
   const handleSendMessage = useCallback(async (text: string) => {
