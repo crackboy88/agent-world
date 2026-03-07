@@ -1,26 +1,39 @@
 /**
- * 房间类型定义
- * Simple flat map - no predefined rooms
+ * Map types - Simple flat map, no predefined rooms/locations
  */
 
-export type RoomId = string;
+export type MapId = string;
+export type RoomId = MapId; // Alias for backward compatibility
 
-export interface Room {
-  id: RoomId;
+export interface MapItem {
+  id: MapId;
   name: string;
 }
 
-// 简单的空地图
-export const DEFAULT_ROOMS: Room[] = [];
+// Backward compatibility alias
+export type Room = MapItem;
 
-export function getRoomById(id: string): Room | undefined {
-  return DEFAULT_ROOMS.find(room => room.id === id);
+// Empty flat map - all positions are free
+export const DEFAULT_MAP: MapItem[] = [];
+export const DEFAULT_ROOMS: MapItem[] = []; // Alias
+
+export function getMapItemById(id: string): MapItem | undefined {
+  return DEFAULT_MAP.find(item => item.id === id);
 }
 
-export function getAllRoomConfigs(): Room[] {
+// Backward compatibility
+export function getRoomById(id: string): MapItem | undefined {
+  return getMapItemById(id);
+}
+
+export function getAllMapItems(): MapItem[] {
+  return DEFAULT_MAP;
+}
+
+export function getAllRoomConfigs(): MapItem[] {
   return DEFAULT_ROOMS;
 }
 
-export function getAllRoomConfigsSync(): Room[] {
+export function getAllRoomConfigsSync(): MapItem[] {
   return DEFAULT_ROOMS;
 }
