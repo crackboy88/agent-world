@@ -59,7 +59,9 @@ const Sidebar: React.FC<SidebarProps> = ({ locale = 'zh' }) => {
     { id: 'events' as Section, icon: '📜', labelZh: '日志', labelEn: 'Logs' },
   ];
 
-  const onlineAgents = agents.filter((a: Agent) => a.isOnline);
+  // 所有智能体都算作"在线"（无论 idle/working），只有真正离线才算离线
+  const onlineAgents = agents.filter((a: Agent) => a.isOnline || a.state !== 'offline');
+  const totalAgents = agents.length;
   const selectedAgent = agents.find((a: Agent) => a.id === selectedAgentId);
 
   // 自动滚动到对话底部
@@ -135,7 +137,7 @@ const Sidebar: React.FC<SidebarProps> = ({ locale = 'zh' }) => {
       </div>
       <div className="gateway-info">
         <div className="info-row"><span>{locale === 'zh' ? '地址' : 'URL'}:</span><span className="mono">{gatewayUrl || '-'}</span></div>
-        <div className="info-row"><span>{locale === 'zh' ? '在线' : 'Online'}:</span><span>{onlineAgents.length}/{agents.length}</span></div>
+        <div className="info-row"><span>{locale === 'zh' ? '在线' : 'Online'}:</span><span>{onlineAgents.length}/{totalAgents}</span></div>
       </div>
       <button className={`btn-full ${gatewayConnected ? 'btn-disconnect' : 'btn-connect'}`} onClick={() => gatewayConnected ? handleGatewayToggle() : setShowGatewayModal(!showGatewayModal)}>
         {gatewayConnected ? (locale === 'zh' ? '断开' : 'Disconnect') : (locale === 'zh' ? '连接' : 'Connect')}
@@ -154,7 +156,7 @@ const Sidebar: React.FC<SidebarProps> = ({ locale = 'zh' }) => {
     <div className="sidebar-section agents-panel">
       <div className="section-header">
         <h3>🤖 {locale === 'zh' ? '智能体' : 'Agents'}</h3>
-        <span className="badge">{onlineAgents.length}/{agents.length}</span>
+        <span className="badge">{onlineAgents.length}/{totalAgents}</span>
       </div>
 
       <div className="agents-layout">
