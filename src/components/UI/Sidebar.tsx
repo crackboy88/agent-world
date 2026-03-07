@@ -95,8 +95,11 @@ const Sidebar: React.FC<SidebarProps> = ({ locale = 'zh' }) => {
   const fetchSessions = useCallback(async (agentId: string) => {
     if (!gatewayConnected) return;
     try {
+      console.log('[Session] Fetching sessions for:', agentId);
       const result = await socketService.listSessions(agentId);
+      console.log('[Session] Result:', result);
       let sessionList = result?.sessions || [];
+      console.log('[Session] Session list:', sessionList);
       
       // 如果没有真实会话，显示提示
       if (sessionList.length === 0) {
