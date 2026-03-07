@@ -7,8 +7,7 @@ import React, { useEffect, useState } from 'react';
 import { useAppStore } from './stores';
 import Scene3D from './components/3D/Scene3D';
 import AgentList from './components/Common/AgentList';
-import EventLog from './components/Common/EventLog';
-import ControlPanel from './components/UI/ControlPanel';
+import Sidebar from './components/UI/Sidebar';
 import LoadingScreen from './components/UI/LoadingScreen';
 import ErrorBoundary from './components/Common/ErrorBoundary';
 import './index.css';
@@ -22,14 +21,11 @@ const App: React.FC = () => {
     setLocale,
     gatewayConnected,
     connectGateway,
-    disconnectGateway,
-    logs
+    disconnectGateway
   } = useAppStore();
   
   const [showGatewayInput, setShowGatewayInput] = useState(false);
   const [gatewayUrl, setGatewayUrl] = useState('ws://localhost:18789');
-  const [activePanel, setActivePanel] = useState<'events' | 'tasks' | 'chat'>('events');
-  const [leftSidebarTab, setLeftSidebarTab] = useState<'list' | 'control'>('list');
   const [selectedAgentId, setSelectedAgentId] = useState<string | undefined>();
   const [isAppLoading, setIsAppLoading] = useState(true);
   
@@ -39,7 +35,6 @@ const App: React.FC = () => {
 
   useEffect(() => {
     initializeStore();
-    // 模拟初始加载时间，保证 LoadingScreen 至少有展示机会
     const timer = setTimeout(() => {
       setIsAppLoading(false);
     }, 1500);
@@ -67,6 +62,7 @@ const App: React.FC = () => {
           onComplete={() => setIsAppLoading(false)} 
         />
       )}
+      
       {/* 顶部导航栏 */}
       <header className="top-bar">
         <div className="logo">
@@ -108,37 +104,12 @@ const App: React.FC = () => {
 
       {/* 主体区域 */}
       <div className="main-content">
-        {/* 左侧 */}
+        {/* 左侧统一侧边栏 */}
         <aside className="sidebar-left">
-          <div className="left-sidebar-tabs">
-            <button 
-              className={leftSidebarTab === 'list' ? 'active' : ''} 
-              onClick={() => setLeftSidebarTab('list')}
-            >
-              🤖 Agents
-            </button>
-            <button 
-              className={leftSidebarTab === 'control' ? 'active' : ''} 
-              onClick={() => setLeftSidebarTab('control')}
-            >
-              🎛️ Control
-            </button>
-          </div>
-          
-          {leftSidebarTab === 'list' ? (
-            <>
-              <div className="panel-header">
-                <h3>🤖 Agents</h3>
-                <span className="badge">{onlineAgents}/{agents.length}</span>
-              </div>
-              <AgentList agents={agents} />
-            </>
-          ) : (
-            <ControlPanel locale={locale} />
-          )}
+          <Sidebar locale={locale} />
         </aside>
 
-        {/* 中间 */}
+        {/* 中间 3D 场景 */}
         <main className="map-area">
           <ErrorBoundary
             fallback={
@@ -168,48 +139,14 @@ const App: React.FC = () => {
             </ErrorBoundary>
           </ErrorBoundary>
         </main>
-
-        {/* 右侧 */}
-        <aside className="sidebar-right">
-          <div className="panel-tabs">
-            <button className={activePanel === 'events' ? 'active' : ''} onClick={() => setActivePanel('events')}>📋 事件</button>
-            <button className={activePanel === 'tasks' ? 'active' : ''} onClick={() => setActivePanel('tasks')}>📝 任务</button>
-            <button className={activePanel === 'chat' ? 'active' : ''} onClick={() => setActivePanel('chat')}>💬 聊天</button>
-          </div>
-          
-          <div className="panel-content">
-            {activePanel === 'events' && <EventLog logs={logs} />}
-            {activePanel === 'tasks' && (
-              <div className="task-list">
-                {tasks.length === 0 ? <div className="empty-state">暂无任务</div> : tasks.map(task => (
-                  <div key={task.id} className={`task-item ${task.status}`}>
-                    <span className="task-title">{task.titleZh}</span>
-                    <span className="task-status">{task.status}</span>
-                  </div>
-                ))}
-              </div>
-            )}
-            {activePanel === 'chat' && (
-              <div className="chat-panel">
-                <div className="chat-messages">
-                  <div className="message system">👋 你好！</div>
-                </div>
-                <div className="chat-input">
-                  <input type="text" placeholder="发送消息..." />
-                  <button>➤</button>
-                </div>
-              </div>
-            )}
-          </div>
-        </aside>
       </div>
 
       {/* 底部状态栏 */}
       <footer className="bottom-bar">
         <div className="status-left">
-          <span className="status-item online">● {onlineAgents} 在线</span>
-          <span className="status-item tasks">⚡ {runningTasks} 任务进行中</span>
-          <span className="status-item total">📋 {tasks.length} 总任务</span>
+          <span className="status-item online">● {onlineAgents} {locale === 'zh' ? '在线' : 'Online'}</span>
+          <span className="status-item tasks">⚡ {runningTasks} {locale === 'zh' ? '任务进行中' : 'Running'}</span>
+          <span className="status-item total">📋 {tasks.length} {locale === 'zh' ? '总任务' : 'Total'}</span>
         </div>
         <div className="status-right"></div>
       </footer>
