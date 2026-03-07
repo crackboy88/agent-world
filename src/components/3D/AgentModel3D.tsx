@@ -37,9 +37,22 @@ export const AgentModel3D = ({
   
   // 用于 idle 动画的 ref
   const groupRef = useRef<THREE.Group>(null);
-  const idleTimeRef = useRef(Math.random() * 100); // 随机起始时间
+  const idleTimeRef = useRef(Math.random() * 100);
   
-  const clonedScene = scene.clone();
+  // 克隆场景
+  const clonedScene = scene ? scene.clone() : null;
+  
+  // 如果场景为空，返回一个可点击的占位符
+  if (!clonedScene) {
+    return (
+      <group position={position} onClick={(e) => { e.stopPropagation(); onClick?.(); }}>
+        <mesh castShadow>
+          <boxGeometry args={[0.5, 1, 0.5]} />
+          <meshStandardMaterial color={color || '#888'} />
+        </mesh>
+      </group>
+    );
+  }
   
   // 应用颜色（如果指定了颜色）
   if (color) {
