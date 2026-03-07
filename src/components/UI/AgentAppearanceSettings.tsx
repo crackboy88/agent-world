@@ -52,25 +52,22 @@ export const AgentAppearanceSettings = () => {
         </select>
       </div>
       
-      {/* Step 2: Select Appearance */}
+      {/* Step 2: Select Model */}
       {selectedAgentId && (
         <div className="mb-4">
           <label className="block text-sm font-medium mb-2">2. Select Model:</label>
-          <div className="grid grid-cols-2 gap-2">
+          <select
+            value={currentAppearance?.modelId || ''}
+            onChange={(e) => handleModelChange(e.target.value)}
+            className="w-full p-2 border rounded bg-white"
+          >
+            <option value="">-- Default Model --</option>
             {agentModels.map(model => (
-              <button
-                key={model.id}
-                onClick={() => handleModelChange(model.id)}
-                className={`p-3 border rounded text-sm transition-all ${
-                  currentAppearance?.modelId === model.id 
-                    ? 'border-blue-500 bg-blue-50' 
-                    : 'border-gray-200 hover:border-gray-300'
-                }`}
-              >
-                <div className="font-medium">{model.name}</div>
-              </button>
+              <option key={model.id} value={model.id}>
+                {model.name}
+              </option>
             ))}
-          </div>
+          </select>
           
           {currentAppearance?.modelId && (
             <div className="mt-2 text-sm text-green-600">
