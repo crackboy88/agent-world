@@ -316,8 +316,12 @@ export const useAppStore = create<AppState>()(
           }
         };
         
-        // 延迟获取确保连接完成
-        setTimeout(fetchAgents, 1000);
+        // 等待连接成功后通过回调获取 agent
+        socketService.onConnectionChange = (connected) => {
+          if (connected) {
+            fetchAgents();
+          }
+        };
       },
       
       disconnectSocket: () => {
