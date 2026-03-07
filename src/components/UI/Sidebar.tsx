@@ -169,7 +169,7 @@ const Sidebar: React.FC<SidebarProps> = ({ locale = 'zh' }) => {
           >
             <div className="agent-header">
               <span className="agent-icon-lg">{agent.skillTag?.icon || '🤖'}</span>
-              <span className="agent-name-lg">{agent.nameZh}</span>
+              <span className="agent-name-lg">{agent.id}</span>
             </div>
             <div className="agent-footer">
               <span className="agent-state-lg" style={{ color: getStatusColor(agent.state) }}>
@@ -185,7 +185,7 @@ const Sidebar: React.FC<SidebarProps> = ({ locale = 'zh' }) => {
         <div className="chat-panel-compact">
           <div className="chat-header">
             <span className="chat-agent-icon">{selectedAgent.skillTag?.icon || '🤖'}</span>
-            <span>{locale === 'zh' ? selectedAgent.nameZh : selectedAgent.nameEn}</span>
+            <span>{selectedAgent.id}</span>
             <button className="btn-close" onClick={() => setSelectedAgentId('')}>✕</button>
           </div>
           <div className="chat-messages">
@@ -235,7 +235,7 @@ const Sidebar: React.FC<SidebarProps> = ({ locale = 'zh' }) => {
         <div className="task-form">
           <select value={selectedAgentId} onChange={(e) => setSelectedAgentId(e.target.value)}>
             <option value="">{locale === 'zh' ? '-- 选择智能体 --' : '-- Select Agent --'}</option>
-            {onlineAgents.map((a: Agent) => <option key={a.id} value={a.id}>{locale === 'zh' ? a.nameZh : a.nameEn}</option>)}
+            {onlineAgents.map((a: Agent) => <option key={a.id} value={a.id}>{a.id}</option>)}
           </select>
           <select value={selectedTaskType} onChange={(e) => setSelectedTaskType(e.target.value)}>
             {taskTypes.map(t => <option key={t.value} value={t.value}>{locale === 'zh' ? t.labelZh : t.labelEn}</option>)}
