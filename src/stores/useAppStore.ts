@@ -158,9 +158,28 @@ export const useAppStore = create<AppState>()(
       
       // Socket 连接
       connectSocket: () => {
-        // 设置事件回调
-        socketService.onAgentUpdate = (agents) => {
-          set({ agents });
+        // 设置事件回调 - 合并更新而非覆盖
+        socketService.onAgentUpdate = (updatedAgents) => {
+          const currentAgents = get().agents;
+          // 创建一个 map 来快速查找现有 agent
+          const agentMap = new Map(currentAgents.map(a => [a.id, a]));
+          
+          // 更新传入的 agent，保留现有 agent
+          const mergedAgents = updatedAgents.map((updated: Agent) => {
+            const existing = agentMap.get(updated.id);
+            if (existing) {
+              return { ...existing, ...updated };
+            }
+            return updated;
+          });
+          
+          // 添加未在更新中的现有 agent
+          updatedAgents.forEach((a: Agent) => agentMap.delete(a.id));
+          for (const existing of agentMap.values()) {
+            mergedAgents.push(existing);
+          }
+          
+          set({ agents: mergedAgents });
         };
         
         socketService.onMessage = (data) => {
