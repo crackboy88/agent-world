@@ -74,9 +74,9 @@ This section explains how to connect Agent World to your OpenClaw Gateway for re
 1. **OpenClaw Gateway** - You need a running OpenClaw Gateway instance
 2. **Agent Pairing** - Your agents must be paired with the Gateway
 
-### Step 1: Verify Gateway Status
+### Step 1: Start Gateway
 
-Check if your Gateway is running:
+First, make sure your OpenClaw Gateway is running:
 
 ```bash
 # Check Gateway status
@@ -86,9 +86,23 @@ openclaw gateway status
 openclaw gateway start
 ```
 
-### Step 2: Pair Your Agents
+### Step 2: Start Agent World
 
-When Agent World connects to Gateway, it will automatically send a pairing request. You just need to approve it on the Gateway side:
+```bash
+# Development mode
+npm run dev
+
+# Or serve the built files
+npm run preview
+```
+
+Visit http://localhost:5173
+
+**When Agent World starts, it will automatically attempt to connect to the Gateway and send a pairing request.**
+
+### Step 3: Approve Pairing Request
+
+Now approve the pending pairing request from the Gateway side:
 
 ```bash
 # Check pending pairing requests
@@ -101,36 +115,24 @@ openclaw devices approve --latest
 openclaw devices approve <device-id>
 ```
 
-If there's no pending request, you may need to:
-1. Restart the Gateway: `openclaw gateway restart`
-2. Refresh Agent World to trigger a new connection attempt
+### Step 4: Verify Connection
 
-### Step 3: Get Gateway WebSocket URL
+After approval, the connection should be established. Check in the Agent World UI:
+- The Gateway status should show "Connected"
+- Your agents should appear online
 
-The Gateway WebSocket URL typically follows this format:
+### Gateway URL Configuration
 
-```
-ws://localhost:3000/gateway
-```
-
-Or for remote Gateway:
-
-```
-ws://YOUR_GATEWAY_IP:3000/gateway
-```
-
-### Step 4: Configure Agent World
+The default Gateway URL is `ws://localhost:18789`. If you need to connect to a different Gateway:
 
 1. Open the application in your browser
-2. Look for the Gateway connection panel in the header
-3. Enter your Gateway WebSocket URL
-4. Click "Connect"
+2. Use the Gateway connection panel in the header to change the URL
 
-Alternatively, you can set the Gateway URL in the browser console:
+Or set it via browser console:
 
 ```javascript
 // In browser console
-localStorage.setItem('gatewayUrl', 'ws://localhost:3000/gateway');
+localStorage.setItem('gatewayUrl', 'ws://your-gateway-ip:18789');
 // Then refresh the page
 ```
 
@@ -141,10 +143,10 @@ localStorage.setItem('gatewayUrl', 'ws://localhost:3000/gateway');
 This usually means the device identity is outdated. Try:
 
 ```bash
-# Re-pair the device
-openclaw devices pair
+# Clear old device identity from browser localStorage
+# Then refresh Agent World to trigger a new pairing request
 
-# Or reset and re-approve
+# On Gateway side, approve the new request
 openclaw devices approve --latest
 ```
 
