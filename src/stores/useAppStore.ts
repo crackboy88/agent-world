@@ -40,6 +40,9 @@ interface AppState {
   // Data
   maps: MapItem[];
   agents: Agent[];
+  
+  // Agent appearances (user configured)
+  agentAppearances: Record<string, { modelId?: string; modelUrl?: string; color?: string }>;
   tasks: Task[];
   
   // Logs & Messages
@@ -75,6 +78,7 @@ interface AppState {
   updateAgentLocation: (agentId: AgentId, locationId: MapId) => void;
   setAgentOnline: (agentId: AgentId, isOnline: boolean) => void;
   setAgentMood: (agentId: AgentId, mood: 'positive' | 'neutral' | 'negative') => void;
+  updateAgentAppearance: (agentId: AgentId, appearance: { modelId?: string; modelUrl?: string; color?: string }) => void;
   
   // Actions - Tasks
   assignTask: (agentId: AgentId, taskType: Task['type']) => string;
@@ -121,6 +125,7 @@ export const useAppStore = create<AppState>()(
       // Initial State
       maps: [],
       agents: [],
+      agentAppearances: {},
       tasks: [],
       logs: [],
       messages: [],
@@ -383,6 +388,18 @@ export const useAppStore = create<AppState>()(
           agents: s.agents.map(a => 
             a.id === agentId ? { ...a, mood } : a
           )
+        }));
+      },
+      
+      updateAgentAppearance: (agentId, appearance) => {
+        set((s) => ({
+          agentAppearances: {
+            ...s.agentAppearances,
+            [agentId]: {
+              ...s.agentAppearances[agentId],
+              ...appearance
+            }
+          }
         }));
       },
       

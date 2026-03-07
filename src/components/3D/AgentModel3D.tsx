@@ -8,6 +8,7 @@ import * as THREE from 'three';
 interface AgentModel3DProps {
   agentId: string;
   position: [number, number, number];
+  modelUrl?: string;
   color?: string;
   scale?: number;
 }
@@ -15,9 +16,12 @@ interface AgentModel3DProps {
 // 默认 Agent 模型 URL
 const DEFAULT_AGENT_MODEL = '/assets/agents/agent-default.glb';
 
-export const AgentModel3D = ({ agentId, position, color, scale = 1 }: AgentModel3DProps) => {
-  // 加载默认 Agent 模型
-  const { scene } = useGLTF(DEFAULT_AGENT_MODEL);
+export const AgentModel3D = ({ agentId, position, modelUrl, color, scale = 1 }: AgentModel3DProps) => {
+  // 使用用户选择的模型，或默认模型
+  const modelToLoad = modelUrl || DEFAULT_AGENT_MODEL;
+  
+  // 加载模型
+  const { scene } = useGLTF(modelToLoad);
   
   const clonedScene = useMemo(() => {
     if (!scene) return null;

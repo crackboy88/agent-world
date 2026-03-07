@@ -53,7 +53,7 @@ const MapItems = () => {
   );
 };
 
-export const Scene3D = ({ agents, selectedAgentId, onAgentClick }: { agents: Agent[]; selectedAgentId?: string; onAgentClick?: (id: string) => void }) => {
+export const Scene3D = ({ agents, selectedAgentId, onAgentClick, agentAppearances = {} }: { agents: Agent[]; selectedAgentId?: string; onAgentClick?: (id: string) => void; agentAppearances?: Record<string, { modelId?: string; modelUrl?: string; color?: string }> }) => {
   // Convert 2D position to 3D
   const getAgentPosition = (agent: Agent): [number, number, number] => {
     const x = (agent.position.x - 512) / 100;
@@ -79,15 +79,17 @@ export const Scene3D = ({ agents, selectedAgentId, onAgentClick }: { agents: Age
       {agents.map(agent => {
         const pos = getAgentPosition(agent);
         const agentScale = selectedAgentId === agent.id ? 1.1 : 1;
+        const appearance = agentAppearances[agent.id] || {};
         
         return (
           <group key={`agent-${agent.id}`} onClick={(e: unknown) => { (e as Event).stopPropagation(); onAgentClick?.(agent.id); }}>
             <AgentModel3D
               key={`agent3d-${agent.id}`}
               agentId={agent.id}
+              modelUrl={appearance.modelUrl}
               position={pos}
               scale={agentScale}
-              // TODO: 后续可以从配置中读取 agent 颜色
+              color={appearance.color}
             />
           </group>
         );

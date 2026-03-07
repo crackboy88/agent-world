@@ -15,12 +15,13 @@ import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { useAppStore } from '../../stores';
 import { socketService } from '../../services/socket';
 import type { Task, AgentId, Agent } from '../../types';
+import AgentAppearanceSettings from './AgentAppearanceSettings';
 
 interface SidebarProps {
   locale?: 'zh' | 'en';
 }
 
-type Section = 'gateway' | 'agents' | 'tasks' | 'events';
+type Section = 'gateway' | 'agents' | 'tasks' | 'events' | 'settings';
 
 // 会话类型
 interface Session {
@@ -80,6 +81,7 @@ const Sidebar: React.FC<SidebarProps> = ({ locale = 'zh' }) => {
     { id: 'agents' as Section, icon: '🤖', labelZh: '智能体', labelEn: 'Agents' },
     { id: 'tasks' as Section, icon: '⏰', labelZh: '定时任务', labelEn: 'Cron' },
     { id: 'events' as Section, icon: '📜', labelZh: '日志', labelEn: 'Logs' },
+    { id: 'settings' as Section, icon: '⚙️', labelZh: '设置', labelEn: 'Settings' },
   ];
 
   // 计算属性
@@ -489,6 +491,11 @@ const Sidebar: React.FC<SidebarProps> = ({ locale = 'zh' }) => {
         {activeSection === 'agents' && renderAgents()}
         {activeSection === 'tasks' && renderTasks()}
         {activeSection === 'events' && renderEvents()}
+        {activeSection === 'settings' && (
+          <div className="settings-panel">
+            <AgentAppearanceSettings />
+          </div>
+        )}
       </div>
     </div>
   );

@@ -40,7 +40,7 @@ export interface GlobalStats {
 }
 
 // Sidebar types
-export type SidebarTab = 'tasks' | 'chat' | 'logs' | 'stats';
+export type SidebarTab = 'tasks' | 'chat' | 'logs' | 'stats' | 'settings';
 
 // Language types
 export type Locale = 'zh' | 'en';

@@ -21,7 +21,8 @@ const App: React.FC = () => {
     setLocale,
     gatewayConnected,
     connectGateway,
-    disconnectGateway
+    disconnectGateway,
+    agentAppearances
   } = useAppStore();
   
   const [showGatewayInput, setShowGatewayInput] = useState(false);
@@ -134,7 +135,8 @@ const App: React.FC = () => {
               <Scene3D 
                 agents={agents} 
                 selectedAgentId={selectedAgentId} 
-                onAgentClick={handleAgentClick} 
+                onAgentClick={handleAgentClick}
+                agentAppearances={agentAppearances}
               />
             </ErrorBoundary>
           </ErrorBoundary>
