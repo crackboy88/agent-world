@@ -15,26 +15,9 @@ import type {
   SidebarTab,
   GlobalStats 
 } from '../types';
-import { getAllRoomConfigsSync, getAllAgentConfigsSync } from '../../config';
+import { getAllRoomConfigsSync } from '../../config';
 import { createTask, updateTaskProgress } from '../types/task';
 import { socketService } from '../services/socket';
-
-// 后备 Agent 生成函数（当 Gateway 未连接时使用）
-function getFallbackAgents(): Agent[] {
-  const agentConfigs = getAllAgentConfigsSync();
-  return Object.values(agentConfigs).map(config => ({
-    id: config.id,
-    name: config.name,
-    emoji: config.emoji,
-    isOnline: true,
-    state: 'idle' as AgentState,
-    currentRoom: 'lobby',
-    position: { x: 512 + Math.random() * 200, y: 512 + Math.random() * 200 },
-    targetPosition: { x: 512, y: 512 },
-    animation: 'idle',
-    mood: 'neutral' as const,
-  }));
-}
 
 // 日志类型
 interface LogEntry {
@@ -159,7 +142,6 @@ export const useAppStore = create<AppState>()(
         const rooms = getAllRoomConfigsSync();
         
         // Start with empty agents list - will be fetched from Gateway after connection
-        // Fallback to config agents if Gateway not connected (demo mode)
         
         set({
           rooms,
@@ -175,16 +157,6 @@ export const useAppStore = create<AppState>()(
         
         // 连接 Socket
         get().connectSocket();
-        
-        // 后备机制：5秒后如果还没有 agents（Gateway 未连接），使用后备
-        setTimeout(() => {
-          const currentAgents = get().agents;
-          if (currentAgents.length === 0) {
-            const fallbackAgents = getFallbackAgents();
-            set({ agents: fallbackAgents });
-            console.log('Using fallback agents (demo mode)');
-          }
-        }, 5000);
       },
       
       // Socket 连接
@@ -268,14 +240,7 @@ export const useAppStore = create<AppState>()(
               }
             } catch (error) {
               console.error('Failed to fetch agents from Gateway:', error);
-              // 使用配置作为后备
-              const fallbackAgents = getFallbackAgents();
-              set({ agents: fallbackAgents });
             }
-          } else {
-            // 离线时使用后备 agent
-            const fallbackAgents = getFallbackAgents();
-            set({ agents: fallbackAgents });
           }
         };
         
@@ -328,16 +293,9 @@ export const useAppStore = create<AppState>()(
                   mood: a.mood || 'neutral',
                 }));
                 set({ agents });
-              } else {
-                // Gateway 连接但没有 agent，使用后备
-                const fallbackAgents = getFallbackAgents();
-                set({ agents: fallbackAgents });
               }
             } catch (e) {
               console.error('Failed to fetch agents:', e);
-              // 使用后备 agent
-              const fallbackAgents = getFallbackAgents();
-              set({ agents: fallbackAgents });
             }
           }, 1000); // 延迟确保连接稳定
         }

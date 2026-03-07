@@ -1,18 +1,13 @@
 /**
  * 房间类型定义
- * Room Types - Generic version
  */
 
-import type { RoomId } from './room';
+export type { Room, RoomName, RoomPosition, Furniture, Window, RoomId } from '../../config/rooms';
+export { getRoomById, getRoomDisplayName, DEFAULT_ROOMS } from '../../config/rooms';
 
-// Re-export types
-export type { Room, RoomName, RoomPosition, Furniture, Window, RoomId } from '../../config/rooms.default';
-export { getRoomById, getRoomDisplayName } from '../../config/rooms.default';
+import { DEFAULT_ROOMS } from '../../config/rooms';
 
-// For backward compatibility - load from config
-import { getAllRoomConfigs } from '../../config';
-
-export const ROOMS_CONFIG = getAllRoomConfigs();
+export const ROOMS_CONFIG = DEFAULT_ROOMS;
 
 export function getRoomByIdLegacy(id: string) {
   return ROOMS_CONFIG.find(room => room.id === id);

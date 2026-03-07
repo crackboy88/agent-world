@@ -3,27 +3,42 @@
  * 预生成所有 Agent 的动画帧为图片
  */
 
-import { getAllAgentConfigsSync, getPalette } from '../../config';
+// 默认调色板
+const DEFAULT_PALETTE = {
+  skin: '#FCD34D',
+  skinShadow: '#E5B44D',
+  hair: '#1F2937',
+  hairLight: '#374151',
+  clothes: '#3B82F6',
+  clothesDark: '#2563EB',
+  accent: '#F59E0B',
+  shoe: '#374151',
+  shoeDark: '#1F2937',
+};
+
+// 默认 Agent 颜色（用于未知 Agent）
+const DEFAULT_AGENT_COLORS = {
+  clothes: '#3B82F6',
+  accent: '#F59E0B',
+  hair: '#1F2937',
+};
 
 // 生成单个 Agent 的单个动画帧
 function generateAgentFrame(
   agentId: string, 
   frame: number, 
   totalFrames: number,
-  size: number = 64
+  size: number = 64,
+  colors?: { clothes?: string; accent?: string; hair?: string }
 ): string {
-  const agentConfigs = getAllAgentConfigsSync();
-  const config = agentConfigs[agentId] || agentConfigs['agent-1'];
-  const PALETTE = getPalette();
+  const config = colors || DEFAULT_AGENT_COLORS;
+  const PALETTE = DEFAULT_PALETTE;
   const canvas = document.createElement('canvas');
   canvas.width = size;
   canvas.height = size;
   const ctx = canvas.getContext('2d');
   if (!ctx) return '';
   
-  // 缩放系数（保留以备将来使用）
-  // const _s = size / 32;
-
   // 呼吸动画偏移
   const breathOffset = Math.sin((frame / totalFrames) * Math.PI * 2) * 1;
 
@@ -48,81 +63,85 @@ function generateAgentFrame(
   ctx.fill();
 
   // 身体
-  ctx.fillStyle = config.clothes;
+  ctx.fillStyle = config.clothes || '#3B82F6';
   ctx.fillRect(size * 0.25, size * 0.32 + breathOffset, size * 0.5, size * 0.25);
-  
-  // 衣服条纹
-  ctx.fillStyle = config.accent;
-  ctx.fillRect(size * 0.25, size * 0.5 + breathOffset, size * 0.5, size * 0.06);
+
+  // 身体阴影
+  ctx.fillStyle = config.clothes ? adjustColor(config.clothes, -20) : '#2563EB';
+  ctx.fillRect(size * 0.25, size * 0.52 + breathOffset, size * 0.5, size * 0.06);
 
   // 头部
   ctx.fillStyle = PALETTE.skin;
-  ctx.fillRect(size * 0.3, size * 0.15 + breathOffset, size * 0.4, size * 0.35);
+  ctx.beginPath();
+  ctx.arc(size * 0.5, size * 0.22, size * 0.12, 0, Math.PI * 2);
+  ctx.fill();
 
   // 头发
-  ctx.fillStyle = config.hair;
-  ctx.fillRect(size * 0.28, size * 0.1 + breathOffset, size * 0.44, size * 0.12);
+  ctx.fillStyle = config.hair || '#1F2937';
+  ctx.beginPath();
+  ctx.arc(size * 0.5, size * 0.18, size * 0.1, Math.PI, Math.PI * 2);
+  ctx.fill();
 
   // 眼睛
   ctx.fillStyle = '#1F2937';
-  ctx.fillRect(size * 0.38, size * 0.28 + breathOffset, size * 0.08, size * 0.08);
-  ctx.fillRect(size * 0.54, size * 0.28 + breathOffset, size * 0.08, size * 0.08);
-  
-  // 眼神高光
-  ctx.fillStyle = '#FFF';
-  ctx.fillRect(size * 0.4, size * 0.29 + breathOffset, size * 0.03, size * 0.03);
-  ctx.fillRect(size * 0.56, size * 0.29 + breathOffset, size * 0.03, size * 0.03);
+  ctx.beginPath();
+  ctx.arc(size * 0.45, size * 0.22, size * 0.02, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.beginPath();
+  ctx.arc(size * 0.55, size * 0.22, size * 0.02, 0, Math.PI * 2);
+  ctx.fill();
 
   // 嘴巴
-  ctx.fillStyle = '#BE123C';
+  ctx.fillStyle = '#E5B44D';
   ctx.beginPath();
-  ctx.roundRect(size * 0.43, size * 0.38 + breathOffset, size * 0.14, size * 0.04, size * 0.02);
+  ctx.arc(size * 0.5, size * 0.28, size * 0.025, 0, Math.PI);
   ctx.fill();
 
   return canvas.toDataURL();
 }
 
-// Agent 动画配置
+// 调整颜色亮度
+function adjustColor(hex: string, amount: number): string {
+  const num = parseInt(hex.replace('#', ''), 16);
+  const r = Math.min(255, Math.max(0, (num >> 16) + amount));
+  const g = Math.min(255, Math.max(0, ((num >> 8) & 0x00FF) + amount));
+  const b = Math.min(255, Math.max(0, (num & 0x0000FF) + amount));
+  return `#${((r << 16) | (g << 8) | b).toString(16).padStart(6, '0')}`;
+}
+
+// Agent 动画帧类型
 export interface AgentSprite {
   agentId: string;
-  frames: string[];      // idle 动画帧
-  walkFrames?: string[]; // 行走动画帧
+  frames: string[];
 }
 
 // 生成所有 Agent 的 Sprite
-export function generateAllSprites(): Map<string, AgentSprite> {
+export function generateAllSprites(agentList?: string[]): Map<string, AgentSprite> {
   const sprites = new Map<string, AgentSprite>();
   const frameCount = 4;
   const spriteSize = 256;
-  const agentConfigs = getAllAgentConfigsSync();
-
-  Object.keys(agentConfigs).forEach(agentId => {
-    // 生成 idle 动画帧
+  
+  const agents = agentList || ['default'];
+  
+  agents.forEach(agentId => {
     const frames: string[] = [];
     for (let i = 0; i < frameCount; i++) {
       frames.push(generateAgentFrame(agentId, i, frameCount, spriteSize));
     }
-
+    
     sprites.set(agentId, {
       agentId,
       frames,
     });
   });
-
+  
   return sprites;
 }
 
-// 预生成并缓存
-let spriteCache: Map<string, AgentSprite> | null = null;
-
+// 获取 sprite 缓存
 export function getSpriteCache(): Map<string, AgentSprite> {
-  if (!spriteCache) {
-    spriteCache = generateAllSprites();
-  }
-  return spriteCache;
+  return generateAllSprites();
 }
 
-// 获取单个 Agent 的 Sprite
-export function getAgentSprite(agentId: string): AgentSprite | undefined {
-  return getSpriteCache().get(agentId);
-}
+// 导出默认调色板供外部使用
+export { DEFAULT_PALETTE };

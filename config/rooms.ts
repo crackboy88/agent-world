@@ -1,9 +1,6 @@
 /**
- * 房间配置 - 默认模板
- * Room Configuration - Default Template
- * 
- * 复制此文件为 rooms.local.ts 并修改为你的私有配置
- * Copy this file to rooms.local.ts and customize for your private config
+ * 房间类型定义
+ * Room Types - Generic version
  */
 
 export type RoomId = string;
@@ -48,7 +45,7 @@ export interface Room {
 
 /**
  * 默认房间布局 - 简单的3x3网格
- * 可复制为 rooms.local.ts 自定义你的地图
+ * 可自定义你的地图
  */
 export const DEFAULT_ROOMS: Room[] = [
   {
@@ -136,10 +133,18 @@ export const DEFAULT_ROOMS: Room[] = [
   },
 ];
 
-export function getRoomById(id: RoomId): Room | undefined {
+export function getRoomById(id: string): Room | undefined {
   return DEFAULT_ROOMS.find(room => room.id === id);
 }
 
 export function getRoomDisplayName(room: Room, locale: 'zh' | 'en' = 'en'): string {
   return locale === 'zh' ? room.name.zh : room.name.en;
+}
+
+export function getAllRoomConfigs(): Room[] {
+  return DEFAULT_ROOMS;
+}
+
+export function getAllRoomConfigsSync(): Room[] {
+  return DEFAULT_ROOMS;
 }
