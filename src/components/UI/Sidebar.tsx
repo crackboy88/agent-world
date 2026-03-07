@@ -91,7 +91,37 @@ const Sidebar: React.FC<SidebarProps> = ({ locale = 'zh' }) => {
     chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, selectedAgentId, selectedSessionKey]);
 
-  // 获取真实会话列表（从 Gateway）
+  // 监听 Gateway 会话更新
+  useEffect(() => {
+    if (!gatewayConnected) return;
+    
+    const originalOnSessionsUpdate = socketService.onSessionsUpdate;
+    socketService.onSessionsUpdate = (sessions: unknown[]) => {
+      console.log('[Sidebar] Sessions from Gateway:', sessions);
+      const sessionsByAgent: Record<string, Session[]> = {};
+      (sessions as Array<{ sessionKey: string; agentId?: string; title?: string; updatedAt?: number }>).forEach(s => {
+        const agentId = s.agentId || s.sessionKey.split(':')[1] || 'unknown';
+        if (!sessionsByAgent[agentId]) sessionsByAgent[agentId] = [];
+        sessionsByAgent[agentId].push({
+          sessionKey: s.sessionKey,
+          title: s.title || s.sessionKey,
+          updatedAt: s.updatedAt || Date.now()
+        });
+      });
+      
+      setSessions(prev => {
+        const merged = { ...prev };
+        Object.entries(sessionsByAgent).forEach(([agentId, list]) => {
+          if (list.length > 0) merged[agentId] = list;
+        });
+        return merged;
+      });
+    };
+
+    return () => { socketService.onSessionsUpdate = originalOnSessionsUpdate; };
+  }, [gatewayConnected]);
+
+  // 获取真实会话列表
   const fetchSessions = useCallback(async (agentId: string) => {
     if (!gatewayConnected) return;
     try {

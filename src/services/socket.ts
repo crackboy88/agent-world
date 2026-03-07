@@ -32,6 +32,7 @@ class OpenClawSocketService {
   onPresence?: (data: unknown) => void;
   onGatewayStatus?: (status: { connected: boolean; url: string }) => void;
   onChat?: (data: unknown) => void;
+  onSessionsUpdate?: (sessions: unknown[]) => void;
   onGatewayEvent?: (event: { type: string; data: unknown }) => void;
 
   // 设备身份存储
@@ -96,6 +97,13 @@ class OpenClawSocketService {
           break;
         case 'chat':
           this.onChat?.(event.payload);
+          break;
+        case 'session':
+          // 处理 session 事件
+          console.log('[Socket] Session event:', event.payload);
+          if (Array.isArray(event.payload)) {
+            this.onSessionsUpdate?.(event.payload);
+          }
           break;
         case 'message':
           // 处理消息事件
