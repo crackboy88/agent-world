@@ -22,7 +22,9 @@ const App: React.FC = () => {
     gatewayConnected,
     connectGateway,
     disconnectGateway,
-    agentAppearances
+    agentAppearances,
+    updateAgentAppearance,
+    updateAgentPosition
   } = useAppStore();
   
   const [showGatewayInput, setShowGatewayInput] = useState(false);
@@ -48,6 +50,12 @@ const App: React.FC = () => {
     } else if (gatewayUrl) {
       connectGateway(gatewayUrl);
       setShowGatewayInput(false);
+    }
+  };
+  
+  const handleMapClick = (position: { x: number; y: number }) => {
+    if (selectedAgentId) {
+      updateAgentPosition(selectedAgentId, position);
     }
   };
 
@@ -137,6 +145,7 @@ const App: React.FC = () => {
                 selectedAgentId={selectedAgentId} 
                 onAgentClick={handleAgentClick}
                 agentAppearances={agentAppearances}
+                onMapClick={handleMapClick}
               />
             </ErrorBoundary>
           </ErrorBoundary>

@@ -345,11 +345,31 @@ export const useAppStore = create<AppState>()(
       },
       
       updateAgentPosition: (agentId, position) => {
+        // Move agent to position - start walking animation
         set((s) => ({
           agents: s.agents.map(a => 
-            a.id === agentId ? { ...a, position } : a
+            a.id === agentId ? { 
+              ...a, 
+              position,
+              targetPosition: position,
+              state: 'walking' as AgentState,
+              animation: 'walk'
+            } : a
           )
         }));
+        
+        // After a short delay, set back to idle
+        setTimeout(() => {
+          set((s) => ({
+            agents: s.agents.map(a => 
+              a.id === agentId ? { 
+                ...a, 
+                state: 'idle' as AgentState,
+                animation: 'idle'
+              } : a
+            )
+          }));
+        }, 2000); // Assume it takes 2 seconds to move
       },
       
       updateAgentLocation: (agentId, locationId) => {

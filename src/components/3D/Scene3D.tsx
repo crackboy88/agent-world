@@ -14,10 +14,15 @@ preloadModels();
 preloadAgentModel();
 
 // Simple flat floor
-const Floor = ({ size = 20 }: { size?: number }) => {
+const Floor = ({ size = 20, onClick }: { size?: number; onClick?: (event: THREE.Event) => void }) => {
   return (
     <group>
-      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.01, 0]} receiveShadow>
+      <mesh 
+        rotation={[-Math.PI / 2, 0, 0]} 
+        position={[0, -0.01, 0]} 
+        receiveShadow
+        onClick={onClick}
+      >
         <planeGeometry args={[size, size]} />
         <meshStandardMaterial color="#E8E4DF" roughness={0.9} />
       </mesh>
@@ -53,12 +58,38 @@ const MapItems = () => {
   );
 };
 
-export const Scene3D = ({ agents, selectedAgentId, onAgentClick, agentAppearances = {} }: { agents: Agent[]; selectedAgentId?: string; onAgentClick?: (id: string) => void; agentAppearances?: Record<string, { modelId?: string; modelUrl?: string; color?: string }> }) => {
+export const Scene3D = ({ 
+  agents, 
+  selectedAgentId, 
+  onAgentClick, 
+  agentAppearances = {},
+  onMapClick
+}: { 
+  agents: Agent[]; 
+  selectedAgentId?: string; 
+  onAgentClick?: (id: string) => void; 
+  agentAppearances?: Record<string, { modelId?: string; modelUrl?: string; color?: string }>;
+  onMapClick?: (position: { x: number; y: number }) => void;
+}) => {
   // Convert 2D position to 3D
   const getAgentPosition = (agent: Agent): [number, number, number] => {
     const x = (agent.position.x - 512) / 100;
     const z = (agent.position.y - 512) / 100;
     return [x, 0, z];
+  };
+  
+  // Handle floor click
+  const handleFloorClick = (event: THREE.Event) => {
+    if (!selectedAgentId || !onMapClick) return;
+    
+    // Get click point in 3D
+    const point = (event as unknown as { point: THREE.Vector3 }).point;
+    
+    // Convert 3D to 2D
+    const x = Math.round(point.x * 100 + 512);
+    const y = Math.round(point.z * 100 + 512);
+    
+    onMapClick({ x, y });
   };
 
   return (
@@ -70,7 +101,7 @@ export const Scene3D = ({ agents, selectedAgentId, onAgentClick, agentAppearance
       <directionalLight position={[8, 12, 8]} intensity={1.5} color="#FFF5E6" castShadow shadow-mapSize={[2048, 2048]} shadow-camera-far={50} shadow-camera-left={-10} shadow-camera-right={10} shadow-camera-top={10} shadow-camera-bottom={-10} />
       <hemisphereLight args={['#87CEEB', '#8B7355', 0.4]} />
       
-      <Floor size={20} />
+      <Floor size={20} onClick={handleFloorClick} />
       
       {/* Map Items from config */}
       <MapItems />
