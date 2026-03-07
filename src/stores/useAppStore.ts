@@ -164,11 +164,10 @@ export const useAppStore = create<AppState>()(
       
       // Socket 连接
       connectSocket: () => {
-        // 确保回调只设置一次
-        if ((socketService as unknown as { _callbacksSet: boolean })._callbacksSet) {
-          return;
-        }
-        (socketService as unknown as { _callbacksSet: boolean })._callbacksSet = true;
+        // 只设置一次回调
+        const alreadyCalled = (window as unknown as { _socketCallbacksSet?: boolean })._socketCallbacksSet;
+        if (alreadyCalled) return;
+        (window as unknown as { _socketCallbacksSet?: boolean })._socketCallbacksSet = true;
         
         // 设置事件回调 - 合并更新而非覆盖
         socketService.onAgentUpdate = (updatedAgents) => {
@@ -318,7 +317,7 @@ export const useAppStore = create<AppState>()(
         };
         
         // 延迟获取确保连接完成
-        setTimeout(fetchAgents, 2000);
+        setTimeout(fetchAgents, 1000);
       },
       
       disconnectSocket: () => {
