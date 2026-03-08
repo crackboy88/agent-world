@@ -83,10 +83,17 @@ export const Scene3D = ({
 }) => {
   // Convert 2D position to 3D
   const getAgentPosition = (agent: Agent): [number, number, number] => {
-    if (!agent?.position) return [0, 0, 0];
-    const x = ((agent.position?.x || 0) - 512) / 100;
-    const z = ((agent.position?.y || 0) - 512) / 100;
-    return [x, 0, z];
+    try {
+      if (!agent || !agent.position) return [0, 0, 0];
+      const posX = agent.position.x ?? 0;
+      const posY = agent.position.y ?? 0;
+      const x = (posX - 512) / 100;
+      const z = (posY - 512) / 100;
+      return [x, 0, z];
+    } catch (e) {
+      console.error('[DEBUG] getAgentPosition error:', e);
+      return [0, 0, 0];
+    }
   };
   
   // Handle floor click
