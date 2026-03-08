@@ -73,6 +73,11 @@ const App: React.FC = () => {
     }
   };
 
+  // 右键取消选择
+  const handleDeselect = () => {
+    setSelectedAgentId(undefined);
+  };
+
   const onlineAgents = Array.isArray(agents) ? agents.filter(a => a.isOnline).length : 0;
   const runningTasks = Array.isArray(tasks) ? tasks.filter(t => t.status === 'running').length : 0;
 
@@ -160,6 +165,7 @@ const App: React.FC = () => {
                 onAgentClick={handleAgentClick}
                 agentAppearances={agentAppearances}
                 onMapClick={handleMapClick}
+                onDeselect={handleDeselect}
               />
             </ErrorBoundary>
           </ErrorBoundary>

@@ -63,13 +63,15 @@ export const Scene3D = ({
   selectedAgentId, 
   onAgentClick, 
   agentAppearances = {},
-  onMapClick
+  onMapClick,
+  onDeselect
 }: { 
   agents: Agent[]; 
   selectedAgentId?: string; 
   onAgentClick?: (id: string) => void; 
   agentAppearances?: Record<string, { modelId?: string; modelUrl?: string; color?: string }>;
   onMapClick?: (position: { x: number; y: number }) => void;
+  onDeselect?: () => void;
 }) => {
   // Convert 2D position to 3D
   const getAgentPosition = (agent: Agent): [number, number, number] => {
@@ -97,8 +99,21 @@ export const Scene3D = ({
     onMapClick({ x, y });
   };
 
+  // Handle right-click to deselect
+  const handleContextMenu = (e: any) => {
+    e.preventDefault?.();
+    console.log('[DEBUG] Right-click: deselect agent');
+    onDeselect?.();
+  };
+
   return (
-    <Canvas gl={{ antialias: true, toneMapping: THREE.ACESFilmicToneMapping, toneMappingExposure: 1.1 }} shadows={{ type: THREE.PCFShadowMap }} dpr={[1, 2]}>
+    <Canvas 
+      gl={{ antialias: true, toneMapping: THREE.ACESFilmicToneMapping, toneMappingExposure: 1.1 }} 
+      shadows={{ type: THREE.PCFShadowMap }} 
+      dpr={[1, 2]}
+      onContextMenu={handleContextMenu}
+      onPointerMissed={() => {}}
+    >
       <PerspectiveCamera makeDefault position={[8, 8, 8]} fov={50} />
       <OrbitControls enablePan enableZoom enableRotate minDistance={3} maxDistance={20} target={[0, 1, 0]} maxPolarAngle={Math.PI / 2 - 0.1} enableDamping dampingFactor={0.05} />
       <Environment preset="city" />
