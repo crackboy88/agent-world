@@ -44,7 +44,7 @@ const MapItems = ({
   
   return (
     <>
-      {items.map((item: MapItem) => {
+      {items && items.map((item: MapItem) => {
         // Convert 2D position to 3D
         const x = (item.position.x - 512) / 100;
         const z = (item.position.y - 512) / 100;
@@ -139,7 +139,7 @@ export const Scene3D = ({
       <MapItems onItemClick={onItemClick} selectedItemId={selectedItemId} />
       
       {/* Agents - use model from assets */}
-      {agents.map(agent => {
+      {agents && agents.map(agent => {
         const pos = getAgentPosition(agent);
         const agentScale = selectedAgentId === agent.id ? 1.1 : 1;
         const appearance = agentAppearances[agent.id] || {};
