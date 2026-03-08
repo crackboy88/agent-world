@@ -110,9 +110,35 @@ export const Scene3D = ({
       >
         <PerspectiveCamera makeDefault position={[8, 8, 8]} fov={50} />
         <OrbitControls enablePan enableZoom enableRotate minDistance={3} maxDistance={20} />
-        <ambientLight intensity={0.6} />
-        <directionalLight position={[8, 12, 8]} intensity={1.2} castShadow />
-        <directionalLight position={[-5, 10, -5]} intensity={0.3} />
+        
+        {/* Ambient - base illumination */}
+        <ambientLight intensity={0.4} />
+        
+        {/* Hemisphere - sky/ground color */}
+        <hemisphereLight args={['#87CEEB', '#8B7355', 0.5]} />
+        
+        {/* Main directional - sun-like */}
+        <directionalLight 
+          position={[10, 15, 10]} 
+          intensity={1.5} 
+          castShadow 
+          shadow-mapSize={[2048, 2048]}
+          shadow-camera-far={50}
+          shadow-camera-left={-15}
+          shadow-camera-right={15}
+          shadow-camera-top={15}
+          shadow-camera-bottom={-15}
+        />
+        
+        {/* Fill light - softer from opposite side */}
+        <directionalLight 
+          position={[-8, 10, -8]} 
+          intensity={0.4} 
+          color="#E8E4DF"
+        />
+        
+        {/* Point light - extra warmth */}
+        <pointLight position={[0, 8, 0]} intensity={0.3} color="#FFF5E6" />
         
         <Floor size={20} onClick={handleFloorClick} />
         
