@@ -37,10 +37,13 @@ const App: React.FC = () => {
   };
 
   useEffect(() => {
+    // Clear localStorage if URL has ?clear=1
+    if (window.location.search.includes('clear=1')) {
+      localStorage.clear();
+    }
     initializeStore();
     // Force show 3D scene after timeout
     const timer = setTimeout(() => {
-      console.log('[DEBUG] Forcing app loading to false');
       setIsAppLoading(false);
     }, 2000);
     return () => clearTimeout(timer);
