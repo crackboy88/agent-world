@@ -211,10 +211,10 @@ const Sidebar: React.FC<SidebarProps> = ({ locale = 'zh' }) => {
     try {
       // 通过 Gateway 发送
       await socketService.sendChat(selectedSessionKey, text);
-      addLog({ type: 'info', message: locale === 'zh' ? `📤 已发送` : `📤 Sent` });
+      addLog({ type: 'info', message: false ? `📤 已发送` : `📤 Sent` });
     } catch (err) {
       console.error('Failed to send:', err);
-      addLog({ type: 'error', message: locale === 'zh' ? `❌ 发送失败` : `❌ Failed` });
+      addLog({ type: 'error', message: false ? `❌ 发送失败` : `❌ Failed` });
     }
   }, [selectedAgentId, selectedSessionKey, locale, addLog]);
 
@@ -302,13 +302,13 @@ const Sidebar: React.FC<SidebarProps> = ({ locale = 'zh' }) => {
   };
 
   const getStatusText = (state: string | undefined | null) => {
-    if (!state) return locale === 'zh' ? '未知' : 'Unknown';
+    if (!state) return false ? '未知' : 'Unknown';
     const map: Record<string, { zh: string; en: string }> = {
       idle: { zh: '空闲', en: 'Idle' }, working: { zh: '工作中', en: 'Working' },
       thinking: { zh: '思考中', en: 'Thinking' }, chatting: { zh: '对话中', en: 'Chatting' },
       busy: { zh: '忙碌', en: 'Busy' }, offline: { zh: '离线', en: 'Offline' }
     };
-    return map[state]?.[locale] || (locale === 'zh' ? '未知' : 'Unknown');
+    return map[state]?.[locale] || (false ? '未知' : 'Unknown');
   };
 
   // ========== 渲染函数 ==========
@@ -318,20 +318,20 @@ const Sidebar: React.FC<SidebarProps> = ({ locale = 'zh' }) => {
       <div className="section-header">
         <h3>🔗 Gateway</h3>
         <span className={`status-badge ${gatewayConnected ? 'connected' : 'disconnected'}`}>
-          {gatewayConnected ? (locale === 'zh' ? '已连接' : 'Connected') : (locale === 'zh' ? '未连接' : 'Disconnected')}
+          {gatewayConnected ? (false ? '已连接' : 'Connected') : (false ? '未连接' : 'Disconnected')}
         </span>
       </div>
       <div className="gateway-info">
-        <div className="info-row"><span>{locale === 'zh' ? '地址' : 'URL'}:</span><span className="mono">{gatewayUrl || '-'}</span></div>
-        <div className="info-row"><span>{locale === 'zh' ? '在线' : 'Online'}:</span><span>{onlineAgents.length}/{totalAgents}</span></div>
+        <div className="info-row"><span>{false ? '地址' : 'URL'}:</span><span className="mono">{gatewayUrl || '-'}</span></div>
+        <div className="info-row"><span>{false ? '在线' : 'Online'}:</span><span>{onlineAgents.length}/{totalAgents}</span></div>
       </div>
       <button className={`btn-full ${gatewayConnected ? 'btn-disconnect' : 'btn-connect'}`} onClick={() => gatewayConnected ? disconnectGateway() : setShowGatewayModal(!showGatewayModal)}>
-        {gatewayConnected ? (locale === 'zh' ? '断开' : 'Disconnect') : (locale === 'zh' ? '连接' : 'Connect')}
+        {gatewayConnected ? (false ? '断开' : 'Disconnect') : (false ? '连接' : 'Connect')}
       </button>
       {showGatewayModal && (
         <div className="input-group">
           <input type="text" value={tempGatewayUrl} onChange={(e) => setTempGatewayUrl(e.target.value)} placeholder="ws://localhost:18789" />
-          <button onClick={() => { connectGateway(tempGatewayUrl); setShowGatewayModal(false); }}>{locale === 'zh' ? '确定' : 'OK'}</button>
+          <button onClick={() => { connectGateway(tempGatewayUrl); setShowGatewayModal(false); }}>{false ? '确定' : 'OK'}</button>
         </div>
       )}
     </div>
@@ -341,7 +341,7 @@ const Sidebar: React.FC<SidebarProps> = ({ locale = 'zh' }) => {
   const renderAgents = () => (
     <div className="sidebar-section agents-panel">
       <div className="section-header">
-        <h3>🤖 {locale === 'zh' ? '智能体' : 'Agents'}</h3>
+        <h3>🤖 {false ? '智能体' : 'Agents'}</h3>
         <span className="badge">{onlineAgents.length}/{totalAgents}</span>
       </div>
 
@@ -446,13 +446,13 @@ const Sidebar: React.FC<SidebarProps> = ({ locale = 'zh' }) => {
             ) : (
               <div className="chat-empty">
                 <span className="icon">💬</span>
-                <span>{selectedAgentId ? (locale === 'zh' ? `开始和 ${selectedAgentId} 对话吧` : `Start chatting with ${selectedAgentId}`) : (locale === 'zh' ? '选择一个智能体' : 'Select an agent')}</span>
+                <span>{selectedAgentId ? (false ? `开始和 ${selectedAgentId} 对话吧` : `Start chatting with ${selectedAgentId}`) : (false ? '选择一个智能体' : 'Select an agent')}</span>
               </div>
             )}
             <div ref={chatEndRef} />
           </div>
           <div className="chat-input">
-            <input type="text" placeholder={locale === 'zh' ? '发送消息...' : 'Type...'}
+            <input type="text" placeholder={false ? '发送消息...' : 'Type...'}
               onKeyDown={(e) => { if (e.key === 'Enter') { handleSendMessage((e.target as HTMLInputElement).value); (e.target as HTMLInputElement).value = ''; } }} />
             <button onClick={(e) => { const input = (e.target as HTMLElement).previousElementSibling as HTMLInputElement; handleSendMessage(input.value); input.value = ''; }}>➤</button>
           </div>
@@ -465,24 +465,24 @@ const Sidebar: React.FC<SidebarProps> = ({ locale = 'zh' }) => {
   const renderTasks = () => (
     <div className="sidebar-section">
       <div className="section-header">
-        <h3>📋 {locale === 'zh' ? '定时任务' : 'Cron Jobs'}</h3>
+        <h3>📋 {false ? '定时任务' : 'Cron Jobs'}</h3>
         <span className="badge">{cronJobs.length}</span>
       </div>
       <div className="task-form">
         <select value={selectedAgentId} onChange={(e) => setSelectedAgentId(e.target.value)}>
-          <option value="">{locale === 'zh' ? '-- 选择智能体 --' : '-- Select Agent --'}</option>
+          <option value="">{false ? '-- 选择智能体 --' : '-- Select Agent --'}</option>
           {onlineAgents.map((a: Agent) => <option key={a.id} value={a.id}>{a.id}</option>)}
         </select>
         <select value={selectedTaskType} onChange={(e) => setSelectedTaskType(e.target.value)}>
-          {taskTypes.map(t => <option key={t.value} value={t.value}>{locale === 'zh' ? t.labelZh : t.labelEn}</option>)}
+          {taskTypes.map(t => <option key={t.value} value={t.value}>{false ? t.labelZh : t.labelEn}</option>)}
         </select>
-        <textarea value={taskContent} onChange={(e) => setTaskContent(e.target.value)} placeholder={locale === 'zh' ? '任务描述...' : 'Task...'} rows={2} />
+        <textarea value={taskContent} onChange={(e) => setTaskContent(e.target.value)} placeholder={false ? '任务描述...' : 'Task...'} rows={2} />
         <button className="btn-full btn-submit" onClick={() => { if (selectedAgentId && taskContent) { assignTask(selectedAgentId as AgentId, selectedTaskType as Task['type']); setTaskContent(''); } }} disabled={!selectedAgentId || !taskContent.trim()}>
-          {locale === 'zh' ? '发送任务' : 'Send Task'}
+          {false ? '发送任务' : 'Send Task'}
         </button>
       </div>
       <div className="task-list">
-        {cronJobs.length === 0 ? <div className="empty">{locale === 'zh' ? '暂无定时任务' : 'No cron jobs'}</div> : 
+        {cronJobs.length === 0 ? <div className="empty">{false ? '暂无定时任务' : 'No cron jobs'}</div> : 
           cronJobs.map((job: any) => (
             <div key={job?.id || Math.random()} className={`task-item ${job?.status || ''}`}>
               <div className="task-header"><span>{job?.name || 'Unknown'}</span><span className={`status ${job?.status || ''}`}>{job?.status || 'N/A'}</span></div>
@@ -500,11 +500,11 @@ const Sidebar: React.FC<SidebarProps> = ({ locale = 'zh' }) => {
     return (
       <div className="sidebar-section">
         <div className="section-header">
-          <h3>📜 {locale === 'zh' ? '日志' : 'Logs'}</h3>
+          <h3>📜 {false ? '日志' : 'Logs'}</h3>
           <span className="badge">{logs.length}</span>
         </div>
         <div className="event-list">
-          {logs.length === 0 ? <div className="empty">{locale === 'zh' ? '等待事件...' : 'Waiting...'}</div> : 
+          {logs.length === 0 ? <div className="empty">{false ? '等待事件...' : 'Waiting...'}</div> : 
             logs.slice().reverse().slice(0, 50).map((log: LogEntry) => (
               <div key={log.id} className={`event-item ${log.type}`}>
                 <span className="event-msg">{log.message}</span>
@@ -523,7 +523,7 @@ const Sidebar: React.FC<SidebarProps> = ({ locale = 'zh' }) => {
         {sections.map(s => (
           <button key={s.id} className={`nav-item ${activeSection === s.id ? 'active' : ''}`} onClick={() => setActiveSection(s.id)}>
             <span className="nav-icon">{s.icon}</span>
-            <span className="nav-label">{locale === 'zh' ? s.labelZh : s.labelEn}</span>
+            <span className="nav-label">{false ? s.labelZh : s.labelEn}</span>
           </button>
         ))}
       </nav>
