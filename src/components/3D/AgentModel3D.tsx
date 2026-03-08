@@ -173,6 +173,13 @@ export const AgentModel3D = ({
   
   return (
     <group ref={groupRef} position={position} onClick={handleClick}>
+      {/* 点击区域 - 始终在最外层，不受 GLB 模型影响 */}
+      <mesh visible={false} position={[0, 1, 0]}>
+        <boxGeometry args={[1.5, 2.5, 1.5]} />
+        <meshBasicMaterial transparent opacity={0} />
+      </mesh>
+      
+      {/* 3D 模型 */}
       <Suspense fallback={<ModelPlaceholder color={color} />}>
         <GLBModelWithLabel 
           url={modelToLoad} 
@@ -180,7 +187,6 @@ export const AgentModel3D = ({
           scale={scale} 
           state={state}
           name={name}
-          onClick={onClick}
         />
       </Suspense>
     </group>
