@@ -416,8 +416,17 @@ const Sidebar: React.FC<SidebarProps> = ({ locale = 'zh' }) => {
             {selectedSessionKey && messages[selectedAgentId]?.[selectedSessionKey]?.length > 0 ? (
               messages[selectedAgentId]?.[selectedSessionKey].filter((msg: ChatMessage) => msg?.id).map((msg: ChatMessage) => {
                 try {
+                  // 处理各种可能的 text 格式
+                  let text = '';
+                  const msgText = msg?.text as any;
+                  if (typeof msgText === 'string') {
+                    text = msgText;
+                  } else if (msgText && typeof msgText === 'object') {
+                    // 如果是对象，尝试获取 text 或 content 字段
+                    text = msgText.text || msgText.content || msgText.message || JSON.stringify(msgText);
+                  }
+                  
                   const avatar = msg.sender === 'agent' ? String(selectedAgent?.skillTag?.icon || '🤖') : '👤';
-                  const text = msg?.text ? String(msg.text) : '';
                   const time = msg?.time ? String(msg.time) : '';
                   return (
                     <div key={msg.id} className={`chat-message ${msg.sender}`}>
