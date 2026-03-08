@@ -11,10 +11,10 @@
 
 ## ✨ Features
 
-- 🏢 **3D Scene** - Customizable 3D environment with detailed room layouts
-- 🤖 **Multi-Agent Visualization** - Real-time agent status and movement
-- 💬 **Real-time Communication** - WebSocket/Socket.io messaging
-- 🎮 **Interactive Control** - Right-click menu for task dispatch, camera control
+- 🌐 **3D Scene** - Web-based 3D environment with rooms and furniture
+- 🤖 **Multi-Agent Visualization** - Real-time agent status, movement, and selection
+- 🎯 **Interactive Control** - Click to select agents, right-click to deselect, drag to move
+- 💬 **Real-time Chat** - WebSocket communication with agents
 - 🔗 **OpenClaw Integration** - Connect to Gateway for agent management
 
 ## 🛠️ Tech Stack
