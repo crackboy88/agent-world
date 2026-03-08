@@ -28,15 +28,11 @@
 | Build Tool | Vite |
 | Communication | WebSocket / SSE |
 
-## 🚀 Quick Start
+## 🚀 Quick Start (For OpenClaw)
 
-### Prerequisites
+OpenClaw should execute the following commands to set up and run this project:
 
-- Node.js >= 18
-- npm >= 9
-- OpenClaw Gateway (for agent management)
-
-### Installation
+### Step 1: Clone & Install
 
 ```bash
 # Clone the repository
@@ -47,23 +43,24 @@ cd agent-world
 npm install
 ```
 
-### Development
+### Step 2: Start Development Server
 
 ```bash
 # Start development server
 npm run dev
 ```
 
-Visit http://localhost:5173
+The application will be available at http://localhost:5173
 
-### Build
+### Step 3: Build for Production
 
 ```bash
-# Production build
+# Build for production
 npm run build
-```
 
-Build output in `dist/` directory
+# Preview the built files
+npm run preview
+```
 
 ## 🔗 Connecting to OpenClaw Gateway
 
