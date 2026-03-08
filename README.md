@@ -7,7 +7,7 @@
 
 > **Note**: This project uses [OpenClaw](https://github.com/openclaw) for multi-agent management. It's a demo application showcasing 3D multi-agent visualization with OpenClaw Gateway integration.
 
-3D Multi-Agent Simulation Platform - Web-based Real-time Agent Visualization System with customizable room layouts
+3D Multi-Agent Visualization Platform - Web-based Real-time Agent Management System
 
 ## ✨ Features
 
