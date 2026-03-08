@@ -332,21 +332,21 @@ const Sidebar: React.FC<SidebarProps> = ({ locale = 'zh' }) => {
     <div className="sidebar-section">
       <div className="section-header">
         <h3>🔗 Gateway</h3>
-        <span className={`status-badge ${gatewayConnected ? 'connected' : 'disconnected'}`}>
-          {gatewayConnected ? (false ? 'Connected' : 'Connected') : (false ? 'Disconnected' : 'Disconnected')}
+        <span className={`status-badge ${gatewayConnected || onlineAgents.length > 0 ? 'connected' : 'disconnected'}`}>
+          {gatewayConnected || onlineAgents.length > 0 ? 'Connected' : 'Disconnected'}
         </span>
       </div>
       <div className="gateway-info">
-        <div className="info-row"><span>{false ? 'URL' : 'URL'}:</span><span className="mono">{gatewayUrl || '-'}</span></div>
-        <div className="info-row"><span>{false ? 'Online' : 'Online'}:</span><span>{onlineAgents.length}/{totalAgents}</span></div>
+        <div className="info-row"><span>URL:</span><span className="mono">{gatewayUrl || '-'}</span></div>
+        <div className="info-row"><span>Online:</span><span>{onlineAgents.length}/{totalAgents}</span></div>
       </div>
-      <button className={`btn-full ${gatewayConnected ? 'btn-disconnect' : 'btn-connect'}`} onClick={() => gatewayConnected ? disconnectGateway() : setShowGatewayModal(!showGatewayModal)}>
-        {gatewayConnected ? (false ? 'Disconnect' : 'Disconnect') : (false ? 'Connect' : 'Connect')}
+      <button className={`btn-full ${gatewayConnected || onlineAgents.length > 0 ? 'btn-disconnect' : 'btn-connect'}`} onClick={() => (gatewayConnected || onlineAgents.length > 0) ? disconnectGateway() : setShowGatewayModal(!showGatewayModal)}>
+        {gatewayConnected || onlineAgents.length > 0 ? 'Disconnect' : 'Connect'}
       </button>
       {showGatewayModal && (
         <div className="input-group">
           <input type="text" value={tempGatewayUrl} onChange={(e) => setTempGatewayUrl(e.target.value)} placeholder="ws://localhost:18789" />
-          <button onClick={() => { connectGateway(tempGatewayUrl); setShowGatewayModal(false); }}>{false ? '确定' : 'OK'}</button>
+          <button onClick={() => { connectGateway(tempGatewayUrl); setShowGatewayModal(false); }}>OK</button>
         </div>
       )}
     </div>
