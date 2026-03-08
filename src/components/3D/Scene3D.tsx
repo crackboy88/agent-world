@@ -83,8 +83,9 @@ export const Scene3D = ({
 }) => {
   // Convert 2D position to 3D
   const getAgentPosition = (agent: Agent): [number, number, number] => {
-    const x = (agent.position.x - 512) / 100;
-    const z = (agent.position.y - 512) / 100;
+    if (!agent?.position) return [0, 0, 0];
+    const x = ((agent.position?.x || 0) - 512) / 100;
+    const z = ((agent.position?.y || 0) - 512) / 100;
     return [x, 0, z];
   };
   
