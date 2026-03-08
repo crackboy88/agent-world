@@ -28,22 +28,25 @@ const ModelPlaceholder = ({ color }: { color?: string }) => (
   </mesh>
 );
 
-// 模型加载组件
-const GLBModel = ({ 
+// 模型加载组件 - 包含3D模型和名称标签
+const GLBModelWithLabel = ({ 
   url, 
   color, 
   scale,
-  state 
+  state,
+  name,
+  onClick
 }: { 
   url: string; 
   color?: string; 
   scale: number;
   state: string;
+  name?: string;
+  onClick?: () => void;
 }) => {
   const { scene, animations } = useGLTF(url);
   const { actions } = useAnimations(animations, scene);
   
-  // 克隆并应用颜色
   const clonedScene = scene ? scene.clone() : null;
   
   useEffect(() => {
@@ -62,7 +65,6 @@ const GLBModel = ({
     }
   }, [clonedScene, color]);
   
-  // 动画播放
   useEffect(() => {
     if (actions && Object.keys(actions).length > 0) {
       const actionNames = Object.keys(actions);
@@ -85,9 +87,48 @@ const GLBModel = ({
     }
   }, [actions, state]);
   
+  const handleClick = (e: any) => {
+    e.stopPropagation();
+    onClick?.();
+  };
+  
   if (!clonedScene) return null;
   
-  return <primitive object={clonedScene} scale={scale} />;
+  return (
+    <group onClick={handleClick}>
+      {/* 3D模型 */}
+      <primitive object={clonedScene} scale={scale} />
+      
+      {/* 点击区域 */}
+      <mesh visible={false} position={[0, 1, 0]}>
+        <boxGeometry args={[1.2, 2, 1.2]} />
+        <meshBasicMaterial transparent opacity={0} />
+      </mesh>
+      
+      {/* 名称标签 - 绑定在模型上 */}
+      {name && (
+        <Html
+          position={[0, 2.2, 0]}
+          center
+          distanceFactor={10}
+          style={{ pointerEvents: 'none', userSelect: 'none' }}
+        >
+          <div style={{
+            background: 'rgba(0, 0, 0, 0.7)',
+            color: '#fff',
+            padding: '4px 8px',
+            borderRadius: '4px',
+            fontSize: '12px',
+            fontFamily: 'Arial, sans-serif',
+            whiteSpace: 'nowrap',
+            textShadow: '0 1px 2px rgba(0,0,0,0.5)',
+          }}>
+            {name}
+          </div>
+        </Html>
+      )}
+    </group>
+  );
 };
 
 export const AgentModel3D = ({ 
@@ -125,42 +166,15 @@ export const AgentModel3D = ({
   return (
     <group ref={groupRef} position={position} onClick={handleClick}>
       <Suspense fallback={<ModelPlaceholder color={color} />}>
-        <GLBModel 
+        <GLBModelWithLabel 
           url={modelToLoad} 
           color={color} 
           scale={scale} 
           state={state}
+          name={name}
+          onClick={onClick}
         />
       </Suspense>
-      
-      {/* 点击区域 */}
-      <mesh visible={false} position={[0, 1, 0]}>
-        <boxGeometry args={[1.2, 2, 1.2]} />
-        <meshBasicMaterial transparent opacity={0} />
-      </mesh>
-      
-      {/* 名称标签 */}
-      {name && (
-        <Html
-          position={[0, 2.2, 0]}
-          center
-          distanceFactor={10}
-          style={{ pointerEvents: 'none', userSelect: 'none' }}
-        >
-          <div style={{
-            background: 'rgba(0, 0, 0, 0.7)',
-            color: '#fff',
-            padding: '4px 8px',
-            borderRadius: '4px',
-            fontSize: '12px',
-            fontFamily: 'Arial, sans-serif',
-            whiteSpace: 'nowrap',
-            textShadow: '0 1px 2px rgba(0,0,0,0.5)',
-          }}>
-            {name}
-          </div>
-        </Html>
-      )}
     </group>
   );
 };
