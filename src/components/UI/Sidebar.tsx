@@ -378,18 +378,29 @@ const Sidebar: React.FC<SidebarProps> = ({ locale = 'zh' }) => {
             <button className="btn-close" onClick={() => { setSelectedAgentId(''); setSelectedSessionKey(''); }}>✕</button>
           </div>
           
-          {/* 会话标签 - 如果有多个会话 */}
-          {sessions[selectedAgentId] && sessions[selectedAgentId].length > 0 && (
-            <div className="session-tabs">
-              {sessions[selectedAgentId].slice(0, 3).filter((s: Session) => s?.sessionKey).map((s: Session) => (
-                <button 
-                  key={s.sessionKey}
-                  className={`session-tab ${selectedSessionKey === s.sessionKey ? 'active' : ''}`}
-                  onClick={() => setSelectedSessionKey(s.sessionKey)}
-                >
-                  {(s?.title) || ((s?.sessionKey || '').split(':').pop()) || 'Chat'}
-                </button>
-              ))}
+          {/* 会话标签下拉菜单 - 如果有多个会话 */}
+          {sessions[selectedAgentId] && sessions[selectedAgentId].length > 1 && (
+            <div className="session-dropdown">
+              <select 
+                value={selectedSessionKey} 
+                onChange={(e) => setSelectedSessionKey(e.target.value)}
+                className="session-select"
+              >
+                {sessions[selectedAgentId].filter((s: Session) => s?.sessionKey).map((s: Session) => (
+                  <option key={s.sessionKey} value={s.sessionKey}>
+                    {(s?.title) || ((s?.sessionKey || '').split(':').pop()) || 'Chat'}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
+          
+          {/* 单个会话时显示标签 */}
+          {sessions[selectedAgentId] && sessions[selectedAgentId].length === 1 && (
+            <div className="session-header">
+              <span className="session-title">
+                {(sessions[selectedAgentId][0]?.title) || ((sessions[selectedAgentId][0]?.sessionKey || '').split(':').pop()) || 'Chat'}
+              </span>
             </div>
           )}
           

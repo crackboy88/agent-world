@@ -428,38 +428,38 @@
 }
 
 /* ===== 会话标签下拉 ===== */
-.session-tabs {
-  display: flex;
-  gap: 4px;
+.session-dropdown {
   padding: 8px 12px;
   background: var(--bg-dark);
   border-bottom: 1px solid var(--border-color);
 }
 
-.session-tab {
-  flex: 1;
-  padding: 6px 12px;
+.session-select {
+  width: 100%;
+  padding: 8px 12px;
   background: var(--bg-medium);
   border: 1px solid var(--border-color);
   border-radius: 6px;
-  color: var(--text-secondary);
-  font-size: 12px;
-  cursor: pointer;
-  transition: all 0.2s;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.session-tab:hover {
-  background: var(--bg-light);
   color: var(--text-primary);
+  font-size: 13px;
+  cursor: pointer;
+  outline: none;
 }
 
-.session-tab.active {
-  background: var(--accent-blue);
+.session-select:focus {
   border-color: var(--accent-blue);
-  color: white;
+}
+
+.session-header {
+  padding: 8px 12px;
+  background: var(--bg-dark);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.session-title {
+  color: var(--text-primary);
+  font-size: 13px;
+  font-weight: 500;
 }
 
 /* ===== 聊天面板 ===== */
