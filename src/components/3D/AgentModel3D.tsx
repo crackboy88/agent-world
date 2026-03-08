@@ -5,9 +5,11 @@ import { useGLTF, useAnimations } from '@react-three/drei';
 import { useEffect, useRef, useMemo } from 'react';
 import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
+import { Html } from '@react-three/drei';
 
 interface AgentModel3DProps {
   agentId: string;
+  name?: string;
   position: [number, number, number];
   modelUrl?: string;
   color?: string;
@@ -21,6 +23,7 @@ const DEFAULT_AGENT_MODEL = '/assets/agents/agent-default.glb';
 
 export const AgentModel3D = ({ 
   agentId, 
+  name,
   position, 
   modelUrl, 
   color, 
@@ -147,6 +150,31 @@ export const AgentModel3D = ({
         object={clonedScene}
         scale={scale}
       />
+      {/* Agent 名称标签 */}
+      {name && (
+        <Html
+          position={[0, 2.5, 0]}
+          center
+          distanceFactor={10}
+          style={{
+            pointerEvents: 'none',
+            userSelect: 'none',
+          }}
+        >
+          <div style={{
+            background: 'rgba(0, 0, 0, 0.7)',
+            color: '#fff',
+            padding: '4px 8px',
+            borderRadius: '4px',
+            fontSize: '12px',
+            fontFamily: 'Arial, sans-serif',
+            whiteSpace: 'nowrap',
+            textShadow: '0 1px 2px rgba(0,0,0,0.5)',
+          }}>
+            {name}
+          </div>
+        </Html>
+      )}
     </group>
   );
 };

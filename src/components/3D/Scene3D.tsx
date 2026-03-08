@@ -122,6 +122,7 @@ export const Scene3D = ({
             <AgentModel3D
               key={`agent3d-${agent.id}`}
               agentId={agent.id}
+              name={agent.name}
               modelUrl={appearance.modelUrl}
               position={pos}
               scale={agentScale}
