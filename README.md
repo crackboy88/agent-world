@@ -187,8 +187,8 @@ agent-world/
 
 ## 📝 License
 
-MIT License - See [LICENSE](LICENSE) for details
+MIT License
 
-## 👤 Author
+## 👤 Built with
 
-Built with [OpenClaw](https://github.com/openclaw)
+[OpenClaw](https://github.com/openclaw)
