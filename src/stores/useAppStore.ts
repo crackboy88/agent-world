@@ -252,7 +252,7 @@ export const useAppStore = create<AppState>()(
                 
                 get().addLog({
                   type: 'success',
-                  message: `📥 从 Gateway 获取到 ${agents.length} 个 Agents`
+                  message: `📥 Fetched ${agents.length}  Agents`
                 });
               }
             } catch (error) {
@@ -309,7 +309,7 @@ export const useAppStore = create<AppState>()(
               set({ agents });
               get().addLog({
                 type: 'success',
-                message: `📥 从 Gateway 获取到 ${agents.length} 个 Agents`
+                message: `📥 Fetched ${agents.length}  Agents`
               });
             }
           } catch (e) {
@@ -520,12 +520,12 @@ export const useAppStore = create<AppState>()(
           
           get().addLog({
             type: 'info',
-            message: `📤 任务已发送: ${task.title}`
+            message: `📤 Task sent: ${task.title}`
           });
         } else {
           get().addLog({
             type: 'warning',
-            message: '⚠️ Gateway 未连接，任务仅保存在本地'
+            message: '⚠️ Gateway not connected, task saved locally'
           });
         }
         

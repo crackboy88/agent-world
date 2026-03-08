@@ -50,7 +50,7 @@ const ControlPanel: React.FC<ControlPanelProps> = ({ locale = 'zh' }) => {
     if (!selectedAgentId || !taskContent.trim()) {
       addLog({
         type: 'warning',
-        message: locale === 'zh' ? '请选择 Agent 并输入任务内容' : 'Please select an Agent and enter task content'
+        message: locale === 'zh' ? 'Select an agent' : 'Select an agent'
       });
       return;
     }
@@ -78,14 +78,14 @@ const ControlPanel: React.FC<ControlPanelProps> = ({ locale = 'zh' }) => {
       disconnectGateway();
       addLog({
         type: 'info',
-        message: locale === 'zh' ? '已断开 Gateway 连接' : 'Disconnected from Gateway'
+        message: locale === 'zh' ? 'Disconnected' : 'Disconnected'
       });
     } else {
       connectGateway(tempGatewayUrl);
       setShowGatewayModal(false);
       addLog({
         type: 'info',
-        message: locale === 'zh' ? '正在连接 Gateway...' : 'Connecting to Gateway...'
+        message: locale === 'zh' ? 'Connecting...' : 'Connecting...'
       });
     }
   };
@@ -130,7 +130,7 @@ const ControlPanel: React.FC<ControlPanelProps> = ({ locale = 'zh' }) => {
         <div className="section-header">
           <h4>🔗 Gateway</h4>
           <span className={`status-badge ${gatewayConnected ? 'connected' : 'disconnected'}`}>
-            {gatewayConnected ? (locale === 'zh' ? '已连接' : 'Connected') : (locale === 'zh' ? '未连接' : 'Disconnected')}
+            {gatewayConnected ? (locale === 'zh' ? 'Connected' : 'Connected') : (locale === 'zh' ? 'Disconnected' : 'Disconnected')}
           </span>
         </div>
         <div className="gateway-info">
@@ -139,7 +139,7 @@ const ControlPanel: React.FC<ControlPanelProps> = ({ locale = 'zh' }) => {
             className={`gateway-btn ${gatewayConnected ? 'connected' : ''}`}
             onClick={() => gatewayConnected ? handleGatewayToggle() : setShowGatewayModal(!showGatewayModal)}
           >
-            {gatewayConnected ? (locale === 'zh' ? '断开' : 'Disconnect') : (locale === 'zh' ? '连接' : 'Connect')}
+            {gatewayConnected ? (locale === 'zh' ? 'Disconnect' : 'Disconnect') : (locale === 'zh' ? 'Connect' : 'Connect')}
           </button>
         </div>
         
@@ -151,7 +151,7 @@ const ControlPanel: React.FC<ControlPanelProps> = ({ locale = 'zh' }) => {
               onChange={(e) => setTempGatewayUrl(e.target.value)}
               placeholder="ws://localhost:18789"
             />
-            <button onClick={handleGatewayToggle}>{locale === 'zh' ? '确认' : 'Confirm'}</button>
+            <button onClick={handleGatewayToggle}>{locale === 'zh' ? 'Confirm' : 'Confirm'}</button>
           </div>
         )}
       </div>

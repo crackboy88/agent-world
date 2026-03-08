@@ -1337,6 +1337,19 @@
   gap: 8px;
 }
 
+.task-group {
+  margin-bottom: 12px;
+}
+
+.task-group-header {
+  padding: 6px 8px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
 .task-item {
   padding: 10px;
   background: var(--bg-darker);
@@ -1346,6 +1359,23 @@
 
 .task-item.running {
   border-left-color: var(--accent-blue);
+}
+
+.task-item.enabled {
+  border-left-color: var(--accent-green);
+}
+
+.task-item.disabled {
+  border-left-color: var(--text-secondary);
+  opacity: 0.7;
+}
+
+.task-item .status.enabled {
+  color: var(--accent-green);
+}
+
+.task-item .status.disabled {
+  color: var(--text-secondary);
 }
 
 .task-item.completed {

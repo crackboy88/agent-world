@@ -62,6 +62,21 @@ const Sidebar: React.FC<SidebarProps> = ({ locale = 'zh' }) => {
   const [showGatewayModal, setShowGatewayModal] = useState(false);
   const [tempGatewayUrl, setTempGatewayUrl] = useState(gatewayUrl || 'ws://localhost:18789');
   const [cronJobs, setCronJobs] = useState<Array<{id: string; name: string; schedule: string; status: string; target: string; agentId: string}>>([]);
+  
+  // 获取 Cron 任务列表
+  useEffect(() => {
+    if (activeSection === 'tasks') {
+      console.log('[DEBUG] Fetching cron jobs, current:', cronJobs);
+      socketService.listCronJobs().then((jobs: any) => {
+        console.log('[DEBUG] Cron jobs result:', jobs);
+        if (jobs && Array.isArray(jobs)) {
+          setCronJobs(jobs);
+        }
+      }).catch((err: any) => {
+        console.log('[DEBUG] Cron jobs error:', err);
+      });
+    }
+  }, [activeSection]);
 
   // 消息状态: { agentId: { sessionKey: [messages] } }
   const [messages, setMessages] = useState<Record<string, Record<string, ChatMessage[]>>>({});
@@ -211,10 +226,10 @@ const Sidebar: React.FC<SidebarProps> = ({ locale = 'zh' }) => {
     try {
       // 通过 Gateway 发送
       await socketService.sendChat(selectedSessionKey, text);
-      addLog({ type: 'info', message: false ? `📤 已发送` : `📤 Sent` });
+      addLog({ type: 'info', message: false ? `📤 Sent` : `📤 Sent` });
     } catch (err) {
       console.error('Failed to send:', err);
-      addLog({ type: 'error', message: false ? `❌ 发送失败` : `❌ Failed` });
+      addLog({ type: 'error', message: false ? `❌ Failed` : `❌ Failed` });
     }
   }, [selectedAgentId, selectedSessionKey, locale, addLog]);
 
@@ -318,15 +333,15 @@ const Sidebar: React.FC<SidebarProps> = ({ locale = 'zh' }) => {
       <div className="section-header">
         <h3>🔗 Gateway</h3>
         <span className={`status-badge ${gatewayConnected ? 'connected' : 'disconnected'}`}>
-          {gatewayConnected ? (false ? '已连接' : 'Connected') : (false ? '未连接' : 'Disconnected')}
+          {gatewayConnected ? (false ? 'Connected' : 'Connected') : (false ? 'Disconnected' : 'Disconnected')}
         </span>
       </div>
       <div className="gateway-info">
-        <div className="info-row"><span>{false ? '地址' : 'URL'}:</span><span className="mono">{gatewayUrl || '-'}</span></div>
-        <div className="info-row"><span>{false ? '在线' : 'Online'}:</span><span>{onlineAgents.length}/{totalAgents}</span></div>
+        <div className="info-row"><span>{false ? 'URL' : 'URL'}:</span><span className="mono">{gatewayUrl || '-'}</span></div>
+        <div className="info-row"><span>{false ? 'Online' : 'Online'}:</span><span>{onlineAgents.length}/{totalAgents}</span></div>
       </div>
       <button className={`btn-full ${gatewayConnected ? 'btn-disconnect' : 'btn-connect'}`} onClick={() => gatewayConnected ? disconnectGateway() : setShowGatewayModal(!showGatewayModal)}>
-        {gatewayConnected ? (false ? '断开' : 'Disconnect') : (false ? '连接' : 'Connect')}
+        {gatewayConnected ? (false ? 'Disconnect' : 'Disconnect') : (false ? 'Connect' : 'Connect')}
       </button>
       {showGatewayModal && (
         <div className="input-group">
@@ -341,7 +356,7 @@ const Sidebar: React.FC<SidebarProps> = ({ locale = 'zh' }) => {
   const renderAgents = () => (
     <div className="sidebar-section agents-panel">
       <div className="section-header">
-        <h3>🤖 {false ? '智能体' : 'Agents'}</h3>
+        <h3>🤖 {false ? 'Agents' : 'Agents'}</h3>
         <span className="badge">{onlineAgents.length}/{totalAgents}</span>
       </div>
 
@@ -446,7 +461,7 @@ const Sidebar: React.FC<SidebarProps> = ({ locale = 'zh' }) => {
             ) : (
               <div className="chat-empty">
                 <span className="icon">💬</span>
-                <span>{selectedAgentId ? (false ? `开始和 ${selectedAgentId} 对话吧` : `Start chatting with ${selectedAgentId}`) : (false ? '选择一个智能体' : 'Select an agent')}</span>
+                <span>{selectedAgentId ? (false ? `Start chatting with ${selectedAgentId}` : `Start chatting with ${selectedAgentId}`) : (false ? 'Select an agent' : 'Select an agent')}</span>
               </div>
             )}
             <div ref={chatEndRef} />
@@ -461,38 +476,83 @@ const Sidebar: React.FC<SidebarProps> = ({ locale = 'zh' }) => {
     </div>
   );
 
-  // Tasks
-  const renderTasks = () => (
-    <div className="sidebar-section">
-      <div className="section-header">
-        <h3>📋 {false ? '定时任务' : 'Cron Jobs'}</h3>
-        <span className="badge">{cronJobs.length}</span>
+  // Tasks - 显示所有Cron任务（启用和禁用）
+  const renderTasks = () => {
+    console.log('[DEBUG] Rendering tasks, cronJobs:', cronJobs);
+    
+    // 分类显示 - 改为根据 status 字段
+    const enabledJobs = cronJobs.filter((j: any) => j?.status === 'enabled' || j?.status === 'active' || j?.status === 'running');
+    const disabledJobs = cronJobs.filter((j: any) => j?.status === 'disabled' || j?.status === 'inactive' || j?.status === 'stopped');
+    const otherJobs = cronJobs.filter((j: any) => !['enabled', 'active', 'running', 'disabled', 'inactive', 'stopped'].includes(j?.status));
+    
+    console.log('[DEBUG] Enabled:', enabledJobs.length, 'Disabled:', disabledJobs.length, 'Other:', otherJobs.length);
+    
+    return (
+      <div className="sidebar-section">
+        <div className="section-header">
+          <h3>📋 Cron Jobs</h3>
+          <span className="badge">{cronJobs.length}</span>
+        </div>
+        
+        {cronJobs.length === 0 ? (
+          <div className="empty">No cron jobs</div>
+        ) : (
+          <>
+            {/* 启用的任务 */}
+            {enabledJobs.length > 0 && (
+              <div className="task-group">
+                <div className="task-group-header">Enabled ({enabledJobs.length})</div>
+                {enabledJobs.map((job: any) => {
+                  const schedule = typeof job?.schedule === 'string' ? job.schedule : (job?.schedule?.expression || job?.schedule?.interval || String(job?.schedule || 'N/A'));
+                  const target = typeof job?.target === 'string' ? job.target : (job?.target?.id || String(job?.target || '-'));
+                  return (
+                    <div key={job?.id || Math.random()} className="task-item enabled">
+                      <div className="task-header"><span>{job?.name || 'Unknown'}</span><span className="status enabled">✓</span></div>
+                      <div className="task-meta"><span>📅 {schedule}</span><span>🎯 {target}</span></div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+            
+            {/* 禁用的任务 */}
+            {disabledJobs.length > 0 && (
+              <div className="task-group">
+                <div className="task-group-header">Disabled ({disabledJobs.length})</div>
+                {disabledJobs.map((job: any) => {
+                  const schedule = typeof job?.schedule === 'string' ? job.schedule : (job?.schedule?.expression || job?.schedule?.interval || String(job?.schedule || 'N/A'));
+                  const target = typeof job?.target === 'string' ? job.target : (job?.target?.id || String(job?.target || '-'));
+                  return (
+                    <div key={job?.id || Math.random()} className="task-item disabled">
+                      <div className="task-header"><span>{job?.name || 'Unknown'}</span><span className="status disabled">✗</span></div>
+                      <div className="task-meta"><span>📅 {schedule}</span><span>🎯 {target}</span></div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+            
+            {/* 其他状态的任务 */}
+            {otherJobs.length > 0 && (
+              <div className="task-group">
+                <div className="task-group-header">Other ({otherJobs.length})</div>
+                {otherJobs.map((job: any) => {
+                  const schedule = typeof job?.schedule === 'string' ? job.schedule : (job?.schedule?.expression || job?.schedule?.interval || String(job?.schedule || 'N/A'));
+                  const target = typeof job?.target === 'string' ? job.target : (job?.target?.id || String(job?.target || '-'));
+                  return (
+                    <div key={job?.id || Math.random()} className="task-item">
+                      <div className="task-header"><span>{job?.name || 'Unknown'}</span><span className="status">{job?.status || 'N/A'}</span></div>
+                      <div className="task-meta"><span>📅 {schedule}</span><span>🎯 {target}</span></div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </>
+        )}
       </div>
-      <div className="task-form">
-        <select value={selectedAgentId} onChange={(e) => setSelectedAgentId(e.target.value)}>
-          <option value="">{false ? '-- 选择智能体 --' : '-- Select Agent --'}</option>
-          {onlineAgents.map((a: Agent) => <option key={a.id} value={a.id}>{a.id}</option>)}
-        </select>
-        <select value={selectedTaskType} onChange={(e) => setSelectedTaskType(e.target.value)}>
-          {taskTypes.map(t => <option key={t.value} value={t.value}>{false ? t.labelZh : t.labelEn}</option>)}
-        </select>
-        <textarea value={taskContent} onChange={(e) => setTaskContent(e.target.value)} placeholder={false ? '任务描述...' : 'Task...'} rows={2} />
-        <button className="btn-full btn-submit" onClick={() => { if (selectedAgentId && taskContent) { assignTask(selectedAgentId as AgentId, selectedTaskType as Task['type']); setTaskContent(''); } }} disabled={!selectedAgentId || !taskContent.trim()}>
-          {false ? '发送任务' : 'Send Task'}
-        </button>
-      </div>
-      <div className="task-list">
-        {cronJobs.length === 0 ? <div className="empty">{false ? '暂无定时任务' : 'No cron jobs'}</div> : 
-          cronJobs.map((job: any) => (
-            <div key={job?.id || Math.random()} className={`task-item ${job?.status || ''}`}>
-              <div className="task-header"><span>{job?.name || 'Unknown'}</span><span className={`status ${job?.status || ''}`}>{job?.status || 'N/A'}</span></div>
-              <div className="task-meta"><span>📅 {job?.schedule || 'N/A'}</span><span>🎯 {job?.target || '-'}</span></div>
-            </div>
-          ))
-        }
-      </div>
-    </div>
-  );
+    );
+  };
 
   // Events
   const renderEvents = () => {
@@ -504,11 +564,11 @@ const Sidebar: React.FC<SidebarProps> = ({ locale = 'zh' }) => {
           <span className="badge">{logs.length}</span>
         </div>
         <div className="event-list">
-          {logs.length === 0 ? <div className="empty">{false ? '等待事件...' : 'Waiting...'}</div> : 
-            logs.slice().reverse().slice(0, 50).map((log: LogEntry) => (
-              <div key={log.id} className={`event-item ${log.type}`}>
-                <span className="event-msg">{log.message}</span>
-                <span className="event-time">{new Date(log.timestamp).toLocaleTimeString()}</span>
+          {logs.length === 0 ? <div className="empty">{false ? 'Waiting...' : 'Waiting...'}</div> : 
+            logs.slice().reverse().slice(0, 50).map((log: any) => (
+              <div key={log?.id || Math.random()} className={`event-item ${log?.type || ''}`}>
+                <span className="event-msg">{typeof log?.message === 'string' ? log.message : String(log?.message || '')}</span>
+                <span className="event-time">{new Date(log?.timestamp || Date.now()).toLocaleTimeString()}</span>
               </div>
             ))
           }

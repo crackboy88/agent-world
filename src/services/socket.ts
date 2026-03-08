@@ -76,9 +76,9 @@ class OpenClawSocketService {
         this.onGatewayStatus?.({ connected, url: gatewayUrl });
         this.onConnectionChange?.(connected);
         if (connected) {
-          this.onLog?.({ message: '✅ Gateway 连接成功', level: 'info', timestamp: Date.now() });
+          this.onLog?.({ message: '✅ Gateway connected', level: 'info', timestamp: Date.now() });
         } else {
-          this.onLog?.({ message: '❌ Gateway 断开连接', level: 'info', timestamp: Date.now() });
+          this.onLog?.({ message: '❌ Gateway disconnected', level: 'info', timestamp: Date.now() });
         }
       },
       onPairingRequired: (required) => {
@@ -134,10 +134,10 @@ class OpenClawSocketService {
     // 连接
     this.client.connect()
       .then(() => {
-        this.onLog?.({ message: '🎉 连接成功!', level: 'info', timestamp: Date.now() });
+        this.onLog?.({ message: '🎉 Connected!', level: 'info', timestamp: Date.now() });
       })
       .catch((err) => {
-        this.onLog?.({ message: `❌ 连接失败: ${err}`, level: 'error', timestamp: Date.now() });
+        this.onLog?.({ message: `❌ Connection failed: ${err}`, level: 'error', timestamp: Date.now() });
       });
   }
 
