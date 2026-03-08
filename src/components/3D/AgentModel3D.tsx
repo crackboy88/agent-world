@@ -108,6 +108,8 @@ export const AgentModel3D = ({
   }
   
   // Show error state or model
+  console.log('[DEBUG] AgentModel3D render: model=', model ? 'exists' : 'null', 'loading=', loading);
+  
   return (
     <group ref={groupRef} position={position} onClick={handleClick}>
       {/* 点击区域 */}
