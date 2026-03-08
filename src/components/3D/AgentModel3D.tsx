@@ -87,21 +87,29 @@ const GLBModelWithLabel = ({
     }
   }, [actions, state]);
   
+  if (!clonedScene) return null;
+  
+  // 点击处理
   const handleClick = (e: any) => {
     e.stopPropagation();
+    console.log('[DEBUG] GLBModel clicked');
     onClick?.();
   };
   
-  if (!clonedScene) return null;
-  
   return (
     <group onClick={handleClick}>
-      {/* 3D模型 */}
-      <primitive object={clonedScene} scale={scale} />
+      {/* 3D模型 - 确保可以点击 */}
+      <primitive 
+        object={clonedScene} 
+        scale={scale}
+      />
       
-      {/* 点击区域 */}
-      <mesh visible={false} position={[0, 1, 0]}>
-        <boxGeometry args={[1.2, 2, 1.2]} />
+      {/* 点击区域 - 覆盖整个模型区域 */}
+      <mesh 
+        visible={false} 
+        position={[0, 1, 0]}
+      >
+        <boxGeometry args={[1.5, 2.5, 1.5]} />
         <meshBasicMaterial transparent opacity={0} />
       </mesh>
       
