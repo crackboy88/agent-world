@@ -399,7 +399,7 @@ const Sidebar: React.FC<SidebarProps> = ({ locale = 'zh' }) => {
                 <div key={msg.id} className={`chat-message ${msg.sender}`}>
                   <span className="msg-avatar">{msg.sender === 'agent' ? (selectedAgent?.skillTag?.icon || '🤖') : '👤'}</span>
                   <div className="msg-content">
-                    <span className="msg-text">{msg?.text || ''}</span>
+                    <span className="msg-text">{String(msg?.text || '')}</span>
                     <span className="msg-time">{msg?.time || ''}</span>
                   </div>
                 </div>
