@@ -116,27 +116,26 @@ export const Scene3D = ({
   };
 
   return (
-    <Canvas 
-      gl={{ antialias: true, toneMapping: THREE.ACESFilmicToneMapping, toneMappingExposure: 1.1 }} 
-      shadows={{ type: THREE.PCFShadowMap }} 
-      dpr={[1, 2]}
-      onContextMenu={handleContextMenu}
-      onPointerMissed={() => {}}
-    >
-      <PerspectiveCamera makeDefault position={[8, 8, 8]} fov={50} />
-      <OrbitControls enablePan enableZoom enableRotate minDistance={3} maxDistance={20} target={[0, 1, 0]} maxPolarAngle={Math.PI / 2 - 0.1} enableDamping dampingFactor={0.05} />
-      <Environment preset="city" />
-      <ambientLight intensity={0.3} color="#FFF8E7" />
-      <directionalLight position={[8, 12, 8]} intensity={1.5} color="#FFF5E6" castShadow shadow-mapSize={[2048, 2048]} shadow-camera-far={50} shadow-camera-left={-10} shadow-camera-right={10} shadow-camera-top={10} shadow-camera-bottom={-10} />
-      <hemisphereLight args={['#87CEEB', '#8B7355', 0.4]} />
-      
-      <Floor size={20} onClick={handleFloorClick} />
-      
-      {/* Map Items from config */}
-      <MapItems onItemClick={onItemClick} selectedItemId={selectedItemId} />
-      
-      {/* Agents - use model from assets */}
-      {agents && agents.map(agent => {
+    <div style={{ width: '100%', height: '100%', minHeight: '400px' }}>
+      <Canvas 
+        gl={{ antialias: true, toneMapping: THREE.ACESFilmicToneMapping, toneMappingExposure: 1.1 }} 
+        shadows={{ type: THREE.PCFShadowMap }} 
+        dpr={[1, 2]}
+        onContextMenu={handleContextMenu}
+        onPointerMissed={() => {}}
+      >
+        <PerspectiveCamera makeDefault position={[8, 8, 8]} fov={50} />
+        <OrbitControls enablePan enableZoom enableRotate minDistance={3} maxDistance={20} target={[0, 1, 0]} maxPolarAngle={Math.PI / 2 - 0.1} enableDamping dampingFactor={0.05} />
+        <ambientLight intensity={0.3} color="#FFF8E7" />
+        <directionalLight position={[8, 12, 8]} intensity={1.5} color="#FFF5E6" castShadow shadow-mapSize={[2048, 2048]} shadow-camera-far={50} shadow-camera-left={-10} shadow-camera-right={10} shadow-camera-top={10} shadow-camera-bottom={-10} />
+        
+        <Floor size={20} onClick={handleFloorClick} />
+        
+        {/* Map Items from config */}
+        <MapItems onItemClick={onItemClick} selectedItemId={selectedItemId} />
+        
+        {/* Agents - use model from assets */}
+        {agents && agents.map(agent => {
         const pos = getAgentPosition(agent);
         const agentScale = selectedAgentId === agent.id ? 1.1 : 1;
         const appearance = agentAppearances[agent.id] || {};
@@ -160,6 +159,7 @@ export const Scene3D = ({
       
       <ContactShadows position={[0, 0.01, 0]} opacity={0.4} scale={25} blur={2.5} far={10} resolution={256} color="#1a1a1a" />
     </Canvas>
+    </div>
   );
 };
 
