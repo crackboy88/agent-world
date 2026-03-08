@@ -379,13 +379,13 @@ const Sidebar: React.FC<SidebarProps> = ({ locale = 'zh' }) => {
           {/* 会话标签 - 如果有多个会话 */}
           {sessions[selectedAgentId] && sessions[selectedAgentId].length > 0 && (
             <div className="session-tabs">
-              {sessions[selectedAgentId].slice(0, 3).map((s: Session) => (
+              {sessions[selectedAgentId].slice(0, 3).filter((s: Session) => s?.sessionKey).map((s: Session) => (
                 <button 
                   key={s.sessionKey}
                   className={`session-tab ${selectedSessionKey === s.sessionKey ? 'active' : ''}`}
                   onClick={() => setSelectedSessionKey(s.sessionKey)}
                 >
-                  {s.title ||  (s.sessionKey || '').split(':').pop() || 'Chat'}
+                  {(s?.title) || ((s?.sessionKey || '').split(':').pop()) || 'Chat'}
                 </button>
               ))}
             </div>
