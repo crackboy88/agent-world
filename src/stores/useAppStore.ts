@@ -150,12 +150,10 @@ export const useAppStore = create<AppState>()(
       
       // Initialize Store
       initializeStore: () => {
-        // Start with empty agents list - will be fetched from Gateway after connection
-        // Simple flat map - no predefined rooms
-        
+        // 保留 localStorage 中已保存的 agent 数据（位置等）
+        // 不要清空 agents，让 persist middleware 自动恢复
         set({
           maps: [],
-          agents: [],
           tasks: [],
           selectedAgentId: null,
           selectedMapId: null,
@@ -664,6 +662,9 @@ export const useAppStore = create<AppState>()(
         sidebarOpen: state.sidebarOpen,
         sidebarWidth: state.sidebarWidth,
         sidebarTab: state.sidebarTab,
+        // Agent data (positions, appearances)
+        agents: state.agents,
+        agentAppearances: state.agentAppearances,
       })
     }
   )
