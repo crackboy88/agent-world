@@ -44,7 +44,9 @@ const GLBModelWithLabel = ({
   name?: string;
   onClick?: () => void;
 }) => {
+  console.log('[DEBUG] GLBModel loading:', url);
   const { scene, animations } = useGLTF(url);
+  console.log('[DEBUG] GLBModel loaded, scene:', scene ? 'exists' : 'null', 'animations:', animations?.length);
   const { actions } = useAnimations(animations, scene);
   
   const clonedScene = scene ? scene.clone() : null;
