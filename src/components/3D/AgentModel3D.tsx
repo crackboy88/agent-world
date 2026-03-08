@@ -1,7 +1,7 @@
 /**
- * 3D Agent Component - Using refs for stable model handling
+ * 3D Agent Component - Using state for model
  */
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { Html } from '@react-three/drei';
@@ -38,37 +38,29 @@ export const AgentModel3D = ({
   onClick
 }: AgentModel3DProps) => {
   const modelToLoad = modelUrl || DEFAULT_AGENT_MODEL;
-  const groupRef = useRef<THREE.Group>(null);
-  const modelRef = useRef<THREE.Group | null>(null);
-  const [loaded, setLoaded] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [model, setModel] = useState<THREE.Group | null>(null);
+  const [loading, setLoading] = useState(true);
   
-  // Load GLB model using useEffect
+  // Load GLB model
   useEffect(() => {
-    console.log('[DEBUG] AgentModel3D: Starting load for', agentId);
+    console.log('[DEBUG] AgentModel3D: Loading', agentId, 'from', modelToLoad);
+    setLoading(true);
+    setModel(null);
     
     const loader = new GLTFLoader();
     loader.load(
       modelToLoad,
       (gltf) => {
-        console.log('[DEBUG] AgentModel3D: Model loaded for', agentId, gltf.scene);
-        modelRef.current = gltf.scene;
-        setLoaded(true);
+        console.log('[DEBUG] AgentModel3D: Success for', agentId, 'model:', gltf.scene);
+        setModel(gltf.scene);
+        setLoading(false);
       },
       undefined,
       (err: any) => {
-        console.error('[DEBUG] AgentModel3D: Load error for', agentId, err);
-        setError(err.message || 'Failed to load');
+        console.error('[DEBUG] AgentModel3D: Error for', agentId, err);
+        setLoading(false);
       }
     );
-    
-    // Cleanup
-    return () => {
-      console.log('[DEBUG] AgentModel3D: Cleanup for', agentId);
-      if (modelRef.current) {
-        modelRef.current = null;
-      }
-    };
   }, [agentId, modelToLoad]);
   
   const handleClick = (e: any) => {
@@ -76,10 +68,10 @@ export const AgentModel3D = ({
     onClick?.();
   };
   
-  console.log('[DEBUG] AgentModel3D render:', agentId, 'loaded=', loaded, 'modelRef=', modelRef.current ? 'exists' : 'null');
+  console.log('[DEBUG] AgentModel3D render:', agentId, 'loading=', loading, 'model=', model ? 'yes' : 'no');
   
   return (
-    <group ref={groupRef} position={position} onClick={handleClick}>
+    <group position={position} onClick={handleClick}>
       {/* 点击区域 */}
       <mesh visible={false} position={[0, 1, 0]}>
         <boxGeometry args={[1.5, 2.5, 1.5]} />
@@ -87,8 +79,8 @@ export const AgentModel3D = ({
       </mesh>
       
       {/* 模型或占位符 */}
-      {loaded && modelRef.current ? (
-        <primitive object={modelRef.current} scale={scale} />
+      {model ? (
+        <primitive object={model} scale={scale} />
       ) : (
         <ModelPlaceholder color={color} />
       )}
