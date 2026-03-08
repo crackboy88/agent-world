@@ -46,17 +46,6 @@ export const AgentModel3D = ({
   // 克隆场景
   const clonedScene = useMemo(() => scene ? scene.clone() : null, [scene]);
   
-  // 计算模型底部偏移 - 从原始 scene 计算
-  const [modelBottom, setModelBottom] = useState(0);
-  
-  useEffect(() => {
-    if (scene) {
-      const box = new THREE.Box3().setFromObject(scene);
-      const bottom = -box.min.y;
-      setModelBottom(bottom);
-    }
-  }, [scene]);
-  
   // 应用颜色到克隆的场景
   useEffect(() => {
     if (clonedScene && color) {
@@ -155,26 +144,28 @@ export const AgentModel3D = ({
     onClick?.();
   };
   
+  // 固定偏移值 - 让模型底部对齐地面
+  const MODEL_Y_OFFSET = 0;
+  
   return (
     <group ref={groupRef} position={position} onClick={handleClick}>
-      {/* 3D模型 - 使用 modelBottom 抬升使底部对齐地面 */}
+      {/* 3D模型 - 不做额外偏移 */}
       <primitive
         ref={primitiveRef}
         object={clonedScene}
-        position={[0, modelBottom, 0]}
         scale={scale}
       />
       
       {/* 点击区域 - 覆盖整个模型 */}
-      <mesh visible={false} position={[0, modelBottom + 1, 0]}>
+      <mesh visible={false} position={[0, 1, 0]}>
         <boxGeometry args={[1.2, 2, 1.2]} />
         <meshBasicMaterial transparent opacity={0} />
       </mesh>
       
-      {/* 名称标签 - 在模型顶部 */}
+      {/* 名称标签 - 在模型顶部固定位置 */}
       {name && (
         <Html
-          position={[0, modelBottom + 2.2, 0]}
+          position={[0, 1.8, 0]}
           center
           distanceFactor={10}
           style={{
