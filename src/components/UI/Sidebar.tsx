@@ -416,11 +416,18 @@ const Sidebar: React.FC<SidebarProps> = ({ locale = 'zh' }) => {
             {selectedSessionKey && messages[selectedAgentId]?.[selectedSessionKey]?.length > 0 ? (
               messages[selectedAgentId]?.[selectedSessionKey].filter((msg: ChatMessage) => msg?.id).map((msg: ChatMessage) => {
                 try {
-                  // 调试：打印消息结构
-                  console.log('[DEBUG] Message:', msg);
+                  // text 可能是字符串或数组
+                  let text = '';
+                  const msgText = msg?.text as any;
+                  if (Array.isArray(msgText)) {
+                    // 如果是数组，提取每个元素的 text 字段
+                    text = msgText.map((t: any) => t?.text || t?.content || t?.message || '').join('');
+                  } else if (typeof msgText === 'string') {
+                    text = msgText;
+                  } else if (msgText && typeof msgText === 'object') {
+                    text = msgText.text || msgText.content || msgText.message || '';
+                  }
                   
-                  // 简化：直接取 text 字段
-                  const text = String(msg?.text || '');
                   const avatar = msg.sender === 'agent' ? String(selectedAgent?.skillTag?.icon || '🤖') : '👤';
                   const time = msg?.time || '';
                   return (
