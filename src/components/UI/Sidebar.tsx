@@ -393,19 +393,19 @@ const Sidebar: React.FC<SidebarProps> = ({ locale = 'zh' }) => {
           
           <div className="chat-messages">
             {selectedSessionKey && messages[selectedAgentId]?.[selectedSessionKey]?.length > 0 ? (
-              messages[selectedAgentId]?.[selectedSessionKey].map((msg: ChatMessage) => (
+              messages[selectedAgentId]?.[selectedSessionKey].filter((msg: ChatMessage) => msg?.id).map((msg: ChatMessage) => (
                 <div key={msg.id} className={`chat-message ${msg.sender}`}>
                   <span className="msg-avatar">{msg.sender === 'agent' ? (selectedAgent?.skillTag?.icon || '🤖') : '👤'}</span>
                   <div className="msg-content">
                     <span className="msg-text">{msg?.text || ''}</span>
-                    <span className="msg-time">{msg.time}</span>
+                    <span className="msg-time">{msg?.time || ''}</span>
                   </div>
                 </div>
               ))
             ) : (
               <div className="chat-empty">
                 <span className="icon">💬</span>
-                <span>{locale === 'zh' ? `开始和 ${selectedAgentId} 对话吧` : `Start chatting with ${selectedAgentId}`}</span>
+                <span>{selectedAgentId ? (locale === 'zh' ? `开始和 ${selectedAgentId} 对话吧` : `Start chatting with ${selectedAgentId}`) : (locale === 'zh' ? '选择一个智能体' : 'Select an agent')}</span>
               </div>
             )}
             <div ref={chatEndRef} />
