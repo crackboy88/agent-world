@@ -2,7 +2,7 @@
  * 3D Agent Component - With animations and idle movement
  */
 import { useGLTF, useAnimations } from '@react-three/drei';
-import { useEffect, useRef, useMemo, useState } from 'react';
+import { useEffect, useRef, useState, Suspense } from 'react';
 import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 import { Html } from '@react-three/drei';
@@ -14,39 +14,38 @@ interface AgentModel3DProps {
   modelUrl?: string;
   color?: string;
   scale?: number;
-  state?: string; // 'idle', 'walking', 'working', etc.
+  state?: string;
   onClick?: () => void;
 }
 
-// 默认 Agent 模型 URL
 const DEFAULT_AGENT_MODEL = '/assets/agents/agent-default.glb';
 
-export const AgentModel3D = ({ 
-  agentId, 
-  name,
-  position, 
-  modelUrl, 
+// 简单的占位符组件
+const ModelPlaceholder = ({ color }: { color?: string }) => (
+  <mesh castShadow position={[0, 0.5, 0]}>
+    <boxGeometry args={[0.5, 1, 0.5]} />
+    <meshStandardMaterial color={color || '#888'} />
+  </mesh>
+);
+
+// 模型加载组件
+const GLBModel = ({ 
+  url, 
   color, 
-  scale = 1,
-  state = 'idle',
-  onClick
-}: AgentModel3DProps) => {
-  // 使用用户选择的模型，或默认模型
-  const modelToLoad = modelUrl || DEFAULT_AGENT_MODEL;
-  
-  // 加载模型和动画
-  const { scene, animations } = useGLTF(modelToLoad);
+  scale,
+  state 
+}: { 
+  url: string; 
+  color?: string; 
+  scale: number;
+  state: string;
+}) => {
+  const { scene, animations } = useGLTF(url);
   const { actions } = useAnimations(animations, scene);
   
-  // 用于 idle 动画的 ref
-  const groupRef = useRef<THREE.Group>(null);
-  const primitiveRef = useRef<THREE.Group>(null);
-  const idleTimeRef = useRef(Math.random() * 100);
+  // 克隆并应用颜色
+  const clonedScene = scene ? scene.clone() : null;
   
-  // 克隆场景
-  const clonedScene = useMemo(() => scene ? scene.clone() : null, [scene]);
-  
-  // 应用颜色到克隆的场景
   useEffect(() => {
     if (clonedScene && color) {
       clonedScene.traverse((child) => {
@@ -63,164 +62,113 @@ export const AgentModel3D = ({
     }
   }, [clonedScene, color]);
   
-  // 播放动画
+  // 动画播放
   useEffect(() => {
     if (actions && Object.keys(actions).length > 0) {
       const actionNames = Object.keys(actions);
-      
       const animationMap: Record<string, string[]> = {
-        idle: ['Idle', 'idle', 'Stand', 'stand', 'Waiting', 'Walk', 'walk'],
+        idle: ['Idle', 'idle', 'Stand', 'stand', 'Waiting'],
         walking: ['Walk', 'walk', 'Running', 'running', 'Run'],
         working: ['Work', 'work', 'Working', 'working'],
       };
-      
       const possibleNames = animationMap[state] || animationMap['idle'];
       
-      let foundAction = null;
-      for (const name of possibleNames) {
-        const action = actions[name];
-        if (action) {
-          foundAction = action;
-          break;
-        }
-      }
-      
+      let foundAction = actionNames.find(name => actions[name]);
       if (!foundAction && actionNames.length > 0) {
-        foundAction = actions[actionNames[0]];
+        foundAction = actionNames[0];
       }
       
-      if (foundAction) {
+      if (foundAction && actions[foundAction]) {
         Object.values(actions).forEach(a => a?.stop());
-        foundAction.reset().fadeIn(0.3).play();
+        actions[foundAction]?.reset().fadeIn(0.3).play();
       }
-      
-      return () => {
-        if (foundAction) {
-          foundAction.fadeOut(0.3);
-        }
-      };
     }
   }, [actions, state]);
   
-  // 随机浮动动画
+  if (!clonedScene) return null;
+  
+  return <primitive object={clonedScene} scale={scale} />;
+};
+
+export const AgentModel3D = ({ 
+  agentId, 
+  name,
+  position, 
+  modelUrl, 
+  color, 
+  scale = 1,
+  state = 'idle',
+  onClick
+}: AgentModel3DProps) => {
+  const modelToLoad = modelUrl || DEFAULT_AGENT_MODEL;
+  const groupRef = useRef<THREE.Group>(null);
+  const idleTimeRef = useRef(Math.random() * 100);
+  
+  // 浮动动画
   useFrame((_, delta) => {
     if (groupRef.current) {
       idleTimeRef.current += delta;
-      
       const floatSpeed = state === 'working' ? 1.5 : (state === 'walking' ? 3 : 2);
       const floatAmplitude = state === 'working' ? 0.015 : 0.02;
-      
       const floatY = Math.sin(idleTimeRef.current * floatSpeed) * floatAmplitude;
       const swayX = Math.sin(idleTimeRef.current * floatSpeed * 0.75) * 0.01;
-      
       groupRef.current.position.y = floatY;
       groupRef.current.rotation.y = swayX;
     }
   });
   
-  // 如果场景为空，返回占位符
-  if (!clonedScene) {
-    return (
-      <group position={position} onClick={(e: any) => { e.stopPropagation(); onClick?.(); }}>
-        <mesh castShadow position={[0, 0.5, 0]}>
-          <boxGeometry args={[0.5, 1, 0.5]} />
-          <meshStandardMaterial color={color || '#888'} />
-        </mesh>
-        {name && (
-          <Html position={[0, 1.5, 0]} center distanceFactor={10} style={{ pointerEvents: 'none', userSelect: 'none' }}>
-            <div style={{ background: 'rgba(0,0,0,0.7)', color: '#fff', padding: '4px 8px', borderRadius: '4px', fontSize: '12px', whiteSpace: 'nowrap' }}>
-              {name}
-            </div>
-          </Html>
-        )}
-      </group>
-    );
-  }
-  
-  // 点击处理
   const handleClick = (e: any) => {
     e.stopPropagation();
-    console.log('[DEBUG] AgentModel3D clicked:', agentId);
     onClick?.();
   };
   
-  // 检查并重置模型的 transform
-  useEffect(() => {
-    if (clonedScene) {
-      // 递归重置所有子对象的 transform
-      clonedScene.traverse((child) => {
-        if (child instanceof THREE.Object3D) {
-          child.position.set(0, 0, 0);
-          child.rotation.set(0, 0, 0);
-          child.scale.set(1, 1, 1);
-        }
-      });
-      // 重置顶层
-      clonedScene.position.set(0, 0, 0);
-      clonedScene.rotation.set(0, 0, 0);
-      clonedScene.scale.set(scale, scale, scale);
-      console.log('[DEBUG] Model all transforms reset');
-    }
-  }, [clonedScene, scale]);
-  
   return (
-    <group position={position} onClick={handleClick}>
-      {/* 模型和标签放在同一个子 group */}
-      <group>
-        {/* 3D模型 - 强制设置位置和旋转 */}
-        <primitive
-          ref={primitiveRef}
-          object={clonedScene}
-          position={[0, 0, 0]}
-          rotation={[0, 0, 0]}
-          scale={scale}
+    <group ref={groupRef} position={position} onClick={handleClick}>
+      <Suspense fallback={<ModelPlaceholder color={color} />}>
+        <GLBModel 
+          url={modelToLoad} 
+          color={color} 
+          scale={scale} 
+          state={state}
         />
-        
-        {/* 点击区域 */}
-        <mesh visible={false} position={[0, 1, 0]}>
-          <boxGeometry args={[1.2, 2, 1.2]} />
-          <meshBasicMaterial transparent opacity={0} />
-        </mesh>
-        
-        {/* 名称标签 */}
-        {name && (
-          <Html
-            position={[0, 2.2, 0]}
-            center
-            distanceFactor={10}
-            style={{
-              pointerEvents: 'none',
-              userSelect: 'none',
-            }}
-          >
-            <div style={{
-              background: 'rgba(0, 0, 0, 0.7)',
-              color: '#fff',
-              padding: '4px 8px',
-              borderRadius: '4px',
-              fontSize: '12px',
-              fontFamily: 'Arial, sans-serif',
-              whiteSpace: 'nowrap',
-              textShadow: '0 1px 2px rgba(0,0,0,0.5)',
-            }}>
-              {name}
-            </div>
-          </Html>
-        )}
-      </group>
+      </Suspense>
+      
+      {/* 点击区域 */}
+      <mesh visible={false} position={[0, 1, 0]}>
+        <boxGeometry args={[1.2, 2, 1.2]} />
+        <meshBasicMaterial transparent opacity={0} />
+      </mesh>
+      
+      {/* 名称标签 */}
+      {name && (
+        <Html
+          position={[0, 2.2, 0]}
+          center
+          distanceFactor={10}
+          style={{ pointerEvents: 'none', userSelect: 'none' }}
+        >
+          <div style={{
+            background: 'rgba(0, 0, 0, 0.7)',
+            color: '#fff',
+            padding: '4px 8px',
+            borderRadius: '4px',
+            fontSize: '12px',
+            fontFamily: 'Arial, sans-serif',
+            whiteSpace: 'nowrap',
+            textShadow: '0 1px 2px rgba(0,0,0,0.5)',
+          }}>
+            {name}
+          </div>
+        </Html>
+      )}
     </group>
   );
 };
 
-// 预加载 Agent 模型
 export function preloadAgentModel() {
   useGLTF.preload(DEFAULT_AGENT_MODEL);
-  
-  const models = [
-    '/assets/agents/soldier-animated.glb',
-    '/assets/agents/xbot.glb',
-    '/assets/agents/character1.glb',
-    '/assets/agents/mixamo-character.glb',
-  ];
-  models.forEach(url => useGLTF.preload(url));
+  useGLTF.preload('/assets/agents/soldier-animated.glb');
+  useGLTF.preload('/assets/agents/xbot.glb');
+  useGLTF.preload('/assets/agents/character1.glb');
+  useGLTF.preload('/assets/agents/mixamo-character.glb');
 }
