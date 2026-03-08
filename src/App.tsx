@@ -53,8 +53,22 @@ const App: React.FC = () => {
     }
   };
   
+  // 点击地图：检查是否点击了 Agent，有则选中，否则移动选中的 Agent
   const handleMapClick = (position: { x: number; y: number }) => {
-    if (selectedAgentId) {
+    // 检查点击位置是否有 Agent（半径 30 像素内的 Agent）
+    const clickedAgent = agents.find(agent => {
+      const dx = agent.position.x - position.x;
+      const dy = agent.position.y - position.y;
+      const distance = Math.sqrt(dx * dx + dy * dy);
+      return distance < 30;
+    });
+    
+    if (clickedAgent) {
+      // 选中点击的 Agent
+      setSelectedAgentId(clickedAgent.id);
+      console.log('[DEBUG] Selected agent from map click:', clickedAgent.id);
+    } else if (selectedAgentId) {
+      // 移动选中的 Agent
       updateAgentPosition(selectedAgentId, position);
     }
   };
