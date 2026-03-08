@@ -50,7 +50,7 @@ export const MapItem3D = ({
   
   // 处理点击 - 用 onPointerDown 确保捕获
   const handlePointerDown = (e: any) => {
-    e.stopPropagation();
+    e.stopPropagation(); // 阻止事件传播到 Floor
     console.log('[DEBUG] MapItem clicked!');
     onClick?.();
   };
