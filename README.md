@@ -127,99 +127,61 @@ openclaw devices approve --latest
 
 ## ⚙️ Configuration
 
-### Assets Folder
+### Assets
 
-All assets (3D models, sprites, textures) are stored in `public/assets/`:
+Assets are stored in `public/assets/`:
 
 ```
 public/assets/
-├── models/      # 3D models (.glb, .gltf)
-├── sprites/     # 2D sprites (.png, .jpg)
-└── textures/    # Texture files
+├── agents/     # Agent 3D models (.glb)
+├── models/     # Map item 3D models (.glb)
+└── textures/   # Texture files
 ```
-
-**Adding your own assets:**
-1. Add your files to the appropriate folder
-2. Reference them in the map/agent configuration
 
 ### Map Configuration
 
 Edit `src/config/map.ts` to customize map items:
 
-1. Copy the example config:
-   ```bash
-   cp config/map.local.example.ts config/map.local.ts
-   ```
+```typescript
+export const DEFAULT_MAP_ITEMS: MapItem[] = [
+  { id: 'plant-1', type: 'plant-small', name: 'Plant', position: { x: 100, y: 100 } },
+  { id: 'table-1', type: 'table', name: 'Meeting Table', position: { x: 512, y: 512 } },
+];
+```
 
-2. Edit `config/map.local.ts` to add items:
-   ```typescript
-   export const LOCAL_MAP_ITEMS: MapItem[] = [
-     { id: 'plant-1', type: 'plant', name: 'Plant', position: { x: 100, y: 100 } },
-     { id: 'table-1', type: 'table', name: 'Meeting Table', position: { x: 512, y: 512 } },
-   ];
-   ```
-
-Available item types: `plant`, `table`, `chair`, `cabinet`, `desk`, `other`
+Available item types: `plant-small`, `plant-large`, `table`, `chair`, `desk`, `cabinet`
 
 ### Agent Appearance
 
-To customize agent appearances:
+Edit `src/config/agent.ts` to customize agent appearances:
 
-1. Copy the example config:
-   ```bash
-   cp config/agent.local.example.ts config/agent.local.ts
-   ```
-
-2. Edit `config/agent.local.ts` to customize:
-   ```typescript
-   export const LOCAL_AGENT_APPEARANCES: AgentAppearance[] = [
-     {
-       id: 'main',
-       name: 'My Agent',
-       skinColor: '#FCD34D',
-       hairColor: '#1F2937',
-       clothesColor: '#3B82F6',
-       accentColor: '#F59E0B',
-       accessory: '💼',
-     },
-   ];
-   ```
-
-The `.gitignore` already excludes local configs from version control.
-    id: 'my-agent',
-    name: 'My Agent',
-    emoji: '🤖',
-    clothes: '#3B82F6',
-    accent: '#F59E0B',
-    hair: '#1F2937',
-    accessory: '⚙️'
+```typescript
+export const DEFAULT_APPEARANCES: Record<string, AgentAppearance> = {
+  'main': {
+    modelId: 'default',
+    modelUrl: '/assets/agents/agent-default.glb',
+    color: '#3B82F6',
   },
 };
 ```
-
-### Room Configuration
-
-Define your own room layout with positions, furniture, and agent assignments.
 
 ## 📁 Project Structure
 
 ```
 agent-world/
-├── config/                      # Configuration files
-│   ├── agents.default.ts        # Default agents
-│   ├── agents.local.example.ts  # Local config example
-│   ├── rooms.default.ts        # Default rooms
-│   ├── rooms.local.example.ts  # Local config example
-│   └── index.ts               # Config loader
-├── public/                     # Static assets
-├── src/                        # Source code
-│   ├── components/            # React components
-│   │   ├── 3D/               # 3D scene components
-│   │   └── UI/               # UI components
-│   ├── services/              # Services (Socket, Gateway)
-│   ├── stores/                # Zustand state management
-│   └── types/                 # TypeScript types
-├── docs/                      # Documentation
+├── public/assets/              # Static assets
+│   ├── agents/                 # Agent 3D models
+│   ├── models/                 # Map item 3D models
+│   └── textures/               # Textures
+├── src/
+│   ├── components/             # React components
+│   │   ├── 3D/                # 3D scene components
+│   │   ├── UI/                # UI components
+│   │   └── Map/               # Map components
+│   ├── config/                 # Configuration files
+│   ├── services/               # Socket.io services
+│   ├── stores/                 # Zustand state management
+│   └── types/                  # TypeScript types
 └── dist/                      # Build output
 ```
 
