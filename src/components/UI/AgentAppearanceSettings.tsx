@@ -56,23 +56,28 @@ export const AgentAppearanceSettings = () => {
       {selectedAgentId && (
         <div className="mb-4">
           <label className="block text-sm font-medium mb-2">2. Select Model:</label>
-          <select
-            value={currentAppearance?.modelId || ''}
-            onChange={(e) => handleModelChange(e.target.value)}
-            className="w-full p-2 border rounded bg-white"
-          >
-            <option value="">-- Default Model --</option>
-            {agentModels.map(model => (
-              <option key={model.id} value={model.id}>
-                {model.name}
-              </option>
-            ))}
-          </select>
-          
-          {currentAppearance?.modelId && (
-            <div className="mt-2 text-sm text-green-600">
-              ✓ Applied: {agentModels.find(m => m.id === currentAppearance?.modelId)?.name}
-            </div>
+          {agentModels.length > 0 ? (
+            <>
+              <select
+                value={currentAppearance?.modelId || ''}
+                onChange={(e) => handleModelChange(e.target.value)}
+                className="w-full p-2 border rounded bg-white"
+              >
+                {agentModels.map(model => (
+                  <option key={model.id} value={model.id}>
+                    {model.name}
+                  </option>
+                ))}
+              </select>
+              
+              {currentAppearance?.modelId && (
+                <div className="mt-2 text-sm text-green-600">
+                  ✓ Applied: {agentModels.find(m => m.id === currentAppearance?.modelId)?.name}
+                </div>
+              )}
+            </>
+          ) : (
+            <div className="text-sm text-gray-500">No models available in /assets/agents/</div>
           )}
         </div>
       )}
