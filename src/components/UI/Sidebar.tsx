@@ -347,26 +347,34 @@ const Sidebar: React.FC<SidebarProps> = ({ locale = 'zh' }) => {
 
       {/* Agent 网格 - 点击获取真实会话 */}
       <div className="agent-grid-full">
-        {agents.filter((a: Agent) => a?.id).map((agent: Agent) => (
-          <div key={agent.id} className={`agent-card-large ${selectedAgentId === agent.id ? 'selected' : ''}`}
-            onClick={() => {
-              if (selectedAgentId === agent.id) {
-                setSelectedAgentId('');
-                setSelectedSessionKey('');
-              } else {
-                setSelectedAgentId(agent.id);
-                fetchSessions(agent.id);
-              }
-            }}>
-            <div className="agent-header">
-              <span className="agent-icon-lg">{agent.skillTag?.icon || '🤖'}</span>
-              <span className="agent-name-lg">{agent.id}</span>
-            </div>
-            <div className="agent-footer">
-              <span className="agent-state-lg" style={{ color: getStatusColor(agent?.state) }}>{getStatusText(agent?.state)}</span>
-            </div>
-          </div>
-        ))}
+        {agents.filter((a: Agent) => a?.id).map((agent: Agent) => {
+          try {
+            const icon = String(agent.skillTag?.icon || '🤖');
+            const state = agent?.state || 'idle';
+            return (
+              <div key={agent.id} className={`agent-card-large ${selectedAgentId === agent.id ? 'selected' : ''}`}
+                onClick={() => {
+                  if (selectedAgentId === agent.id) {
+                    setSelectedAgentId('');
+                    setSelectedSessionKey('');
+                  } else {
+                    setSelectedAgentId(agent.id);
+                    fetchSessions(agent.id);
+                  }
+                }}>
+                <div className="agent-header">
+                  <span className="agent-icon-lg">{icon}</span>
+                  <span className="agent-name-lg">{agent.id}</span>
+                </div>
+                <div className="agent-footer">
+                  <span className="agent-state-lg" style={{ color: getStatusColor(state) }}>{getStatusText(state)}</span>
+                </div>
+              </div>
+            );
+          } catch (e) {
+            return null;
+          }
+        })}
       </div>
 
       {/* 对话面板 - 选中 agent 时显示 */}
@@ -406,15 +414,24 @@ const Sidebar: React.FC<SidebarProps> = ({ locale = 'zh' }) => {
           
           <div className="chat-messages">
             {selectedSessionKey && messages[selectedAgentId]?.[selectedSessionKey]?.length > 0 ? (
-              messages[selectedAgentId]?.[selectedSessionKey].filter((msg: ChatMessage) => msg?.id).map((msg: ChatMessage) => (
-                <div key={msg.id} className={`chat-message ${msg.sender}`}>
-                  <span className="msg-avatar">{msg.sender === 'agent' ? (selectedAgent?.skillTag?.icon || '🤖') : '👤'}</span>
-                  <div className="msg-content">
-                    <span className="msg-text">{String(msg?.text || '')}</span>
-                    <span className="msg-time">{msg?.time || ''}</span>
-                  </div>
-                </div>
-              ))
+              messages[selectedAgentId]?.[selectedSessionKey].filter((msg: ChatMessage) => msg?.id).map((msg: ChatMessage) => {
+                try {
+                  const avatar = msg.sender === 'agent' ? String(selectedAgent?.skillTag?.icon || '🤖') : '👤';
+                  const text = msg?.text ? String(msg.text) : '';
+                  const time = msg?.time ? String(msg.time) : '';
+                  return (
+                    <div key={msg.id} className={`chat-message ${msg.sender}`}>
+                      <span className="msg-avatar">{avatar}</span>
+                      <div className="msg-content">
+                        <span className="msg-text">{text}</span>
+                        <span className="msg-time">{time}</span>
+                      </div>
+                    </div>
+                  );
+                } catch (e) {
+                  return null;
+                }
+              })
             ) : (
               <div className="chat-empty">
                 <span className="icon">💬</span>
