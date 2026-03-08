@@ -2,7 +2,7 @@
  * 3D Agent Component - With animations and idle movement
  */
 import { useGLTF, useAnimations } from '@react-three/drei';
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useMemo } from 'react';
 import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 
@@ -40,34 +40,24 @@ export const AgentModel3D = ({
   const idleTimeRef = useRef(Math.random() * 100);
   
   // 克隆场景
-  const clonedScene = scene ? scene.clone() : null;
+  const clonedScene = useMemo(() => scene ? scene.clone() : null, [scene]);
   
-  // 如果场景为空，返回一个可点击的占位符
-  if (!clonedScene) {
-    return (
-      <group position={position} onClick={(e) => { e.stopPropagation(); onClick?.(); }}>
-        <mesh castShadow>
-          <boxGeometry args={[0.5, 1, 0.5]} />
-          <meshStandardMaterial color={color || '#888'} />
-        </mesh>
-      </group>
-    );
-  }
-  
-  // 应用颜色（如果指定了颜色）
-  if (color) {
-    clonedScene.traverse((child) => {
-      if ((child as THREE.Mesh).isMesh) {
-        const mesh = child as THREE.Mesh;
-        if (mesh.material) {
-          const material = mesh.material as THREE.MeshStandardMaterial;
-          if (material.color) {
-            material.color.set(color);
+  // 应用颜色到克隆的场景
+  useEffect(() => {
+    if (clonedScene && color) {
+      clonedScene.traverse((child) => {
+        if ((child as THREE.Mesh).isMesh) {
+          const mesh = child as THREE.Mesh;
+          if (mesh.material) {
+            const material = mesh.material as THREE.MeshStandardMaterial;
+            if (material.color) {
+              material.color.set(color);
+            }
           }
         }
-      }
-    });
-  }
+      });
+    }
+  }, [clonedScene, color]);
   
   // 播放动画
   useEffect(() => {
@@ -126,11 +116,35 @@ export const AgentModel3D = ({
     }
   });
   
+  // 如果场景为空，返回一个可点击的占位符
+  if (!clonedScene) {
+    return (
+      <group position={position} onClick={(e) => { e.stopPropagation(); onClick?.(); }}>
+        <mesh castShadow>
+          <boxGeometry args={[0.5, 1, 0.5]} />
+          <meshStandardMaterial color={color || '#888'} />
+        </mesh>
+      </group>
+    );
+  }
+  
+  // 点击处理函数
+  const handleClick = (e: any) => {
+    e.stopPropagation();
+    console.log('[DEBUG] AgentModel3D clicked:', agentId);
+    onClick?.();
+  };
+  
   return (
-    <group ref={groupRef} onClick={(e) => { e.stopPropagation(); onClick?.(); }}>
+    <group ref={groupRef} position={position} onClick={handleClick}>
+      {/* 不可见的点击区域 (hitbox) - 确保足够大且在模型位置 */}
+      <mesh visible={false} position={[0, 1, 0]}>
+        <boxGeometry args={[1.5, 2.5, 1.5]} />
+        <meshBasicMaterial transparent opacity={0} />
+      </mesh>
+      {/* 实际的3D模型 */}
       <primitive
         object={clonedScene}
-        position={position}
         scale={scale}
       />
     </group>
