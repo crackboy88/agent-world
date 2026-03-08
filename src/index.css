@@ -427,6 +427,41 @@
   color: var(--accent-green);
 }
 
+/* ===== 会话标签下拉 ===== */
+.session-tabs {
+  display: flex;
+  gap: 4px;
+  padding: 8px 12px;
+  background: var(--bg-dark);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.session-tab {
+  flex: 1;
+  padding: 6px 12px;
+  background: var(--bg-medium);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  color: var(--text-secondary);
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.session-tab:hover {
+  background: var(--bg-light);
+  color: var(--text-primary);
+}
+
+.session-tab.active {
+  background: var(--accent-blue);
+  border-color: var(--accent-blue);
+  color: white;
+}
+
 /* ===== 聊天面板 ===== */
 .chat-panel {
   display: flex;
