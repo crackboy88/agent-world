@@ -94,8 +94,8 @@ const App: React.FC = () => {
       {/* 顶部导航栏 */}
       <header className="top-bar">
         <div className="logo">
-          <span className="logo-icon">🏢</span>
-          <span className="logo-text">Chen Company</span>
+          <span className="logo-icon">🌐</span>
+          <span className="logo-text">Agent World</span>
         </div>
         
         <div className="top-nav">
