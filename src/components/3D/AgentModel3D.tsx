@@ -20,11 +20,15 @@ interface AgentModel3DProps {
 
 const DEFAULT_AGENT_MODEL = '/assets/agents/mixamo.glb';
 
-// Simple placeholder component
+// Simple placeholder component - improved material for better lighting
 const ModelPlaceholder = ({ color }: { color?: string }) => (
-  <mesh castShadow position={[0, 0.5, 0]}>
+  <mesh castShadow receiveShadow position={[0, 0.5, 0]}>
     <boxGeometry args={[0.5, 1, 0.5]} />
-    <meshStandardMaterial color={color || '#888'} />
+    <meshStandardMaterial 
+      color={color || '#888'} 
+      roughness={0.5} 
+      metalness={0.1}
+    />
   </mesh>
 );
 
@@ -166,7 +170,7 @@ export const AgentModel3D = ({
       
       {/* 模型或占位符 */}
       {model ? (
-        <primitive object={model} scale={scale} />
+        <primitive object={model} scale={scale} castShadow receiveShadow />
       ) : (
         <ModelPlaceholder color={color} />
       )}

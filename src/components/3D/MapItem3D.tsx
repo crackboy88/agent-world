@@ -62,11 +62,13 @@ export const MapItem3D = ({
         position={position} 
         onPointerDown={handlePointerDown}
       >
-        {/* 3D 模型 */}
+        {/* 3D 模型 - with shadows */}
         <primitive
           object={clonedScene}
           rotation={[0, rotation, 0]}
           scale={scale}
+          castShadow
+          receiveShadow
         />
         
         {/* 选中高亮效果 */}
