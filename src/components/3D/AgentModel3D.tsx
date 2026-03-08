@@ -92,29 +92,69 @@ export const AgentModel3D = ({
     timeRef.current += delta;
     const t = timeRef.current;
     
+    // Base position is 0
+    let targetY = 0;
+    let targetScale = 1;
+    let targetRotY = 0;
+    let targetRotZ = 0;
+    
     switch (state) {
       case 'working':
         // Working: faster bobbing + slight rotation
-        groupRef.current.position.y = Math.sin(t * 3) * 0.03;
-        groupRef.current.rotation.z = Math.sin(t * 2) * 0.05;
+        targetY = Math.sin(t * 3) * 0.03;
+        targetRotZ = Math.sin(t * 2) * 0.05;
+        targetRotY = Math.sin(t * 1.5) * 0.03;
         break;
       case 'thinking':
-        // Thinking: slow pulse
-        groupRef.current.scale.setScalar(1 + Math.sin(t * 2) * 0.02);
+        // Thinking: slow pulse + slight tilt
+        targetScale = 1 + Math.sin(t * 2) * 0.03;
+        targetY = Math.sin(t * 1.2) * 0.01;
+        targetRotZ = Math.sin(t * 1) * 0.02;
         break;
       case 'walking':
         // Walking: bouncy walk motion
-        groupRef.current.position.y = Math.abs(Math.sin(t * 8)) * 0.1;
-        groupRef.current.rotation.y = Math.sin(t * 4) * 0.1;
+        targetY = Math.abs(Math.sin(t * 8)) * 0.1;
+        targetRotY = Math.sin(t * 4) * 0.15;
+        break;
+      case 'chatting':
+        // Chatting: excited bounce
+        targetY = Math.sin(t * 4) * 0.05;
+        targetRotY = Math.sin(t * 3) * 0.08;
+        break;
+      case 'busy':
+        // Busy: urgent tapping
+        targetY = Math.sin(t * 6) * 0.02;
+        targetRotZ = Math.sin(t * 5) * 0.03;
         break;
       case 'idle':
       default:
         // Idle: gentle breathing
-        groupRef.current.position.y = Math.sin(t * 1.5) * 0.02;
-        groupRef.current.rotation.y = Math.sin(t * 0.5) * 0.02;
+        targetY = Math.sin(t * 1.5) * 0.02;
+        targetRotY = Math.sin(t * 0.5) * 0.02;
         break;
     }
+    
+    // Smooth interpolation
+    const lerp = (a: number, b: number, t: number) => a + (b - a) * t;
+    const lerpSpeed = 0.1;
+    
+    groupRef.current.position.y = lerp(groupRef.current.position.y, targetY, lerpSpeed);
+    groupRef.current.scale.setScalar(lerp(groupRef.current.scale.x, targetScale, lerpSpeed));
+    groupRef.current.rotation.y = lerp(groupRef.current.rotation.y, targetRotY, lerpSpeed);
+    groupRef.current.rotation.z = lerp(groupRef.current.rotation.z, targetRotZ, lerpSpeed);
   });
+  
+  // Get status color based on state
+  const getStatusColor = () => {
+    switch (state) {
+      case 'working': return '#10B981'; // green
+      case 'thinking': return '#8B5CF6'; // purple
+      case 'walking': return '#3B82F6'; // blue
+      case 'chatting': return '#06B6D4'; // cyan
+      case 'busy': return '#F59E0B'; // orange
+      default: return '#6B7280'; // gray
+    }
+  };
   
   return (
     <group ref={groupRef} position={position} onClick={handleClick}>
@@ -147,7 +187,18 @@ export const AgentModel3D = ({
             fontSize: '12px',
             fontFamily: 'Arial, sans-serif',
             whiteSpace: 'nowrap',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '6px',
           }}>
+            {/* Status indicator */}
+            <span style={{
+              width: '8px',
+              height: '8px',
+              borderRadius: '50%',
+              backgroundColor: getStatusColor(),
+              display: 'inline-block',
+            }} />
             {name}
           </div>
         </Html>
