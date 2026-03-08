@@ -179,8 +179,16 @@ export const AgentModel3D = ({
         <meshBasicMaterial transparent opacity={0} />
       </mesh>
       
-      {/* 使用简单的占位符，不加载GLB模型 */}
-      <ModelPlaceholder color={color} />
+      {/* 尝试加载GLB模型，如果失败则显示占位符 */}
+      <Suspense fallback={<ModelPlaceholder color={color} />}>
+        <GLBModelWithLabel 
+          url={modelToLoad} 
+          color={color} 
+          scale={scale} 
+          state={state}
+          name={name}
+        />
+      </Suspense>
       
       {/* 名称标签 */}
       {name && (
