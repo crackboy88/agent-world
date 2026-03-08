@@ -38,11 +38,13 @@ const App: React.FC = () => {
 
   useEffect(() => {
     initializeStore();
+    // Force show 3D scene after timeout
     const timer = setTimeout(() => {
+      console.log('[DEBUG] Forcing app loading to false');
       setIsAppLoading(false);
-    }, 1500);
+    }, 2000);
     return () => clearTimeout(timer);
-  }, [initializeStore]);
+  }, []);
 
   const handleConnectGateway = () => {
     if (gatewayConnected) {
