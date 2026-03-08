@@ -17,10 +17,16 @@ const Floor = ({ size = 20, onClick }: { size?: number; onClick?: (point: THREE.
   };
   
   return (
-    <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0, 0]} receiveShadow onClick={handleClick}>
-      <planeGeometry args={[size, size]} />
-      <meshStandardMaterial color="#E8E4DF" />
-    </mesh>
+    <group>
+      {/* Main floor */}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.01, 0]} receiveShadow onClick={handleClick}>
+        <planeGeometry args={[size, size]} />
+        <meshStandardMaterial color="#D4CFC7" roughness={0.9} metalness={0.1} />
+      </mesh>
+      
+      {/* Grid lines for visual reference */}
+      <gridHelper args={[size, size, '#B8B4AB', '#C8C4BD']} position={[0, 0.01, 0]} />
+    </group>
   );
 };
 
@@ -105,6 +111,7 @@ export const Scene3D = ({
       <Canvas 
         style={{ height: '100%' }}
         gl={{ antialias: true }} 
+        shadows={{ type: THREE.PCFSoftShadowMap }}
         dpr={[1, 2]}
         onContextMenu={handleContextMenu}
       >
