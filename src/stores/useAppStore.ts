@@ -150,13 +150,13 @@ export const useAppStore = create<AppState>()(
       
       // Initialize Store
       initializeStore: () => {
-        // 保留 localStorage 中已保存的 agent 数据（位置等）
-        // 不要清空 agents，让 persist middleware 自动恢复
+        // Reset agent appearances to defaults so all agents use same model/color
         set({
           maps: [],
           tasks: [],
           selectedAgentId: null,
           selectedMapId: null,
+          agentAppearances: {}, // Reset to defaults
         });
         
         // 启动时间更新

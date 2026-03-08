@@ -127,8 +127,6 @@ export const Scene3D = ({
           const modelUrl = appearance.modelUrl || '/assets/agents/mixamo.glb';
           const agentColor = appearance.color || '#3B82F6';
           
-          console.log('[DEBUG] Agent:', agent.id, 'modelUrl:', modelUrl, 'color:', agentColor);
-          
           return (
             <AgentModel3D
               key={`agent3d-${agent.id}`}
