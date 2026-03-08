@@ -292,21 +292,23 @@ const Sidebar: React.FC<SidebarProps> = ({ locale = 'zh' }) => {
     }
   }, [selectedAgentId, selectedSessionKey, gatewayConnected]);
 
-  // 状态样式
-  const getStatusColor = (state: string) => {
+  // 状态样式 - 增强 null 安全
+  const getStatusColor = (state: string | undefined | null) => {
+    if (!state) return '#6B7280';
     const colors: Record<string, string> = {
       working: '#10B981', thinking: '#8B5CF6', chatting: '#3B82F6', busy: '#F59E0B'
     };
     return colors[state] || '#6B7280';
   };
 
-  const getStatusText = (state: string) => {
+  const getStatusText = (state: string | undefined | null) => {
+    if (!state) return locale === 'zh' ? '未知' : 'Unknown';
     const map: Record<string, { zh: string; en: string }> = {
       idle: { zh: '空闲', en: 'Idle' }, working: { zh: '工作中', en: 'Working' },
       thinking: { zh: '思考中', en: 'Thinking' }, chatting: { zh: '对话中', en: 'Chatting' },
       busy: { zh: '忙碌', en: 'Busy' }, offline: { zh: '离线', en: 'Offline' }
     };
-    return map[state]?.[locale] || state;
+    return map[state]?.[locale] || (locale === 'zh' ? '未知' : 'Unknown');
   };
 
   // ========== 渲染函数 ==========
