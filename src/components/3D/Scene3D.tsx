@@ -2,7 +2,7 @@
  * 3D Scene Component - Loads models from assets folder
  */
 import { Canvas } from '@react-three/fiber';
-import { OrbitControls, PerspectiveCamera, ContactShadows, Environment } from '@react-three/drei';
+import { OrbitControls, PerspectiveCamera, ContactShadows } from '@react-three/drei';
 import * as THREE from 'three';
 import { AgentModel3D } from './AgentModel3D';
 import { MapItem3D } from './MapItem3D';
