@@ -2,7 +2,7 @@
  * 3D Scene Component - Simple test version
  */
 import { Canvas } from '@react-three/fiber';
-import { OrbitControls, PerspectiveCamera } from '@react-three/drei';
+import { OrbitControls, PerspectiveCamera, ContactShadows } from '@react-three/drei';
 import * as THREE from 'three';
 import { AgentModel3D } from './AgentModel3D';
 import { MapItem3D } from './MapItem3D';
@@ -109,12 +109,13 @@ export const Scene3D = ({
   return (
     <div style={{ width: '100%', height: '100%', minHeight: '400px' }}>
       <Canvas 
-        style={{ height: '100%' }}
+        style={{ height: '100%', background: '#E8E4DF' }}
         gl={{ antialias: true }} 
         shadows={{ type: THREE.PCFSoftShadowMap }}
         dpr={[1, 2]}
         onContextMenu={handleContextMenu}
       >
+        <color attach="background" args={['#E8E4DF']} />
         <PerspectiveCamera makeDefault position={[8, 8, 8]} fov={50} />
         <OrbitControls enablePan enableZoom enableRotate minDistance={3} maxDistance={20} />
         
@@ -146,6 +147,19 @@ export const Scene3D = ({
         
         {/* Point light - extra warmth */}
         <pointLight position={[0, 8, 0]} intensity={0.3} color="#FFF5E6" />
+        
+        {/* Fog for depth */}
+        <fog attach="fog" args={['#E8E4DF', 15, 40]} />
+        
+        {/* Contact shadows for grounded look */}
+        <ContactShadows 
+          position={[0, 0.01, 0]} 
+          opacity={0.5} 
+          scale={25} 
+          blur={2.5} 
+          far={15} 
+          color="#1a1a1a"
+        />
         
         <Floor size={20} onClick={handleFloorClick} />
         
