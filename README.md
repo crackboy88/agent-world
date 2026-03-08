@@ -26,7 +26,7 @@
 | State Management | Zustand |
 | Backend | Express + Socket.io |
 | Build Tool | Vite |
-| Communication | WebSocket / SSE |
+| Communication | Socket.io |
 
 ## 🚀 Quick Start (For OpenClaw)
 
