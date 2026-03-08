@@ -345,7 +345,7 @@ const Sidebar: React.FC<SidebarProps> = ({ locale = 'zh' }) => {
 
       {/* Agent 网格 - 点击获取真实会话 */}
       <div className="agent-grid-full">
-        {agents.map((agent: Agent) => (
+        {agents.filter((a: Agent) => a?.id).map((agent: Agent) => (
           <div key={agent.id} className={`agent-card-large ${selectedAgentId === agent.id ? 'selected' : ''}`}
             onClick={() => {
               if (selectedAgentId === agent.id) {
