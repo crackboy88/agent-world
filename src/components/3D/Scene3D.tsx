@@ -101,17 +101,18 @@ export const Scene3D = ({
   };
 
   return (
-    <div style={{ width: '100%', height: '100%', minHeight: '400px', background: '#f0f0f0' }}>
+    <div style={{ width: '100%', height: '100%', minHeight: '400px' }}>
       <Canvas 
-        style={{ height: 'calc(100% - 40px)' }}
+        style={{ height: '100%' }}
         gl={{ antialias: true }} 
         dpr={[1, 2]}
         onContextMenu={handleContextMenu}
       >
         <PerspectiveCamera makeDefault position={[8, 8, 8]} fov={50} />
         <OrbitControls enablePan enableZoom enableRotate minDistance={3} maxDistance={20} />
-        <ambientLight intensity={0.5} />
-        <directionalLight position={[8, 12, 8]} intensity={1} />
+        <ambientLight intensity={0.6} />
+        <directionalLight position={[8, 12, 8]} intensity={1.2} castShadow />
+        <directionalLight position={[-5, 10, -5]} intensity={0.3} />
         
         <Floor size={20} onClick={handleFloorClick} />
         
