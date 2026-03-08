@@ -220,7 +220,7 @@ export function preloadAgentModel() {
     '/assets/agents/soldier-animated.glb',
     '/assets/agents/xbot.glb',
     '/assets/agents/character1.glb',
-    '/assets/agents/Michelle.glb',
+    '/assets/agents/mixamo-character.glb',
   ];
   models.forEach(url => useGLTF.preload(url));
 }
