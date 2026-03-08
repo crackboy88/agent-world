@@ -48,23 +48,20 @@ export const MapItem3D = ({
     return cloned;
   }, [scene, color]);
   
-  // 处理点击
-  const handleClick = (e: any) => {
+  // 处理点击 - 用 onPointerDown 确保捕获
+  const handlePointerDown = (e: any) => {
     e.stopPropagation();
-    console.log('[DEBUG] MapItem clicked');
+    console.log('[DEBUG] MapItem clicked!');
     onClick?.();
   };
   
   // 渲染模型
   if (clonedScene) {
     return (
-      <group position={position} onClick={handleClick}>
-        {/* 点击区域 - 覆盖物品 */}
-        <mesh visible={false} position={[0, 0.5, 0]}>
-          <boxGeometry args={[1.5, 1, 1.5]} />
-          <meshBasicMaterial transparent opacity={0} />
-        </mesh>
-        
+      <group 
+        position={position} 
+        onPointerDown={handlePointerDown}
+      >
         {/* 3D 模型 */}
         <primitive
           object={clonedScene}
@@ -85,7 +82,7 @@ export const MapItem3D = ({
   
   // Fallback - 简单方块
   return (
-    <group position={position} onClick={handleClick}>
+    <group position={position} onPointerDown={handlePointerDown}>
       <mesh position={[0, 0.25, 0]}>
         <boxGeometry args={[0.5, 0.5, 0.5]} />
         <meshStandardMaterial color={color || '#888'} />
