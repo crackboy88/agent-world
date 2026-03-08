@@ -167,10 +167,12 @@ export const AgentModel3D = ({
     <group position={position} onClick={handleClick}>
       {/* 模型和标签放在同一个子 group */}
       <group>
-        {/* 3D模型 */}
+        {/* 3D模型 - 强制设置位置和旋转 */}
         <primitive
           ref={primitiveRef}
           object={clonedScene}
+          position={[0, 0, 0]}
+          rotation={[0, 0, 0]}
           scale={scale}
         />
         
