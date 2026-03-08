@@ -147,12 +147,21 @@ export const AgentModel3D = ({
   // 检查并重置模型的 transform
   useEffect(() => {
     if (clonedScene) {
-      // 重置 position 和 rotation，保留 scale
+      // 递归重置所有子对象的 transform
+      clonedScene.traverse((child) => {
+        if (child instanceof THREE.Object3D) {
+          child.position.set(0, 0, 0);
+          child.rotation.set(0, 0, 0);
+          child.scale.set(1, 1, 1);
+        }
+      });
+      // 重置顶层
       clonedScene.position.set(0, 0, 0);
       clonedScene.rotation.set(0, 0, 0);
-      console.log('[DEBUG] Model transform reset, position:', clonedScene.position);
+      clonedScene.scale.set(scale, scale, scale);
+      console.log('[DEBUG] Model all transforms reset');
     }
-  }, [clonedScene]);
+  }, [clonedScene, scale]);
   
   return (
     <group position={position} onClick={handleClick}>
