@@ -179,16 +179,31 @@ export const AgentModel3D = ({
         <meshBasicMaterial transparent opacity={0} />
       </mesh>
       
-      {/* 3D 模型 */}
-      <Suspense fallback={<ModelPlaceholder color={color} />}>
-        <GLBModelWithLabel 
-          url={modelToLoad} 
-          color={color} 
-          scale={scale} 
-          state={state}
-          name={name}
-        />
-      </Suspense>
+      {/* 使用简单的占位符，不加载GLB模型 */}
+      <ModelPlaceholder color={color} />
+      
+      {/* 名称标签 */}
+      {name && (
+        <Html
+          position={[0, 2.2, 0]}
+          center
+          distanceFactor={10}
+          style={{ pointerEvents: 'none', userSelect: 'none' }}
+        >
+          <div style={{
+            background: 'rgba(0, 0, 0, 0.7)',
+            color: '#fff',
+            padding: '4px 8px',
+            borderRadius: '4px',
+            fontSize: '12px',
+            fontFamily: 'Arial, sans-serif',
+            whiteSpace: 'nowrap',
+            textShadow: '0 1px 2px rgba(0,0,0,0.5)',
+          }}>
+            {name}
+          </div>
+        </Html>
+      )}
     </group>
   );
 };
