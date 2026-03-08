@@ -62,18 +62,11 @@ npm run build
 npm run preview
 ```
 
-## 🔗 Connecting to OpenClaw Gateway
+## 🔗 OpenClaw Gateway Setup (For OpenClaw)
 
-This section explains how to connect Agent World to your OpenClaw Gateway for real-time agent management.
-
-### Prerequisites
-
-1. **OpenClaw Gateway** - You need a running OpenClaw Gateway instance
-2. **Agent Pairing** - Your agents must be paired with the Gateway
+OpenClaw should perform the following steps to connect to the Gateway:
 
 ### Step 1: Start Gateway
-
-First, make sure your OpenClaw Gateway is running:
 
 ```bash
 # Check Gateway status
@@ -83,50 +76,27 @@ openclaw gateway status
 openclaw gateway start
 ```
 
-### Step 2: Start Agent World
+### Step 2: Approve Pairing Request
 
-```bash
-# Development mode
-npm run dev
-
-# Or serve the built files
-npm run preview
-```
-
-Visit http://localhost:5173
-
-> **When Agent World starts, it will automatically attempt to connect to the Gateway and send a pairing request.**
-
-### Step 3: Approve Pairing Request
-
-Now approve the pending pairing request from the Gateway side:
+When Agent World starts, it will automatically attempt to connect. Approve the pending pairing request:
 
 ```bash
 # Check pending pairing requests
 openclaw devices list
 
-# Approve the pending device (usually the most recent one)
+# Approve the pending device
 openclaw devices approve --latest
-
-# Or approve by specific device ID
-openclaw devices approve <device-id>
 ```
 
-### Step 4: Verify Connection
+### Step 3: Verify Connection
 
-After approval, the connection should be established. Check in the Agent World UI:
+The connection should be established automatically. The Gateway status in Agent World should show "Connected".
 
-- The Gateway status should show "Connected"
-- Your agents should appear online
+### Gateway URL
 
-### Gateway URL Configuration
+Default: `ws://localhost:18789`
 
-The default Gateway URL is `ws://localhost:18789`. If you need to connect to a different Gateway:
-
-1. Open the application in your browser
-2. Use the Gateway connection panel in the header to change the URL
-
-Or set it via browser console:
+To change the Gateway URL:
 
 ```javascript
 // In browser console
@@ -138,13 +108,10 @@ localStorage.setItem('gatewayUrl', 'ws://your-gateway-ip:18789');
 
 #### "Device nonce mismatch" Error
 
-This usually means the device identity is outdated. Try:
-
 ```bash
-# Clear old device identity from browser localStorage
-# Then refresh Agent World to trigger a new pairing request
+# Clear old device identity from browser localStorage, then refresh
 
-# On Gateway side, approve the new request
+# Approve new request
 openclaw devices approve --latest
 ```
 
@@ -152,28 +119,11 @@ openclaw devices approve --latest
 
 - Check if Gateway is running: `openclaw gateway status`
 - Verify firewall rules allow the connection
-- Check the Gateway logs for errors
 
 #### Agents Not Showing Online
 
 - Ensure agents are paired and approved
 - Check agent status: `openclaw agents list`
-- Restart the Gateway if needed
-
-### Network Architecture
-
-```
-┌─────────────────┐         ┌──────────────────┐
-│  Agent World    │ ──────▶ │  OpenClaw        │
-│  (Browser)      │  WS     │  Gateway         │
-└─────────────────┘         └──────────────────┘
-                                   │
-                                   ▼
-                            ┌──────────────────┐
-                            │  OpenClaw       │
-                            │  Agents          │
-                            └──────────────────┘
-```
 
 ## ⚙️ Configuration
 
