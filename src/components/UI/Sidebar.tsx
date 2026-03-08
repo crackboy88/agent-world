@@ -416,24 +416,19 @@ const Sidebar: React.FC<SidebarProps> = ({ locale = 'zh' }) => {
             {selectedSessionKey && messages[selectedAgentId]?.[selectedSessionKey]?.length > 0 ? (
               messages[selectedAgentId]?.[selectedSessionKey].filter((msg: ChatMessage) => msg?.id).map((msg: ChatMessage) => {
                 try {
-                  // 处理各种可能的 text 格式
-                  let text = '';
-                  const msgText = msg?.text as any;
-                  if (typeof msgText === 'string') {
-                    text = msgText;
-                  } else if (msgText && typeof msgText === 'object') {
-                    // 如果是对象，尝试获取 text 或 content 字段
-                    text = msgText.text || msgText.content || msgText.message || JSON.stringify(msgText);
-                  }
+                  // 调试：打印消息结构
+                  console.log('[DEBUG] Message:', msg);
                   
+                  // 简化：直接取 text 字段
+                  const text = String(msg?.text || '');
                   const avatar = msg.sender === 'agent' ? String(selectedAgent?.skillTag?.icon || '🤖') : '👤';
-                  const time = msg?.time ? String(msg.time) : '';
+                  const time = msg?.time || '';
                   return (
                     <div key={msg.id} className={`chat-message ${msg.sender}`}>
                       <span className="msg-avatar">{avatar}</span>
                       <div className="msg-content">
-                        <span className="msg-text">{text}</span>
-                        <span className="msg-time">{time}</span>
+                        <div className="msg-text">{text || '(空消息)'}</div>
+                        <div className="msg-time">{time}</div>
                       </div>
                     </div>
                   );
