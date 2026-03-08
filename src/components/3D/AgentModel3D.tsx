@@ -144,49 +144,59 @@ export const AgentModel3D = ({
     onClick?.();
   };
   
-  // 固定偏移值 - 让模型底部对齐地面
-  const MODEL_Y_OFFSET = 0;
+  // 检查并重置模型的 transform
+  useEffect(() => {
+    if (clonedScene) {
+      // 重置 position 和 rotation，保留 scale
+      clonedScene.position.set(0, 0, 0);
+      clonedScene.rotation.set(0, 0, 0);
+      console.log('[DEBUG] Model transform reset, position:', clonedScene.position);
+    }
+  }, [clonedScene]);
   
   return (
-    <group ref={groupRef} position={position} onClick={handleClick}>
-      {/* 3D模型 - 不做额外偏移 */}
-      <primitive
-        ref={primitiveRef}
-        object={clonedScene}
-        scale={scale}
-      />
-      
-      {/* 点击区域 - 覆盖整个模型 */}
-      <mesh visible={false} position={[0, 1, 0]}>
-        <boxGeometry args={[1.2, 2, 1.2]} />
-        <meshBasicMaterial transparent opacity={0} />
-      </mesh>
-      
-      {/* 名称标签 - 在模型顶部固定位置 */}
-      {name && (
-        <Html
-          position={[0, 1.8, 0]}
-          center
-          distanceFactor={10}
-          style={{
-            pointerEvents: 'none',
-            userSelect: 'none',
-          }}
-        >
-          <div style={{
-            background: 'rgba(0, 0, 0, 0.7)',
-            color: '#fff',
-            padding: '4px 8px',
-            borderRadius: '4px',
-            fontSize: '12px',
-            fontFamily: 'Arial, sans-serif',
-            whiteSpace: 'nowrap',
-            textShadow: '0 1px 2px rgba(0,0,0,0.5)',
-          }}>
-            {name}
-          </div>
-        </Html>
-      )}
+    <group position={position} onClick={handleClick}>
+      {/* 模型和标签放在同一个子 group */}
+      <group>
+        {/* 3D模型 */}
+        <primitive
+          ref={primitiveRef}
+          object={clonedScene}
+          scale={scale}
+        />
+        
+        {/* 点击区域 */}
+        <mesh visible={false} position={[0, 1, 0]}>
+          <boxGeometry args={[1.2, 2, 1.2]} />
+          <meshBasicMaterial transparent opacity={0} />
+        </mesh>
+        
+        {/* 名称标签 */}
+        {name && (
+          <Html
+            position={[0, 2.2, 0]}
+            center
+            distanceFactor={10}
+            style={{
+              pointerEvents: 'none',
+              userSelect: 'none',
+            }}
+          >
+            <div style={{
+              background: 'rgba(0, 0, 0, 0.7)',
+              color: '#fff',
+              padding: '4px 8px',
+              borderRadius: '4px',
+              fontSize: '12px',
+              fontFamily: 'Arial, sans-serif',
+              whiteSpace: 'nowrap',
+              textShadow: '0 1px 2px rgba(0,0,0,0.5)',
+            }}>
+              {name}
+            </div>
+          </Html>
+        )}
+      </group>
     </group>
   );
 };
