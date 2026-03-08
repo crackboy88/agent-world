@@ -43,7 +43,6 @@ export const AgentModel3D = ({
   
   // Load GLB model
   useEffect(() => {
-    console.log('[DEBUG] AgentModel3D: Loading', agentId, 'from', modelToLoad);
     setLoading(true);
     setModel(null);
     
@@ -51,13 +50,11 @@ export const AgentModel3D = ({
     loader.load(
       modelToLoad,
       (gltf) => {
-        console.log('[DEBUG] AgentModel3D: Success for', agentId, 'model:', gltf.scene);
         setModel(gltf.scene);
         setLoading(false);
       },
       undefined,
       (err: any) => {
-        console.error('[DEBUG] AgentModel3D: Error for', agentId, err);
         setLoading(false);
       }
     );

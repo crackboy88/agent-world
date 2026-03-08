@@ -72,8 +72,6 @@ export const Scene3D = ({
   selectedItemId?: string;
   onItemClick?: (id: string) => void;
 }) => {
-  console.log('[DEBUG] Scene3D rendering, agents:', agents?.length, agents);
-  
   // Convert 2D position to 3D
   const getAgentPosition = (agent: Agent): [number, number, number] => {
     try {
@@ -104,15 +102,11 @@ export const Scene3D = ({
 
   return (
     <div style={{ width: '100%', height: '100%', minHeight: '400px', background: '#f0f0f0' }}>
-      <div style={{ padding: '10px', color: '#666' }}>
-        DEBUG: Canvas starting...
-      </div>
       <Canvas 
         style={{ height: 'calc(100% - 40px)' }}
         gl={{ antialias: true }} 
         dpr={[1, 2]}
         onContextMenu={handleContextMenu}
-        onCreated={() => console.log('[DEBUG] Canvas created!')}
       >
         <PerspectiveCamera makeDefault position={[8, 8, 8]} fov={50} />
         <OrbitControls enablePan enableZoom enableRotate minDistance={3} maxDistance={20} />
