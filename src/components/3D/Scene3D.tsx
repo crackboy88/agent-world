@@ -1,49 +1,40 @@
 /**
- * 3D Scene Component - Loads models from assets folder
+ * 3D Scene Component - Simple test version
  */
 import { Canvas } from '@react-three/fiber';
-import { OrbitControls, PerspectiveCamera, ContactShadows } from '@react-three/drei';
+import { OrbitControls, PerspectiveCamera } from '@react-three/drei';
 import * as THREE from 'three';
 import { AgentModel3D } from './AgentModel3D';
 import { MapItem3D } from './MapItem3D';
 import type { Agent } from '../../types';
 import { DEFAULT_MAP_ITEMS, getModelUrl, type MapItem } from '../../config';
 
-// Simple flat floor
-const Floor = ({ size = 20, onClick }: { size?: number; onClick?: (event: THREE.Event) => void }) => {
+// Simple floor component
+const Floor = ({ size = 20, onClick }: { size?: number; onClick?: (point: THREE.Vector3) => void }) => {
+  const handleClick = (e: any) => {
+    e.stopPropagation();
+    onClick?.(e.point);
+  };
+  
   return (
-    <group>
-      <mesh 
-        rotation={[-Math.PI / 2, 0, 0]} 
-        position={[0, -0.01, 0]} 
-        receiveShadow
-        onClick={onClick}
-      >
-        <planeGeometry args={[size, size]} />
-        <meshStandardMaterial color="#E8E4DF" roughness={0.9} />
-      </mesh>
-      {/* Grid lines for reference */}
-      <gridHelper args={[size, size, '#CCC', '#DDD']} position={[0, 0.01, 0]} />
-    </group>
+    <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0, 0]} receiveShadow onClick={handleClick}>
+      <planeGeometry args={[size, size]} />
+      <meshStandardMaterial color="#E8E4DF" />
+    </mesh>
   );
 };
 
-// Map Items from config
-const MapItems = ({ 
-  onItemClick, 
-  selectedItemId 
-}: { 
-  onItemClick?: (id: string) => void;
-  selectedItemId?: string;
-}) => {
-  const items = DEFAULT_MAP_ITEMS;
+// Map Items component
+const MapItems = ({ onItemClick, selectedItemId }: { onItemClick?: (id: string) => void; selectedItemId?: string }) => {
+  const items = DEFAULT_MAP_ITEMS || [];
+  
+  if (!items || items.length === 0) return null;
   
   return (
     <>
-      {items && items.map((item: MapItem) => {
-        // Convert 2D position to 3D
-        const x = (item.position.x - 512) / 100;
-        const z = (item.position.y - 512) / 100;
+      {items.map((item: MapItem) => {
+        const x = ((item.position?.x || 512) - 512) / 100;
+        const z = ((item.position?.y || 512) - 512) / 100;
         const modelUrl = getModelUrl(item.type);
         
         return (
@@ -81,6 +72,8 @@ export const Scene3D = ({
   selectedItemId?: string;
   onItemClick?: (id: string) => void;
 }) => {
+  console.log('[DEBUG] Scene3D rendering, agents:', agents?.length);
+  
   // Convert 2D position to 3D
   const getAgentPosition = (agent: Agent): [number, number, number] => {
     try {
@@ -95,77 +88,63 @@ export const Scene3D = ({
       return [0, 0, 0];
     }
   };
-  
-  // Handle floor click
-  const handleFloorClick = (event: THREE.Event) => {
-    console.log('[DEBUG] Floor clicked, selectedAgentId:', selectedAgentId);
-    if (!selectedAgentId || !onMapClick) {
-      console.log('[DEBUG] Floor click ignored - no selected agent');
-      return;
-    }    
-    // Get click point in 3D
-    const point = (event as unknown as { point: THREE.Vector3 }).point;
-    console.log('[DEBUG] Floor click at point:', point);
-    
-    // Convert 3D to 2D
-    const x = Math.round(point.x * 100 + 512);
-    const y = Math.round(point.z * 100 + 512);
-    console.log('[DEBUG] Moving to:', { x, y });
-    
-    onMapClick({ x, y });
-  };
 
   // Handle right-click to deselect
   const handleContextMenu = (e: any) => {
-    e.preventDefault?.();
-    console.log('[DEBUG] Right-click: deselect agent');
+    e?.preventDefault?.();
     onDeselect?.();
   };
 
+  // Handle floor click - convert 3D to 2D
+  const handleFloorClick = (point: THREE.Vector3) => {
+    const x = Math.round(point.x * 100 + 512);
+    const y = Math.round(point.z * 100 + 512);
+    onMapClick?.({ x, y });
+  };
+
   return (
-    <div style={{ width: '100%', height: '100%', minHeight: '400px' }}>
+    <div style={{ width: '100%', height: '100%', minHeight: '400px', background: '#f0f0f0' }}>
+      <div style={{ padding: '10px', color: '#666' }}>
+        DEBUG: Canvas starting...
+      </div>
       <Canvas 
-        gl={{ antialias: true, toneMapping: THREE.ACESFilmicToneMapping, toneMappingExposure: 1.1 }} 
-        shadows={{ type: THREE.PCFShadowMap }} 
+        style={{ height: 'calc(100% - 40px)' }}
+        gl={{ antialias: true }} 
         dpr={[1, 2]}
         onContextMenu={handleContextMenu}
-        onPointerMissed={() => {}}
+        onCreated={() => console.log('[DEBUG] Canvas created!')}
       >
         <PerspectiveCamera makeDefault position={[8, 8, 8]} fov={50} />
-        <OrbitControls enablePan enableZoom enableRotate minDistance={3} maxDistance={20} target={[0, 1, 0]} maxPolarAngle={Math.PI / 2 - 0.1} enableDamping dampingFactor={0.05} />
-        <ambientLight intensity={0.3} color="#FFF8E7" />
-        <directionalLight position={[8, 12, 8]} intensity={1.5} color="#FFF5E6" castShadow shadow-mapSize={[2048, 2048]} shadow-camera-far={50} shadow-camera-left={-10} shadow-camera-right={10} shadow-camera-top={10} shadow-camera-bottom={-10} />
+        <OrbitControls enablePan enableZoom enableRotate minDistance={3} maxDistance={20} />
+        <ambientLight intensity={0.5} />
+        <directionalLight position={[8, 12, 8]} intensity={1} />
         
         <Floor size={20} onClick={handleFloorClick} />
         
         {/* Map Items from config */}
         <MapItems onItemClick={onItemClick} selectedItemId={selectedItemId} />
         
-        {/* Agents - use model from assets */}
+        {/* Agents */}
         {agents && agents.map(agent => {
-        const pos = getAgentPosition(agent);
-        const agentScale = selectedAgentId === agent.id ? 1.1 : 1;
-        const appearance = agentAppearances[agent.id] || {};
-        
-        return (
-          <group key={`agent-${agent.id}`} onClick={(e: unknown) => { console.log("[DEBUG] Agent clicked:", agent.id); (e as Event).stopPropagation(); onAgentClick?.(agent.id); }}>
+          if (!agent?.id) return null;
+          const pos = getAgentPosition(agent);
+          const appearance = agentAppearances?.[agent.id] || {};
+          
+          return (
             <AgentModel3D
               key={`agent3d-${agent.id}`}
               agentId={agent.id}
-              name={agent.name}
+              name={agent.id}
               modelUrl={appearance.modelUrl}
               position={pos}
-              scale={agentScale}
+              scale={1}
               color={appearance.color}
               state={agent.state}
-              onClick={() => { console.log("[DEBUG] AgentModel3D clicked:", agent.id); onAgentClick?.(agent.id); }}
+              onClick={() => onAgentClick?.(agent.id)}
             />
-          </group>
-        );
-      })}
-      
-      <ContactShadows position={[0, 0.01, 0]} opacity={0.4} scale={25} blur={2.5} far={10} resolution={256} color="#1a1a1a" />
-    </Canvas>
+          );
+        })}
+      </Canvas>
     </div>
   );
 };
