@@ -1,5 +1,5 @@
 /**
- * 3D Agent Component - Using raw GLTFLoader for better compatibility
+ * 3D Agent Component - Using refs for stable model handling
  */
 import { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
@@ -39,76 +39,44 @@ export const AgentModel3D = ({
 }: AgentModel3DProps) => {
   const modelToLoad = modelUrl || DEFAULT_AGENT_MODEL;
   const groupRef = useRef<THREE.Group>(null);
-  const [model, setModel] = useState<THREE.Group | null>(null);
-  const [loading, setLoading] = useState(true);
+  const modelRef = useRef<THREE.Group | null>(null);
+  const [loaded, setLoaded] = useState(false);
   const [error, setError] = useState<string | null>(null);
   
-  // Load GLB model manually
+  // Load GLB model using useEffect
   useEffect(() => {
-    console.log('[DEBUG] AgentModel3D: Loading model from', modelToLoad);
-    setLoading(true);
-    setError(null);
+    console.log('[DEBUG] AgentModel3D: Starting load for', agentId);
     
     const loader = new GLTFLoader();
     loader.load(
       modelToLoad,
       (gltf) => {
-        console.log('[DEBUG] AgentModel3D: Model loaded successfully', gltf.scene);
-        setModel(gltf.scene);
-        setLoading(false);
+        console.log('[DEBUG] AgentModel3D: Model loaded for', agentId, gltf.scene);
+        modelRef.current = gltf.scene;
+        setLoaded(true);
       },
-      (progress) => {
-        console.log('[DEBUG] AgentModel3D: Loading progress', progress.loaded, '/', progress.total);
-      },
+      undefined,
       (err: any) => {
-        console.error('[DEBUG] AgentModel3D: Model load error', err);
-        setError(err.message || 'Failed to load model');
-        setLoading(false);
+        console.error('[DEBUG] AgentModel3D: Load error for', agentId, err);
+        setError(err.message || 'Failed to load');
       }
     );
-  }, [modelToLoad]);
-  
-  // Apply color to model
-  useEffect(() => {
-    if (model && color) {
-      model.traverse((child) => {
-        if ((child as THREE.Mesh).isMesh) {
-          const mesh = child as THREE.Mesh;
-          if (mesh.material) {
-            const material = mesh.material as THREE.MeshStandardMaterial;
-            if (material.color) {
-              material.color.set(color);
-            }
-          }
-        }
-      });
-    }
-  }, [model, color]);
+    
+    // Cleanup
+    return () => {
+      console.log('[DEBUG] AgentModel3D: Cleanup for', agentId);
+      if (modelRef.current) {
+        modelRef.current = null;
+      }
+    };
+  }, [agentId, modelToLoad]);
   
   const handleClick = (e: any) => {
     e.stopPropagation();
     onClick?.();
   };
   
-  // Show loading state
-  if (loading) {
-    return (
-      <group position={position} onClick={handleClick}>
-        <mesh castShadow position={[0, 0.5, 0]}>
-          <boxGeometry args={[0.3, 0.6, 0.3]} />
-          <meshStandardMaterial color="#666" wireframe />
-        </mesh>
-        {name && (
-          <Html position={[0, 1.2, 0]} center distanceFactor={10}>
-            <div style={{ fontSize: '10px', color: '#666' }}>Loading...</div>
-          </Html>
-        )}
-      </group>
-    );
-  }
-  
-  // Show error state or model
-  console.log('[DEBUG] AgentModel3D render: model=', model ? 'exists' : 'null', 'loading=', loading);
+  console.log('[DEBUG] AgentModel3D render:', agentId, 'loaded=', loaded, 'modelRef=', modelRef.current ? 'exists' : 'null');
   
   return (
     <group ref={groupRef} position={position} onClick={handleClick}>
@@ -119,8 +87,8 @@ export const AgentModel3D = ({
       </mesh>
       
       {/* 模型或占位符 */}
-      {model ? (
-        <primitive object={model} scale={scale} />
+      {loaded && modelRef.current ? (
+        <primitive object={modelRef.current} scale={scale} />
       ) : (
         <ModelPlaceholder color={color} />
       )}
