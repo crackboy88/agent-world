@@ -72,7 +72,7 @@ export const Scene3D = ({
   selectedItemId?: string;
   onItemClick?: (id: string) => void;
 }) => {
-  console.log('[DEBUG] Scene3D rendering, agents:', agents?.length);
+  console.log('[DEBUG] Scene3D rendering, agents:', agents?.length, agents);
   
   // Convert 2D position to 3D
   const getAgentPosition = (agent: Agent): [number, number, number] => {
