@@ -2,7 +2,7 @@
  * 3D Agent Component - With animations and idle movement
  */
 import { useGLTF, useAnimations } from '@react-three/drei';
-import { useEffect, useRef, useMemo } from 'react';
+import { useEffect, useRef, useMemo, useState } from 'react';
 import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 import { Html } from '@react-three/drei';
@@ -44,6 +44,20 @@ export const AgentModel3D = ({
   
   // 克隆场景
   const clonedScene = useMemo(() => scene ? scene.clone() : null, [scene]);
+  
+  // 计算模型的底部偏移（使模型底部对齐地面）
+  const [modelOffset, setModelOffset] = useState(0);
+  
+  useEffect(() => {
+    if (clonedScene) {
+      // 计算包围盒
+      const box = new THREE.Box3().setFromObject(clonedScene);
+      const height = box.max.y - box.min.y;
+      const bottom = box.min.y;
+      // 设置偏移，使模型底部在 y=0
+      setModelOffset(-bottom);
+    }
+  }, [clonedScene]);
   
   // 应用颜色到克隆的场景
   useEffect(() => {
@@ -122,11 +136,35 @@ export const AgentModel3D = ({
   // 如果场景为空，返回一个可点击的占位符
   if (!clonedScene) {
     return (
-      <group position={position} onClick={(e) => { e.stopPropagation(); onClick?.(); }}>
-        <mesh castShadow>
+      <group position={position} onClick={(e: any) => { e.stopPropagation(); onClick?.(); }}>
+        <mesh castShadow position={[0, 0.5, 0]}>
           <boxGeometry args={[0.5, 1, 0.5]} />
           <meshStandardMaterial color={color || '#888'} />
         </mesh>
+        {/* 名称标签 */}
+        {name && (
+          <Html
+            position={[0, 1.5, 0]}
+            center
+            distanceFactor={10}
+            style={{
+              pointerEvents: 'none',
+              userSelect: 'none',
+            }}
+          >
+            <div style={{
+              background: 'rgba(0, 0, 0, 0.7)',
+              color: '#fff',
+              padding: '4px 8px',
+              borderRadius: '4px',
+              fontSize: '12px',
+              fontFamily: 'Arial, sans-serif',
+              whiteSpace: 'nowrap',
+            }}>
+              {name}
+            </div>
+          </Html>
+        )}
       </group>
     );
   }
@@ -140,20 +178,21 @@ export const AgentModel3D = ({
   
   return (
     <group ref={groupRef} position={position} onClick={handleClick}>
-      {/* 不可见的点击区域 (hitbox) - 确保足够大且在模型位置 */}
-      <mesh visible={false} position={[0, 1, 0]}>
-        <boxGeometry args={[1.5, 2.5, 1.5]} />
+      {/* 不可见的点击区域 (hitbox) - 基于模型实际高度 */}
+      <mesh visible={false} position={[0, modelOffset + 1, 0]}>
+        <boxGeometry args={[1.5, 2, 1.5]} />
         <meshBasicMaterial transparent opacity={0} />
       </mesh>
-      {/* 实际的3D模型 */}
+      {/* 实际的3D模型 - 底部对齐地面 */}
       <primitive
         object={clonedScene}
+        position={[0, modelOffset, 0]}
         scale={scale}
       />
-      {/* Agent 名称标签 */}
+      {/* Agent 名称标签 - 在模型顶部 */}
       {name && (
         <Html
-          position={[0, 2.5, 0]}
+          position={[0, modelOffset + 2.5, 0]}
           center
           distanceFactor={10}
           style={{
