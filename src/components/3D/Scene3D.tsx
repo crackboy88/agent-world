@@ -4,14 +4,10 @@
 import { Canvas } from '@react-three/fiber';
 import { OrbitControls, PerspectiveCamera, ContactShadows, Environment } from '@react-three/drei';
 import * as THREE from 'three';
-import { AgentModel3D, preloadAgentModel } from './AgentModel3D';
-import { MapItem3D, preloadModels } from './MapItem3D';
+import { AgentModel3D } from './AgentModel3D';
+import { MapItem3D } from './MapItem3D';
 import type { Agent } from '../../types';
 import { DEFAULT_MAP_ITEMS, getModelUrl, type MapItem } from '../../config';
-
-// 预加载模型
-preloadModels();
-preloadAgentModel();
 
 // Simple flat floor
 const Floor = ({ size = 20, onClick }: { size?: number; onClick?: (event: THREE.Event) => void }) => {
