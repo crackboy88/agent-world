@@ -1,8 +1,8 @@
 /**
  * 3D Agent Component - With animations and idle movement
  */
-import { useGLTF, useAnimations } from '@react-three/drei';
-import { useEffect, useRef, useMemo, useState } from 'react';
+import { useGLTF, useAnimations, Center } from '@react-three/drei';
+import { useEffect, useRef, useMemo } from 'react';
 import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 import { Html } from '@react-three/drei';
@@ -20,6 +20,16 @@ interface AgentModel3DProps {
 
 // 默认 Agent 模型 URL
 const DEFAULT_AGENT_MODEL = '/assets/agents/agent-default.glb';
+
+// 不同模型的预设偏移（Y轴抬升，使模型底部对齐地面）
+const MODEL_OFFSETS: Record<string, number> = {
+  '/assets/agents/agent-default.glb': 0,
+  '/assets/agents/soldier-animated.glb': 0,
+  '/assets/agents/xbot.glb': 0,
+  '/assets/agents/character1.glb': 0,
+  '/assets/agents/Michelle.glb': 0,
+  '/assets/agents/michelle.glb': 0,
+};
 
 export const AgentModel3D = ({ 
   agentId, 
@@ -45,19 +55,8 @@ export const AgentModel3D = ({
   // 克隆场景
   const clonedScene = useMemo(() => scene ? scene.clone() : null, [scene]);
   
-  // 计算模型的底部偏移（使模型底部对齐地面）
-  const [modelOffset, setModelOffset] = useState(0);
-  
-  useEffect(() => {
-    if (clonedScene) {
-      // 计算包围盒
-      const box = new THREE.Box3().setFromObject(clonedScene);
-      const height = box.max.y - box.min.y;
-      const bottom = box.min.y;
-      // 设置偏移，使模型底部在 y=0
-      setModelOffset(-bottom);
-    }
-  }, [clonedScene]);
+  // 获取模型的预设偏移
+  const modelOffset = MODEL_OFFSETS[modelToLoad] ?? 0;
   
   // 应用颜色到克隆的场景
   useEffect(() => {
@@ -178,21 +177,24 @@ export const AgentModel3D = ({
   
   return (
     <group ref={groupRef} position={position} onClick={handleClick}>
-      {/* 不可见的点击区域 (hitbox) - 基于模型实际高度 */}
-      <mesh visible={false} position={[0, modelOffset + 1, 0]}>
-        <boxGeometry args={[1.5, 2, 1.5]} />
+      {/* 使用 Center 组件自动居中模型 */}
+      <Center top>
+        <primitive
+          object={clonedScene}
+          scale={scale}
+        />
+      </Center>
+      
+      {/* 不可见的点击区域 (hitbox) - 覆盖整个模型区域 */}
+      <mesh visible={false} position={[0, 1, 0]}>
+        <boxGeometry args={[1.5, 2.5, 1.5]} />
         <meshBasicMaterial transparent opacity={0} />
       </mesh>
-      {/* 实际的3D模型 - 底部对齐地面 */}
-      <primitive
-        object={clonedScene}
-        position={[0, modelOffset, 0]}
-        scale={scale}
-      />
+      
       {/* Agent 名称标签 - 在模型顶部 */}
       {name && (
         <Html
-          position={[0, modelOffset + 2.5, 0]}
+          position={[0, 1.8, 0]}
           center
           distanceFactor={10}
           style={{
@@ -226,6 +228,7 @@ export function preloadAgentModel() {
     '/assets/agents/soldier-animated.glb',
     '/assets/agents/xbot.glb',
     '/assets/agents/character1.glb',
+    '/assets/agents/Michelle.glb',
   ];
   models.forEach(url => useGLTF.preload(url));
 }
