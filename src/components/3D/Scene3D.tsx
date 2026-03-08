@@ -33,7 +33,13 @@ const Floor = ({ size = 20, onClick }: { size?: number; onClick?: (event: THREE.
 };
 
 // Map Items from config
-const MapItems = () => {
+const MapItems = ({ 
+  onItemClick, 
+  selectedItemId 
+}: { 
+  onItemClick?: (id: string) => void;
+  selectedItemId?: string;
+}) => {
   const items = DEFAULT_MAP_ITEMS;
   
   return (
@@ -51,6 +57,8 @@ const MapItems = () => {
             position={[x, 0, z]}
             rotation={item.rotation || 0}
             color={item.color}
+            onClick={() => onItemClick?.(item.id)}
+            isSelected={selectedItemId === item.id}
           />
         );
       })}
@@ -64,7 +72,9 @@ export const Scene3D = ({
   onAgentClick, 
   agentAppearances = {},
   onMapClick,
-  onDeselect
+  onDeselect,
+  selectedItemId,
+  onItemClick
 }: { 
   agents: Agent[]; 
   selectedAgentId?: string; 
@@ -72,6 +82,8 @@ export const Scene3D = ({
   agentAppearances?: Record<string, { modelId?: string; modelUrl?: string; color?: string }>;
   onMapClick?: (position: { x: number; y: number }) => void;
   onDeselect?: () => void;
+  selectedItemId?: string;
+  onItemClick?: (id: string) => void;
 }) => {
   // Convert 2D position to 3D
   const getAgentPosition = (agent: Agent): [number, number, number] => {
@@ -124,7 +136,7 @@ export const Scene3D = ({
       <Floor size={20} onClick={handleFloorClick} />
       
       {/* Map Items from config */}
-      <MapItems />
+      <MapItems onItemClick={onItemClick} selectedItemId={selectedItemId} />
       
       {/* Agents - use model from assets */}
       {agents.map(agent => {

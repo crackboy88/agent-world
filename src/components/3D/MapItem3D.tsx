@@ -11,9 +11,19 @@ interface MapItem3DProps {
   rotation?: number;
   scale?: number;
   color?: string;
+  onClick?: () => void;
+  isSelected?: boolean;
 }
 
-export const MapItem3D = ({ modelUrl, position, rotation = 0, scale = 1, color }: MapItem3DProps) => {
+export const MapItem3D = ({ 
+  modelUrl, 
+  position, 
+  rotation = 0, 
+  scale = 1, 
+  color,
+  onClick,
+  isSelected
+}: MapItem3DProps) => {
   // 尝试加载 GLB 模型
   const { scene } = useGLTF(modelUrl);
   
@@ -38,19 +48,50 @@ export const MapItem3D = ({ modelUrl, position, rotation = 0, scale = 1, color }
     return cloned;
   }, [scene, color]);
   
+  // 处理点击
+  const handleClick = (e: any) => {
+    e.stopPropagation();
+    console.log('[DEBUG] MapItem clicked');
+    onClick?.();
+  };
+  
   // 渲染模型
   if (clonedScene) {
     return (
-      <primitive
-        object={clonedScene}
-        position={position}
-        rotation={[0, rotation, 0]}
-        scale={scale}
-      />
+      <group position={position} onClick={handleClick}>
+        {/* 点击区域 - 覆盖物品 */}
+        <mesh visible={false} position={[0, 0.5, 0]}>
+          <boxGeometry args={[1.5, 1, 1.5]} />
+          <meshBasicMaterial transparent opacity={0} />
+        </mesh>
+        
+        {/* 3D 模型 */}
+        <primitive
+          object={clonedScene}
+          rotation={[0, rotation, 0]}
+          scale={scale}
+        />
+        
+        {/* 选中高亮效果 */}
+        {isSelected && (
+          <mesh position={[0, 0.01, 0]} rotation={[-Math.PI / 2, 0, 0]}>
+            <planeGeometry args={[2, 2]} />
+            <meshBasicMaterial color="#4CAF50" opacity={0.3} transparent />
+          </mesh>
+        )}
+      </group>
     );
   }
   
-  return null;
+  // Fallback - 简单方块
+  return (
+    <group position={position} onClick={handleClick}>
+      <mesh position={[0, 0.25, 0]}>
+        <boxGeometry args={[0.5, 0.5, 0.5]} />
+        <meshStandardMaterial color={color || '#888'} />
+      </mesh>
+    </group>
+  );
 };
 
 // 预加载所有模型
