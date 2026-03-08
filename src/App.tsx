@@ -141,26 +141,6 @@ const App: React.FC = () => {
 
         {/* 中间 3D 场景 */}
         <main className="map-area">
-          <ErrorBoundary
-            fallback={
-              <div className="scene-error-fallback">
-                <div className="scene-error-content">
-                  <span className="scene-error-icon">🗺️</span>
-                  <h3>3D 场景加载失败</h3>
-                  <p>请尝试刷新页面或检查 WebGL 支持</p>
-                  <button onClick={() => window.location.reload()}>🔃 刷新页面</button>
-                </div>
-              </div>
-            }
-          >
-            <ErrorBoundary
-              fallback={
-                <div className="scene-loading-fallback">
-                  <div className="scene-loading-spinner"></div>
-                  <p>加载 3D 场景中...</p>
-                </div>
-              }
-            >
               <Scene3D 
                 agents={agents} 
                 selectedAgentId={selectedAgentId} 
@@ -169,8 +149,6 @@ const App: React.FC = () => {
                 onMapClick={handleMapClick}
                 onDeselect={handleDeselect}
               />
-            </ErrorBoundary>
-          </ErrorBoundary>
         </main>
       </div>
 
