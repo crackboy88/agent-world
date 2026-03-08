@@ -18,7 +18,7 @@ interface AgentModel3DProps {
   onClick?: () => void;
 }
 
-const DEFAULT_AGENT_MODEL = '/assets/agents/agent-default.glb';
+const DEFAULT_AGENT_MODEL = '/assets/agents/mixamo.glb';
 
 // 简单的占位符组件
 const ModelPlaceholder = ({ color }: { color?: string }) => (
@@ -195,8 +195,4 @@ export const AgentModel3D = ({
 
 export function preloadAgentModel() {
   useGLTF.preload(DEFAULT_AGENT_MODEL);
-  useGLTF.preload('/assets/agents/soldier-animated.glb');
-  useGLTF.preload('/assets/agents/xbot.glb');
-  useGLTF.preload('/assets/agents/character1.glb');
-  useGLTF.preload('/assets/agents/mixamo-character.glb');
 }
