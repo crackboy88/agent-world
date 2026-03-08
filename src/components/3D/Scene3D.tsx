@@ -123,16 +123,18 @@ export const Scene3D = ({
           if (!agent?.id) return null;
           const pos = getAgentPosition(agent);
           const appearance = agentAppearances?.[agent.id] || {};
+          // Use default model if not set
+          const modelUrl = appearance.modelUrl || '/assets/agents/mixamo.glb';
           
           return (
             <AgentModel3D
               key={`agent3d-${agent.id}`}
               agentId={agent.id}
               name={agent.id}
-              modelUrl={appearance.modelUrl}
+              modelUrl={modelUrl}
               position={pos}
               scale={1}
-              color={appearance.color}
+              color={appearance.color || '#3B82F6'}
               state={agent.state}
               onClick={() => onAgentClick?.(agent.id)}
             />
