@@ -150,13 +150,12 @@ export const useAppStore = create<AppState>()(
       
       // Initialize Store
       initializeStore: () => {
-        // Reset agent appearances to defaults so all agents use same model/color
+        // Don't reset agentAppearances - let persist middleware handle it
         set({
           maps: [],
           tasks: [],
           selectedAgentId: null,
           selectedMapId: null,
-          agentAppearances: {}, // Reset to defaults
         });
         
         // 启动时间更新
@@ -169,12 +168,8 @@ export const useAppStore = create<AppState>()(
       
       // Socket 连接
       connectSocket: () => {
-        // 只设置一次回调
-        const alreadyCalled = (window as unknown as { _socketCallbacksSet?: boolean })._socketCallbacksSet;
-        // connectSocket called
-        if (alreadyCalled) return;
-        (window as unknown as { _socketCallbacksSet?: boolean })._socketCallbacksSet = true;
-        
+        // Always set up callbacks - they may not be called if already set
+        // Remove the guard that prevented re-setup
         // 设置事件回调 - 合并更新而非覆盖
         socketService.onAgentUpdate = (updatedAgents) => {
           const currentAgents = get().agents;
