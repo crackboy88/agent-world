@@ -19,16 +19,11 @@ const App: React.FC = () => {
     tasks, 
     locale, 
     setLocale,
-    gatewayConnected,
-    connectGateway,
-    disconnectGateway,
     agentAppearances,
     updateAgentAppearance,
     updateAgentPosition
   } = useAppStore();
   
-  const [showGatewayInput, setShowGatewayInput] = useState(false);
-  const [gatewayUrl, setGatewayUrl] = useState('ws://localhost:18789');
   const [selectedAgentId, setSelectedAgentId] = useState<string | undefined>();
   const [isAppLoading, setIsAppLoading] = useState(true);
   
@@ -45,15 +40,6 @@ const App: React.FC = () => {
     return () => clearTimeout(timer);
   }, []);
 
-  const handleConnectGateway = () => {
-    if (gatewayConnected) {
-      disconnectGateway();
-    } else if (gatewayUrl) {
-      connectGateway(gatewayUrl);
-      setShowGatewayInput(false);
-    }
-  };
-  
   // 点击地图：检查是否点击了 Agent，有则选中，否则移动选中的 Agent
   const handleMapClick = (position: { x: number; y: number }) => {
     // 检查点击位置是否有 Agent（半径 30 像素内的 Agent）
@@ -72,6 +58,11 @@ const App: React.FC = () => {
       // 移动选中的 Agent
       updateAgentPosition(selectedAgentId, position);
     }
+  };
+  
+  // Agent 随机走动结束后的位置更新
+  const handleAgentMove = (agentId: string, position: { x: number; y: number }) => {
+    updateAgentPosition(agentId, position);
   };
 
   // 右键取消选择
@@ -101,34 +92,12 @@ const App: React.FC = () => {
         
         <div className="top-nav">
           <button 
-            className={`gateway-btn ${gatewayConnected ? 'connected' : ''}`}
-            onClick={() => setShowGatewayInput(!showGatewayInput)}
-          >
-            <span className="status-dot"></span>
-            Gateway
-          </button>
-          
-          <button 
             className="lang-btn"
             onClick={() => setLocale(locale === 'zh' ? 'en' : 'zh')}
           >
             {locale === 'zh' ? '中文' : 'EN'}
           </button>
         </div>
-        
-        {showGatewayInput && (
-          <div className="gateway-modal">
-            <input
-              type="text"
-              value={gatewayUrl}
-              onChange={(e) => setGatewayUrl(e.target.value)}
-              placeholder="ws://localhost:18789"
-            />
-            <button onClick={handleConnectGateway}>
-              {gatewayConnected ? '断开' : '连接'}
-            </button>
-          </div>
-        )}
       </header>
 
       {/* 主体区域 */}
@@ -147,6 +116,7 @@ const App: React.FC = () => {
                 agentAppearances={agentAppearances}
                 onMapClick={handleMapClick}
                 onDeselect={handleDeselect}
+                onAgentMove={handleAgentMove}
               />
         </main>
       </div>

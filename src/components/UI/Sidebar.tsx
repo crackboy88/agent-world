@@ -17,6 +17,19 @@ import { socketService } from '../../services/socket';
 import type { Task, AgentId, Agent } from '../../types';
 import AgentAppearanceSettings from './AgentAppearanceSettings';
 
+// Agent emoji 映射 (基于 Agent ID)
+const getAgentEmoji = (agentId: string): string => {
+  const defaultEmojis: Record<string, string> = {
+    'main': '💬',
+    'code-expert': '💻',
+    'financial-analyst': '📈',
+    'materials-scientist': '🔬',
+    'political-analyst': '🌍',
+    'zhihu': '📝',
+  };
+  return defaultEmojis[agentId] || '🤖';
+};
+
 interface SidebarProps {
   locale?: 'zh' | 'en';
 }
@@ -332,20 +345,20 @@ const Sidebar: React.FC<SidebarProps> = ({ locale = 'zh' }) => {
     <div className="sidebar-section">
       <div className="section-header">
         <h3>🔗 Gateway</h3>
-        <span className={`status-badge ${gatewayConnected || onlineAgents.length > 0 ? 'connected' : 'disconnected'}`}>
-          {gatewayConnected || onlineAgents.length > 0 ? 'Connected' : 'Disconnected'}
+        <span className={`status-badge ${gatewayConnected ? 'connected' : 'disconnected'}`}>
+          {gatewayConnected ? 'Connected' : 'Disconnected'}
         </span>
       </div>
       <div className="gateway-info">
         <div className="info-row"><span>URL:</span><span className="mono">{gatewayUrl || '-'}</span></div>
         <div className="info-row"><span>Online:</span><span>{onlineAgents.length}/{totalAgents}</span></div>
       </div>
-      <button className={`btn-full ${gatewayConnected || onlineAgents.length > 0 ? 'btn-disconnect' : 'btn-connect'}`} onClick={() => (gatewayConnected || onlineAgents.length > 0) ? disconnectGateway() : setShowGatewayModal(!showGatewayModal)}>
-        {gatewayConnected || onlineAgents.length > 0 ? 'Disconnect' : 'Connect'}
+      <button className={`btn-full ${gatewayConnected ? 'btn-disconnect' : 'btn-connect'}`} onClick={() => gatewayConnected ? disconnectGateway() : setShowGatewayModal(!showGatewayModal)}>
+        {gatewayConnected ? 'Disconnect' : 'Connect'}
       </button>
       {showGatewayModal && (
         <div className="input-group">
-          <input type="text" value={tempGatewayUrl} onChange={(e) => setTempGatewayUrl(e.target.value)} placeholder="ws://localhost:18789" />
+          <input type="text" value={tempGatewayUrl} onChange={(e) => setTempGatewayUrl(e.target.value)} placeholder="ws://localhost:18789?token=xxx" />
           <button onClick={() => { connectGateway(tempGatewayUrl); setShowGatewayModal(false); }}>OK</button>
         </div>
       )}
@@ -364,7 +377,7 @@ const Sidebar: React.FC<SidebarProps> = ({ locale = 'zh' }) => {
       <div className="agent-grid-full">
         {agents.filter((a: Agent) => a?.id).map((agent: Agent) => {
           try {
-            const icon = String(agent.skillTag?.icon || '🤖');
+            const icon = agent.emoji || getAgentEmoji(agent.id);
             const state = agent?.state || 'idle';
             return (
               <div key={agent.id} className={`agent-card-large ${selectedAgentId === agent.id ? 'selected' : ''}`}
@@ -396,7 +409,7 @@ const Sidebar: React.FC<SidebarProps> = ({ locale = 'zh' }) => {
       {selectedAgentId ? (
         <div className="chat-panel-compact">
           <div className="chat-header">
-            <span className="chat-agent-icon">{selectedAgent?.skillTag?.icon || '🤖'}</span>
+            <span className="chat-agent-icon">{selectedAgent?.emoji || getAgentEmoji(selectedAgentId)}</span>
             <span>{selectedAgentId}</span>
             <button className="btn-close" onClick={() => { setSelectedAgentId(''); setSelectedSessionKey(''); }}>✕</button>
           </div>
@@ -443,7 +456,7 @@ const Sidebar: React.FC<SidebarProps> = ({ locale = 'zh' }) => {
                     text = msgText.text || msgText.content || msgText.message || '';
                   }
                   
-                  const avatar = msg.sender === 'agent' ? String(selectedAgent?.skillTag?.icon || '🤖') : '👤';
+                  const avatar = msg.sender === 'agent' ? (selectedAgent?.emoji || getAgentEmoji(selectedAgentId)) : '👤';
                   const time = msg?.time || '';
                   return (
                     <div key={msg.id} className={`chat-message ${msg.sender}`}>

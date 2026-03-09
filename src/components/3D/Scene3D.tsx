@@ -2,8 +2,10 @@
  * 3D Scene Component - Simple test version
  */
 import { Canvas } from '@react-three/fiber';
-import { OrbitControls, PerspectiveCamera, ContactShadows } from '@react-three/drei';
+import { OrbitControls, PerspectiveCamera, ContactShadows, Environment } from '@react-three/drei';
+import { Suspense } from 'react';
 import * as THREE from 'three';
+import { useState, useEffect, useRef } from 'react';
 import { AgentModel3D } from './AgentModel3D';
 import { MapItem3D } from './MapItem3D';
 import type { Agent } from '../../types';
@@ -67,7 +69,8 @@ export const Scene3D = ({
   onMapClick,
   onDeselect,
   selectedItemId,
-  onItemClick
+  onItemClick,
+  onAgentMove
 }: { 
   agents: Agent[]; 
   selectedAgentId?: string; 
@@ -77,18 +80,147 @@ export const Scene3D = ({
   onDeselect?: () => void;
   selectedItemId?: string;
   onItemClick?: (id: string) => void;
+  onAgentMove?: (agentId: string, position: { x: number; y: number }) => void;
 }) => {
-  // Convert 2D position to 3D
+  // Map bounds (in 2D coordinates: 112-912)
+  const MAP_MIN = 112;
+  const MAP_MAX = 912;
+  
+  // Random walking state - store agent IDs that should be walking
+  const [wanderingAgents, setWanderingAgents] = useState<Record<string, { targetX: number; targetY: number; startX: number; startY: number; progress: number }>>({});
+  const walkTimerRef = useRef<NodeJS.Timeout | null>(null);
+  
+  // When wandering ends, save the final position
+  const finalizeWandering = (agentId: string, targetX: number, targetY: number) => {
+    if (onAgentMove) {
+      onAgentMove(agentId, { x: Math.round(targetX), y: Math.round(targetY) });
+    }
+  };
+  
+  // Random walking logic - periodically make random agents walk
+  useEffect(() => {
+    const updateWandering = () => {
+      if (!agents || agents.length === 0) return;
+      
+      setWanderingAgents(prev => {
+        const newWandering = { ...prev };
+        
+        agents.forEach(agent => {
+          // Skip if selected
+          if (selectedAgentId === agent.id) {
+            if (newWandering[agent.id]) {
+              delete newWandering[agent.id];
+            }
+            return;
+          }
+          
+          // Skip if not idle
+          if (agent.state && agent.state !== 'idle') {
+            if (newWandering[agent.id]) {
+              delete newWandering[agent.id];
+            }
+            return;
+          }
+          
+          const isWandering = !!newWandering[agent.id];
+          const rand = Math.random();
+          const currentX = agent.position?.x || 512;
+          const currentY = agent.position?.y || 512;
+          
+          // 20% chance to start wandering
+          if (!isWandering && rand < 0.2) {
+            // Random target within map bounds
+            const targetX = Math.random() * (MAP_MAX - MAP_MIN) + MAP_MIN;
+            const targetY = Math.random() * (MAP_MAX - MAP_MIN) + MAP_MIN;
+            newWandering[agent.id] = {
+              targetX,
+              targetY,
+              startX: currentX,
+              startY: currentY,
+              progress: 0
+            };
+          } 
+          // 35% chance to stop wandering - save final position
+          else if (isWandering && rand < 0.35) {
+            const wander = newWandering[agent.id];
+            if (wander) {
+              finalizeWandering(agent.id, wander.targetX, wander.targetY);
+            }
+            delete newWandering[agent.id];
+          }
+        });
+        
+        return newWandering;
+      });
+    };
+    
+    // Update every 3 seconds
+    walkTimerRef.current = setInterval(updateWandering, 3000);
+    
+    return () => {
+      if (walkTimerRef.current) {
+        clearInterval(walkTimerRef.current);
+      }
+    };
+  }, [agents, selectedAgentId]);
+  
+  // Animate wandering agents - update position smoothly
+  useEffect(() => {
+    const animatePositions = () => {
+      setWanderingAgents(prev => {
+        const updated = { ...prev };
+        let hasUpdates = false;
+        
+        Object.keys(updated).forEach(agentId => {
+          const wander = updated[agentId];
+          if (!wander) return;
+          
+          // Move progress forward
+          wander.progress += 0.01;
+          
+          if (wander.progress >= 1) {
+            // Reached target, remove
+            delete updated[agentId];
+            hasUpdates = true;
+          } else {
+            hasUpdates = true;
+          }
+        });
+        
+        return hasUpdates ? updated : prev;
+      });
+    };
+    
+    const animFrame = setInterval(animatePositions, 50);
+    return () => clearInterval(animFrame);
+  }, []);
+  
+  // Get agent display state (walking if wandering)
+  const getAgentDisplayState = (agent: Agent) => {
+    if (wanderingAgents[agent.id]) return 'walking';
+    return agent.state || 'idle';
+  };
+  
+  // Get agent position (with wandering offset)
   const getAgentPosition = (agent: Agent): [number, number, number] => {
+    const wander = wanderingAgents[agent.id];
+    let posX = agent.position?.x || 512;
+    let posY = agent.position?.y || 512;
+    
+    if (wander) {
+      // Interpolate position
+      const t = Math.min(wander.progress, 1);
+      // Ease in-out
+      const eased = t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
+      posX = wander.startX + (wander.targetX - wander.startX) * eased;
+      posY = wander.startY + (wander.targetY - wander.startY) * eased;
+    }
+    
     try {
-      if (!agent || !agent.position) return [0, 0, 0];
-      const posX = agent.position.x ?? 0;
-      const posY = agent.position.y ?? 0;
       const x = (posX - 512) / 100;
       const z = (posY - 512) / 100;
       return [x, 0, z];
     } catch (e) {
-      console.error('[DEBUG] getAgentPosition error:', e);
       return [0, 0, 0];
     }
   };
@@ -108,6 +240,7 @@ export const Scene3D = ({
 
   return (
     <div style={{ width: '100%', height: '100%', minHeight: '400px' }}>
+      <div id="debug-info" style={{ position: 'absolute', top: 10, left: 10, zIndex: 1000, background: 'rgba(0,0,0,0.7)', color: 'white', padding: 10, fontSize: 12 }}></div>
       <Canvas 
         style={{ height: '100%', background: '#E8E4DF' }}
         gl={{ antialias: true }} 
@@ -120,15 +253,15 @@ export const Scene3D = ({
         <OrbitControls enablePan enableZoom enableRotate minDistance={3} maxDistance={20} />
         
         {/* Ambient - base illumination */}
-        <ambientLight intensity={0.4} />
+        <ambientLight intensity={0.7} />
         
         {/* Hemisphere - sky/ground color */}
-        <hemisphereLight args={['#87CEEB', '#8B7355', 0.5]} />
+        <hemisphereLight args={['#87CEEB', '#8B7355', 0.6]} />
         
         {/* Main directional - sun-like */}
         <directionalLight 
           position={[10, 15, 10]} 
-          intensity={1.5} 
+          intensity={2} 
           castShadow 
           shadow-mapSize={[2048, 2048]}
           shadow-camera-far={50}
@@ -141,12 +274,15 @@ export const Scene3D = ({
         {/* Fill light - softer from opposite side */}
         <directionalLight 
           position={[-8, 10, -8]} 
-          intensity={0.4} 
+          intensity={0.6} 
           color="#E8E4DF"
         />
         
         {/* Point light - extra warmth */}
-        <pointLight position={[0, 8, 0]} intensity={0.3} color="#FFF5E6" />
+        <pointLight position={[0, 8, 0]} intensity={0.5} color="#FFF5E6" />
+        
+        {/* Environment for better GLB material rendering */}
+        <Environment preset="apartment" />
         
         {/* Fog for depth */}
         <fog attach="fog" args={['#E8E4DF', 15, 40]} />
@@ -167,13 +303,19 @@ export const Scene3D = ({
         <MapItems onItemClick={onItemClick} selectedItemId={selectedItemId} />
         
         {/* Agents */}
+        <Suspense fallback={null}>
         {agents && agents.map(agent => {
           if (!agent?.id) return null;
           const pos = getAgentPosition(agent);
           const appearance = agentAppearances?.[agent.id] || {};
           // Use default model if not set
-          const modelUrl = appearance.modelUrl || '/assets/agents/mixamo.glb';
+          const modelUrl = appearance.modelUrl || '/assets/agents/HappyIdle.fbx';
           const agentColor = appearance.color || '#3B82F6';
+          // Use wandering state if agent is randomly walking
+          const displayState = getAgentDisplayState(agent);
+          // FBX models are typically much larger, need to scale down
+          const isFBX = modelUrl.toLowerCase().endsWith('.fbx');
+          const agentScale = isFBX ? 0.01 : 1;
           
           return (
             <AgentModel3D
@@ -182,13 +324,14 @@ export const Scene3D = ({
               name={agent.id}
               modelUrl={modelUrl}
               position={pos}
-              scale={1}
+              scale={agentScale}
               color={agentColor}
-              state={agent.state}
+              state={displayState}
               onClick={() => onAgentClick?.(agent.id)}
             />
           );
         })}
+        </Suspense>
       </Canvas>
     </div>
   );

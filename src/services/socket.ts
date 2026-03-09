@@ -25,6 +25,7 @@ const createBrowserStore = <T>(key: string): {
 class OpenClawSocketService {
   private client: OpenClawClient | null = null;
   private _isConnected: boolean = false;
+  private _manualDisconnect: boolean = false;  // 手动断开标志
   
   // 事件回调
   onAgentUpdate?: (agents: Agent[]) => void;
@@ -55,22 +56,29 @@ class OpenClawSocketService {
   }
 
   /**
-   * 连接到 Gateway (使用设备身份)
+   * 连接到 Gateway (使用 Gateway token)
    * URL 可通过 localStorage['gatewayUrl'] 配置
    */
   connect(): void {
+    // 如果是手动断开的，不自动重连
+    if (this._manualDisconnect) {
+      this._manualDisconnect = false;
+      return;
+    }
+    
     const gatewayUrl = this.getGatewayUrl();
+    
+    // 从 localStorage 获取 gateway token
+    const token = localStorage.getItem('oc-device-token') || '';
     
     this.client = new OpenClawClient({
       gatewayUrl,
-      token: '', // 配对后使用设备令牌，token 字段不再需要
+      token: token, // Gateway auth token
       clientId: 'webchat',
       clientVersion: '1.0.0',
       platform: 'web',
       mode: 'ui',
-      // 启用设备身份认证
-      deviceIdentity: this.identityStore,
-      deviceToken: this.tokenStore,
+      // 不使用设备身份认证，直接使用 token
       onConnection: (connected) => {
         this._isConnected = connected;
         this.onGatewayStatus?.({ connected, url: gatewayUrl });
@@ -145,10 +153,12 @@ class OpenClawSocketService {
    * 断开连接
    */
   disconnect(): void {
+    this._manualDisconnect = true;  // 标记手动断开
     if (this.client) {
       this.client.disconnect();
       this.client = null;
     }
+    this._isConnected = false;
   }
 
   // ========== 公开 API ==========
@@ -243,6 +253,7 @@ class OpenClawSocketService {
    * 连接 Gateway (兼容旧 API)
    */
   connectGateway(url: string): void {
+    this._manualDisconnect = false;  // 清除手动断开标志，允许重连
     this.setUrl(url);
     this.connect();
   }

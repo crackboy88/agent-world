@@ -18,6 +18,27 @@ import type {
 import { createTask, updateTaskProgress } from '../types/task';
 import { socketService } from '../services/socket';
 
+// 从 identity.md 读取 emoji
+const agentIdentityCache: Record<string, string> = {};
+
+const getAgentEmoji = (agentId: string): string => {
+  if (agentIdentityCache[agentId]) {
+    return agentIdentityCache[agentId];
+  }
+  
+  // 默认 emoji 映射（基于 Agent ID）
+  const defaultEmojis: Record<string, string> = {
+    'main': '💬',
+    'code-expert': '💻',
+    'financial-analyst': '📈',
+    'materials-scientist': '🔬',
+    'political-analyst': '🌍',
+    'zhihu': '📝',
+  };
+  
+  return defaultEmojis[agentId] || '🤖';
+};
+
 // 日志类型
 interface LogEntry {
   id: string;
@@ -203,7 +224,7 @@ export const useAppStore = create<AppState>()(
               mergedAgents.push({
                 id: updated.id,
                 name: updated.name || updated.id,
-                emoji: updated.emoji || '🤖',
+                emoji: updated.emoji || getAgentEmoji(updated.id),
                 isOnline: updated.isOnline !== false,
                 state: updated.state || 'idle',
                 currentLocation: updated.currentLocation || 'lobby',
@@ -234,7 +255,7 @@ export const useAppStore = create<AppState>()(
                 const agents: Agent[] = gatewayAgents.map((a: Agent) => ({
                   id: a.id,
                   name: a.name || a.id,
-                  emoji: a.emoji || '🤖',
+                  emoji: a.emoji || getAgentEmoji(a.id),
                   isOnline: a.isOnline !== false,
                   state: a.state || 'idle',
                   currentLocation: a.currentLocation || 'lobby',
@@ -292,7 +313,7 @@ export const useAppStore = create<AppState>()(
               const agents: Agent[] = validAgents.map((a: Agent) => ({
                 id: a.id,
                 name: a.name || a.id,
-                emoji: a.emoji || '🤖',
+                emoji: a.emoji || getAgentEmoji(a.id),
                 isOnline: a.isOnline !== false,
                 state: a.state || 'idle',
                 currentLocation: a.currentLocation || 'lobby',
@@ -331,11 +352,25 @@ export const useAppStore = create<AppState>()(
       
       // Gateway 连接
       connectGateway: (wsUrl: string) => {
+        // 解析 URL 中的 token 参数
+        try {
+          const url = new URL(wsUrl);
+          const token = url.searchParams.get('token');
+          if (token) {
+            localStorage.setItem('oc-device-token', token);
+            // 移除 token 参数，只保留基础 URL
+            url.searchParams.delete('token');
+            wsUrl = url.toString();
+          }
+        } catch (e) {
+          // URL 解析失败，使用原始值
+        }
         socketService.connectGateway(wsUrl);
       },
       
       disconnectGateway: () => {
         socketService.disconnectGateway();
+        set({ gatewayConnected: false });
       },
       
       // Agent Actions
