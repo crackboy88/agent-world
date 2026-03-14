@@ -395,6 +395,22 @@ export const useAppStore = create<AppState>()(
       },
       
       updateAgentPosition: (agentId, position) => {
+        // Get current position to calculate distance
+        let currentPos = { x: 0, y: 0 };
+        set((s) => {
+          const agent = s.agents.find(a => a.id === agentId);
+          if (agent && agent.position) {
+            currentPos = agent.position;
+          }
+          return {};
+        });
+        
+        // Calculate distance and expected duration (assuming speed of 200 pixels per second)
+        const dx = position.x - currentPos.x;
+        const dy = position.y - currentPos.y;
+        const distance = Math.sqrt(dx * dx + dy * dy);
+        const duration = Math.max(500, distance / 200 * 1000); // Min 500ms, otherwise based on distance
+        
         // Move agent to position - start walking animation
         set((s) => ({
           agents: s.agents.map(a => 
@@ -408,7 +424,7 @@ export const useAppStore = create<AppState>()(
           )
         }));
         
-        // After a short delay, set back to idle
+        // After calculated delay, set back to idle
         setTimeout(() => {
           set((s) => ({
             agents: s.agents.map(a => 
@@ -419,7 +435,7 @@ export const useAppStore = create<AppState>()(
               } : a
             )
           }));
-        }, 2000); // Assume it takes 2 seconds to move
+        }, duration);
       },
       
       updateAgentLocation: (agentId, locationId) => {

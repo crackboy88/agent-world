@@ -1,7 +1,7 @@
 /**
- * 3D Agent Component - Using separate FBX files for each state
+ * 3D Agent Component - Fixed state transition
  */
-import { useEffect, useRef, useMemo, useState } from 'react';
+import { useEffect, useRef, useMemo } from 'react';
 import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 import { useAnimations, Html } from '@react-three/drei';
@@ -19,20 +19,10 @@ interface AgentModel3DProps {
   onClick?: () => void;
 }
 
-// FBX files for different states
-const FBX_MODELS: Record<string, string> = {
+const FBX_MODELS = {
   idle: '/assets/agents/HappyIdle.fbx',
   walking: '/assets/agents/Walking.fbx',
   working: '/assets/agents/Talking.fbx',
-  walk: '/assets/agents/Walking.fbx',
-};
-
-// Debug: force load different FBX based on state to see animations
-const getFBXUrl = (state: string): string => {
-  if (state === 'idle') return '/assets/agents/HappyIdle.fbx';
-  if (state === 'walking' || state === 'walk') return '/assets/agents/Walking.fbx';
-  if (state === 'working') return '/assets/agents/Talking.fbx';
-  return '/assets/agents/HappyIdle.fbx';
 };
 
 export const AgentModel3D = ({ 
@@ -48,53 +38,59 @@ export const AgentModel3D = ({
   const groupRef = useRef<THREE.Group>(null);
   const timeRef = useRef(Math.random() * 100);
   
-  // Get the appropriate FBX based on state - use state as key to force reload
-  const currentFBXUrl = getFBXUrl(state);
+  // Get FBX URL based on state
+  const fbxUrl = state === 'walking' ? FBX_MODELS.walking : 
+                 state === 'working' ? FBX_MODELS.working : FBX_MODELS.idle;
   
-  // Load FBX model - force reload when state changes
-  const fbx = useFBX(currentFBXUrl);
+  // Load FBX - this triggers re-load when URL changes
+  const fbx = useFBX(fbxUrl);
   
-  // Debug: show FBX loading in DOM (useEffect to avoid setState during render)
-  useEffect(() => {
-    const debugEl = typeof document !== 'undefined' ? document.getElementById('debug-info') : null;
-    if (debugEl) {
-      debugEl.innerHTML = `State: ${state}<br/>FBX: ${currentFBXUrl}<br/>`;
-    }
-  }, [state, currentFBXUrl]);
-  
-  // Clone the scene for this agent instance
+  // Clone the FBX - force re-clone when fbxUrl changes
   const sceneClone = useMemo(() => {
     if (!fbx) return null;
     return SkeletonUtils.clone(fbx);
   }, [fbx, agentId]);
   
-  // Set up animations for this agent
-  const { actions } = useAnimations(fbx?.animations || [], groupRef);
+  // Get animations from the CLONED scene
+  const { actions, mixer } = useAnimations(sceneClone?.animations || [], groupRef);
   
-  // Handle state changes - play first available animation
+  const prevUrlRef = useRef(fbxUrl);
+  
+  // Play animation whenever fbxUrl changes
   useEffect(() => {
-    if (!actions || !fbx) return;
+    if (!actions || !mixer || !sceneClone) return;
     
-    // Stop all current animations
-    Object.values(actions).forEach(action => action?.stop());
+    const animNames = Object.keys(actions);
+    if (animNames.length === 0) {
+      console.log(`[${agentId}] ⚠️ No animations in ${fbxUrl}`);
+      return;
+    }
     
-    // Just use first animation, don't try to match state
-    const allAnims = Object.keys(actions);
-    const animName = allAnims[0];
+    // Always restart animation on FBX change
+    Object.values(actions).forEach(a => a?.stop());
     
-    console.log(`State: ${state}, Playing: ${animName}`);
-    actions[animName]?.play();
-  }, [state, currentFBXUrl]);
+    const action = actions[animNames[0]];
+    if (action) {
+      action.reset();
+      action.fadeIn(0.15);
+      action.play();
+      console.log(`[${agentId}] ✅ Playing: "${animNames[0]}" for ${state} (FBX: ${fbxUrl})`);
+    }
+    
+    prevUrlRef.current = fbxUrl;
+  }, [fbxUrl, state, sceneClone, actions, mixer, agentId]);
   
-  // Procedural animation (breathing effect)
+  // Procedural animation
   useFrame((_, delta) => {
     if (!groupRef.current) return;
-    
     timeRef.current += delta;
     const t = timeRef.current;
     
-    // Subtle breathing animation
-    groupRef.current.position.y = Math.sin(t * 2) * 0.02;
+    if (state === 'walking') {
+      groupRef.current.position.y = Math.sin(t * 8) * 0.03;
+    } else {
+      groupRef.current.position.y = Math.sin(t * 2) * 0.02;
+    }
   });
   
   const handleClick = (e: any) => {
@@ -104,17 +100,15 @@ export const AgentModel3D = ({
   
   return (
     <group ref={groupRef} position={position} onClick={handleClick}>
-      {/* 模型 */}
       {sceneClone ? (
         <primitive object={sceneClone} scale={scale} castShadow receiveShadow />
       ) : (
         <mesh position={[0, 0.5, 0]}>
           <boxGeometry args={[0.5, 1, 0.5]} />
-          <meshStandardMaterial color="#888" />
+          <meshStandardMaterial color={color || "#888"} />
         </mesh>
       )}
       
-      {/* 名称标签 */}
       {name && (
         <Html position={[0, 1.8, 0]} center distanceFactor={10}>
           <div style={{
@@ -126,7 +120,7 @@ export const AgentModel3D = ({
             whiteSpace: 'nowrap',
             fontFamily: 'Arial, sans-serif',
           }}>
-            {name}
+            {name} ({state})
           </div>
         </Html>
       )}
